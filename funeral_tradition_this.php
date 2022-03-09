@@ -38,7 +38,7 @@
 								<img class='card-img' src='images/providers/".$service['service_type']."/".$service['provider_id']."/".$service['service_img']."'>
 								<div class='card-div'>
 									<div>
-										<h3>Ngan sa lungon
+										<h3>".$service['service_name']."
 											<span>
 												<i class='fa-solid fa-star'></i>
 												<i class='fa-solid fa-star'></i>
