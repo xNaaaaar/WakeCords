@@ -175,7 +175,7 @@ button.header-btn i{font-size:var(--size-7);}
 .my-cart-con h3{margin:0;width:60%;}
 .my-cart-con h3 span{display:flex;margin-top:var(--size-3);justify-content:space-between;font-family:Roboto Slab,serif;font-weight:normal;}
 .my-cart-con h3 span q{display:flex;align-items:center;column-gap:10px;}
-.my-cart-con h3 span input{border:1px solid #000;width:40px;height:40px;margin:0;padding:0 10px;}
+.my-cart-con h3 span input{border:1px solid #000;width:40px;height:40px;margin:0;padding:0 10px;text-align:center;}
 .my-cart-qty{display:flex;text-align:center;align-items:center;}
 
 .my-cart-total .total-sub{display:flex;width:100%;}

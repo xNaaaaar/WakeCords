@@ -4,73 +4,47 @@
 	date_default_timezone_set('Asia/Manila');
 	require_once("others/db.php");
 	
-	## USER LOGIN TYPE
-	function user_type(){
-		if(isset($_SESSION['seeker'])){
-			return "seeker";
-		}
-		else if(isset($_SESSION['provider'])){
-			return "provider";
-		}
-		return "admin";
+	## ADD TO CART
+	function add_to_cart(){
+		
 	}
-	## USER LOGIN ID
-	function current_user(){
-		if(isset($_SESSION['seeker'])){
-			$seeker = read("seeker", ["seeker_id"], [$_SESSION['seeker']]);
-			return $seeker[0];
+	## UPDATE PASSWORD
+	function change_password($user, $email, $password){
+		$pw_cpass = trim(md5($_POST['pw_cpass']));
+		$pw_npass = trim(md5($_POST['pw_npass']));
+		$pw_rpass = trim(md5($_POST['pw_rpass']));
+		
+		if($pw_cpass != $password){
+			echo "<script>alert('Current password do not match!')</script>";
 		}
-		else if(isset($_SESSION['provider'])){
-			$provider = read("provider", ["provider_id"], [$_SESSION['provider']]);
-			return $provider[0];
+		else if($pw_npass != $pw_rpass){
+			echo "<script>alert('New password must match retype password!')</script>";
 		}
 		else {
-			## TBD
+			$data_list = [];
+
+			switch ($user){
+				case "seeker":
+					$attr_list = ["seeker_pass"];
+					$condition = "seeker_email";
+
+					array_push($data_list, $pw_npass, $email);
+					update($user, $attr_list, $data_list, $condition);
+
+					header('Location: profile.php?updated');
+					exit;
+					break;
+					
+				case "provider":
+					break;
+			}
 		}
 	}
 	## CREATE FUNCTION
 	function create($table, $attr_list, $qmark_list, $data_list){
 		## INSERT INTO seeker(seeker_fname, seeker_mi, seeker_lname) VALUES(?,?,?)
 		DB::query("INSERT INTO ".$table."(".join(", ",$attr_list).") VALUES(".join(", ",$qmark_list).")", $data_list, "CREATE");
-	}
-	## READ FUNCTION
-	function read($table, $attr, $data){
-		## SELECT * FROM joiner WHERE joiner_email=?
-		if(count($attr) == 1){
-			return DB::query("SELECT * FROM ".$table." WHERE ".$attr[0]."=?", array($data[0]), "READ");
-		}
-		else if(count($attr) == 2) {
-			return DB::query("SELECT * FROM ".$table." WHERE ".$attr[0]."=? and ".$attr[1]."=?", array($data[0], $data[1]), "READ");
-		}
-			
-	}
-	## BOOLEAN READ FUNCTION
-	function read_bool($table, $attr, $data){
-		## SELECT * FROM joiner WHERE joiner_email=?
-		if(count(DB::query("SELECT * FROM ".$table." WHERE ".$attr[0]."=?", array($data[0]), "READ")) > 0){
-			return true;
-		}
-		return false;	
-	}
-	## UPDATE FUNCTION
-	function update($table, $attr_list, $data_list, $condition){
-		## UPDATE organizer SET orga_company=?, orga_fname=?, orga_lname=?, orga_mi=?, orga_address=?, orga_phone=?, orga_email=? WHERE orga_id=?"
-		DB::query("UPDATE ".$table." SET ".join("=?, ", $attr_list)."=? WHERE ".$condition."=?", $data_list, "UPDATE");
-	}
-	## DELETE FUNCTION
-	function delete(){
-
-	}
-	## GENERATE QUESTION MARK
-	function qmark_generator($arr_length){
-		$arr = [];
-		while($arr_length > 0){
-			array_push($arr, "?");
-			$arr_length--;
-		}
-
-		return $arr;
-	}
+	}	
 	## CREATE USER SEEKER OR PROVIDER
 	function createUser($user){
 		$txtfn = trim(ucwords($_POST['txtfn']));
@@ -147,6 +121,31 @@
 			}
 		}	
 	}
+	## USER LOGIN ID
+	function current_user(){
+		if(isset($_SESSION['seeker'])){
+			$seeker = read("seeker", ["seeker_id"], [$_SESSION['seeker']]);
+			return $seeker[0];
+		}
+		else if(isset($_SESSION['provider'])){
+			$provider = read("provider", ["provider_id"], [$_SESSION['provider']]);
+			return $provider[0];
+		}
+		else {
+			## TBD
+		}
+	}
+	## DELETE FUNCTION
+	function delete(){}
+	## LIMIT DISPLAY TEXT
+	function limit_text($text, $limit) {
+		if (str_word_count($text, 0) > $limit) {
+			$words = str_word_count($text, 2);
+			$pos   = array_keys($words);
+			$text  = substr($text, 0, $pos[$limit]) . '...';
+		}
+		return $text;
+	}
 	## LOGIN USER
 	function loginUser(){
 		$emuser = trim($_POST['emuser']);
@@ -174,139 +173,84 @@
 		## ADMIN ACCOUNT
 		else echo "<script>alert('Email address or password is incorrect!')</script>";
 	}
-	## UPDATE PROFILE
-	function update_profile($user, $email){
-		$txtfn = trim(ucwords($_POST['txtfn']));
-		$txtmi = trim(ucwords($_POST['txtmi']));
-		$txtln = trim(ucwords($_POST['txtln']));
-		$txtaddress = trim(ucwords($_POST['txtaddress']));
-		$txtphone = trim($_POST['txtphone']);
-		## ERROR TRAP
-		if(preg_match('/\d/', $txtfn)){
-			echo "<script>alert('Firstname cannot have a number!')</script>";
-		}
-		else if(preg_match('/\d/', $txtmi)){
-			echo "<script>alert('Middle name cannot have a number!')</script>";
-		}
-		else if(preg_match('/\d/', $txtln)){
-			echo "<script>alert('Lastname cannot have a number!')</script>";
-		}
-		else if(!preg_match('/\d/', $txtphone)){
-			echo "<script>alert('Lastname cannot have a number!')</script>";
+	## DISPLAY CART
+	function my_cart(){
+		$cart = DB::query("SELECT * FROM services s JOIN cart c ON s.service_id=c.service_id JOIN seeker skr ON skr.seeker_id=c.seeker_id JOIN funeral f ON f.service_id=s.service_id WHERE c.seeker_id=?", array($_SESSION['seeker']), "READ");
+		
+		// read("cart", ["seeker_id"], [$_SESSION['seeker']]);
+
+		if(count($cart) > 0){
+			foreach($cart as $results){
+				echo "
+				<div class='my-cart'>
+					<div class='my-cart-con'>
+						<img src='images/providers/".$results['service_type']."/".$results['provider_id']."/".$results['service_img']."' alt=''>
+						<h3>
+							".$results['funeral_name']."
+							<span>₱ ".number_format($results['service_cost'],2,'.',',')." <q>Qty: <input type='text' value='".$results['cart_qty']."'></q></span>
+						</h3>
+					</div>
+					<div class='my-cart-qty'><i class='fa-solid fa-trash-can'></i></div>
+				</div>
+				";
+			}
+
+			echo "
+			<div class='hr full-width'></div>
+			<div class='my-cart-con'>
+				<img class='none' src=''>
+				<div class='my-cart-total'>
+					<div class='total-sub'>
+						<p>Transaction fee:</p>
+						<h3>₱ 300.00</h3>
+					</div>
+					<div class='total-sub'>
+						<p>Total:</p>
+						<h3>₱ 333,300.00</h3>
+					</div>
+					<form action=''>
+						<div>
+							<input class='radio-terms' type='radio' required>
+							<p>By checking this you agree to our <a href=''>terms and conditions</a>.</p>
+						</div>
+						<button class='btn'>Checkout</button>
+					</form>
+				</div>
+			</div>
+			";
 		}
 		else {
-			$data_list = [];
-
-			switch ($user){
-				case "seeker":
-					$attr_list = ["seeker_fname", "seeker_mi", "seeker_lname", "seeker_address", "seeker_phone"];
-					$condition = "seeker_email";
-
-					array_push($data_list, $txtfn, $txtmi, $txtln, $txtaddress, $txtphone, $email);
-					update($user, $attr_list, $data_list, $condition);
-
-					header('Location: profile.php?updated');
-					exit;
-					break;
-
-				case "provider":
-					break;
-			}
+			echo "<span class='note blue'>Note: Please upload a death certificate to proceed! Click <a href='profile.php'>here</a> to upload!</span>";
 		}
 	}
-	## UPDATE PASSWORD
-	function change_password($user, $email, $password){
-		$pw_cpass = trim(md5($_POST['pw_cpass']));
-		$pw_npass = trim(md5($_POST['pw_npass']));
-		$pw_rpass = trim(md5($_POST['pw_rpass']));
-		
-		if($pw_cpass != $password){
-			echo "<script>alert('Current password do not match!')</script>";
+	## GENERATE QUESTION MARK
+	function qmark_generator($arr_length){
+		$arr = [];
+		while($arr_length > 0){
+			array_push($arr, "?");
+			$arr_length--;
 		}
-		else if($pw_npass != $pw_rpass){
-			echo "<script>alert('New password must match retype password!')</script>";
-		}
-		else {
-			$data_list = [];
 
-			switch ($user){
-				case "seeker":
-					$attr_list = ["seeker_pass"];
-					$condition = "seeker_email";
-
-					array_push($data_list, $pw_npass, $email);
-					update($user, $attr_list, $data_list, $condition);
-
-					header('Location: profile.php?updated');
-					exit;
-					break;
-					
-				case "provider":
-					break;
-			}
-		}
+		return $arr;
 	}
-	## UPLOAD REQUIREMENTS
-	function upload_required($user, $user_id){
-		$imageName = upload_image("file_req", "images/".$user."s/".$user_id."/");
-		
-		## ERROR TRAPPINGS
-		if($imageName === 1){
-			echo "<script>alert('An error occurred in uploading your image!')</script>";
+	## READ FUNCTION
+	function read($table, $attr, $data){
+		## SELECT * FROM joiner WHERE joiner_email=?
+		if(count($attr) == 1){
+			return DB::query("SELECT * FROM ".$table." WHERE ".$attr[0]."=?", array($data[0]), "READ");
 		}
-		else if($imageName === 2){
-			echo "<script>alert('File type is not allowed!')</script>";
+		else if(count($attr) == 2) {
+			return DB::query("SELECT * FROM ".$table." WHERE ".$attr[0]."=? and ".$attr[1]."=?", array($data[0], $data[1]), "READ");
 		}
-		else {
-			$data_list = [];
-
-			switch ($user){
-				case "seeker":
-					$table = "requirement";
-					$attr_list = ["seeker_id", "req_type", "req_img"];
-
-					array_push($data_list, $user_id, "death certificate", $imageName);
-					create($table, $attr_list, qmark_generator(count($attr_list)), $data_list);
-
-					header('Location: profile.php?updated');
-					exit;
-					break;
-					
-				case "provider":
-					break;
-			}
-		}
+			
 	}
-	## UPLOAD SINGLE IMAGE
-	function upload_image($name, $target){
-		$allowedType = array('jpg','jpeg','png','pdf');
-		$file = $_FILES[$name];
-		
-		$fileName = $file['name'];
-		$fileTmpName = $file['tmp_name'];
-		$fileError = $file['error'];
-		
-		$fileType = pathinfo($fileName, PATHINFO_EXTENSION);
-		## RETURN 2 MEANS FILE TYPE IS NOT ALLOWED!
-		if(!in_array($fileType, $allowedType)) return 2;
-		## RETURN 1 MEANS THERE IS AN ERROR IN UPLOADING IMAGE!
-		if(!$fileError === 0) return 1;
-		## ASSIGN UNIQUE NAME AND FILE LOCATION
-		$fileNewName = uniqid('', true).".".$fileType;
-		$fileLocation = $target.$fileNewName;
-		## UPLOADS
-		@move_uploaded_file($fileTmpName, $fileLocation);
-
-		return $fileNewName;
-	}
-	## LIMIT DISPLAY TEXT
-	function limit_text($text, $limit) {
-		if (str_word_count($text, 0) > $limit) {
-			$words = str_word_count($text, 2);
-			$pos   = array_keys($words);
-			$text  = substr($text, 0, $pos[$limit]) . '...';
+	## BOOLEAN READ FUNCTION
+	function read_bool($table, $attr, $data){
+		## SELECT * FROM joiner WHERE joiner_email=?
+		if(count(DB::query("SELECT * FROM ".$table." WHERE ".$attr[0]."=?", array($data[0]), "READ")) > 0){
+			return true;
 		}
-		return $text;
+		return false;	
 	}
 	## DISPLAY FUNERAL SERVICES
 	function services($type, $defer=NULL){
@@ -354,7 +298,7 @@
 							<div class='card-0 no-padding'>
 								<a href='funeral_tradition_this.php?service_id=".$results['service_id']."'>
 									<img src='images/providers/".$results['service_type']."/".$results['provider_id']."/".$results['service_img']."'>
-									<h3>".$results['funeral_type']."
+									<h3>".$results['funeral_name']."
 										<span>
 											<i class='fa-solid fa-star'></i>
 											<i class='fa-solid fa-star'></i>
@@ -396,3 +340,112 @@
 			break;
 		}	
 	}
+	## UPDATE FUNCTION
+	function update($table, $attr_list, $data_list, $condition){
+		## UPDATE organizer SET orga_company=?, orga_fname=?, orga_lname=?, orga_mi=?, orga_address=?, orga_phone=?, orga_email=? WHERE orga_id=?"
+		DB::query("UPDATE ".$table." SET ".join("=?, ", $attr_list)."=? WHERE ".$condition."=?", $data_list, "UPDATE");
+	}
+	## UPLOAD SINGLE IMAGE
+	function upload_image($name, $target){
+		$allowedType = array('jpg','jpeg','png','pdf');
+		$file = $_FILES[$name];
+		
+		$fileName = $file['name'];
+		$fileTmpName = $file['tmp_name'];
+		$fileError = $file['error'];
+		
+		$fileType = pathinfo($fileName, PATHINFO_EXTENSION);
+		## RETURN 2 MEANS FILE TYPE IS NOT ALLOWED!
+		if(!in_array($fileType, $allowedType)) return 2;
+		## RETURN 1 MEANS THERE IS AN ERROR IN UPLOADING IMAGE!
+		if(!$fileError === 0) return 1;
+		## ASSIGN UNIQUE NAME AND FILE LOCATION
+		$fileNewName = uniqid('', true).".".$fileType;
+		$fileLocation = $target.$fileNewName;
+		## UPLOADS
+		@move_uploaded_file($fileTmpName, $fileLocation);
+
+		return $fileNewName;
+	}
+	## UPDATE PROFILE
+	function update_profile($user, $email){
+		$txtfn = trim(ucwords($_POST['txtfn']));
+		$txtmi = trim(ucwords($_POST['txtmi']));
+		$txtln = trim(ucwords($_POST['txtln']));
+		$txtaddress = trim(ucwords($_POST['txtaddress']));
+		$txtphone = trim($_POST['txtphone']);
+		## ERROR TRAP
+		if(preg_match('/\d/', $txtfn)){
+			echo "<script>alert('Firstname cannot have a number!')</script>";
+		}
+		else if(preg_match('/\d/', $txtmi)){
+			echo "<script>alert('Middle name cannot have a number!')</script>";
+		}
+		else if(preg_match('/\d/', $txtln)){
+			echo "<script>alert('Lastname cannot have a number!')</script>";
+		}
+		else if(!preg_match('/\d/', $txtphone)){
+			echo "<script>alert('Lastname cannot have a number!')</script>";
+		}
+		else {
+			$data_list = [];
+
+			switch ($user){
+				case "seeker":
+					$attr_list = ["seeker_fname", "seeker_mi", "seeker_lname", "seeker_address", "seeker_phone"];
+					$condition = "seeker_email";
+
+					array_push($data_list, $txtfn, $txtmi, $txtln, $txtaddress, $txtphone, $email);
+					update($user, $attr_list, $data_list, $condition);
+
+					header('Location: profile.php?updated');
+					exit;
+					break;
+
+				case "provider":
+					break;
+			}
+		}
+	}
+	## UPLOAD REQUIREMENTS
+	function upload_required($user, $user_id){
+		$imageName = upload_image("file_req", "images/".$user."s/".$user_id."/");
+		
+		## ERROR TRAPPINGS
+		if($imageName === 1){
+			echo "<script>alert('An error occurred in uploading your image!')</script>";
+		}
+		else if($imageName === 2){
+			echo "<script>alert('File type is not allowed!')</script>";
+		}
+		else {
+			$data_list = [];
+
+			switch ($user){
+				case "seeker":
+					$table = "requirement";
+					$attr_list = ["seeker_id", "req_type", "req_img"];
+
+					array_push($data_list, $user_id, "death certificate", $imageName);
+					create($table, $attr_list, qmark_generator(count($attr_list)), $data_list);
+
+					header('Location: profile.php?updated');
+					exit;
+					break;
+					
+				case "provider":
+					break;
+			}
+		}
+	}
+	## USER LOGIN TYPE
+	function user_type(){
+		if(isset($_SESSION['seeker'])){
+			return "seeker";
+		}
+		else if(isset($_SESSION['provider'])){
+			return "provider";
+		}
+		return "admin";
+	}
+	

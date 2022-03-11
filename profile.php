@@ -77,11 +77,12 @@
 							$exist = false;
 							if(user_type() == "seeker"){
 								$exist = read_bool("requirement", ["seeker_id"], [$user['seeker_id']]);
-								$image_name = read("requirement", ["seeker_id"], [$user['seeker_id']]);
-								$image_name = $image_name[0];
 							}
 							
 							if ($exist){
+								$image_name = read("requirement", ["seeker_id"], [$user['seeker_id']]);
+								$image_name = $image_name[0];
+
 								echo "
 								<figure>	
 									<img src='images/".user_type()."s/".$user['seeker_id']."/".$image_name['req_img']."' alt=''>

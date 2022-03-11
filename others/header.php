@@ -3,13 +3,22 @@
 		<i class="fa-solid fa-bars"></i>
 	</button>
 	<picture>
-		<div>
-			<a href="cart.php">
-				<i class="fa-solid fa-cart-shopping"></i>
-				<span>10</span>
-			</a>
-			
-		</div>
+		<?php
+			if(isset($_SESSION['seeker'])){
+		?>
+			<div>
+				<a href="cart.php">
+					<i class="fa-solid fa-cart-shopping"></i>
+					<?php
+						echo "
+						<span>".count(read('cart', ['seeker_id'], [$_SESSION['seeker']]))."</span>
+						";
+					?>
+				</a>
+			</div>
+		<?php
+			}
+		?>
 		<img class="header-logo" src="images/main-logo.png" alt="">	
 		<div>Wakecords</div>
 	</picture>	

@@ -23,22 +23,22 @@
 				<div class="wrapper">
 					<div class="banner-div">
 						<?php
+							$service = DB::query("SELECT * FROM services s JOIN funeral f ON s.service_id = f.service_id WHERE s.service_id=?", array($_GET['service_id']), "READ");
+							$service = $service[0];
+
 							## NAME BASED ON SERVICE PROVIDER
 							echo "
-							<h2><a href='funeral.php'>Services</a> <span>> <a href='funeral_tradition.php?service_name={$_SESSION['service_name']}'>{$_SESSION['service_name']}</a> > Ngan sa lungon</span></h2>
+							<h2><a href='funeral.php'>Services</a> <span>> <a href='funeral_tradition.php?service_name={$_SESSION['service_name']}'>{$_SESSION['service_name']}</a> > {$service['funeral_name']}</span></h2>
 							";
 						?>
 						 
 						<div class="banner-cards trad">
 							<?php
-								$service = DB::query("SELECT * FROM services s JOIN funeral f ON s.service_id = f.service_id WHERE s.service_id=?", array($_GET['service_id']), "READ");
-								$service = $service[0];
-
 								echo "
 								<img class='card-img' src='images/providers/".$service['service_type']."/".$service['provider_id']."/".$service['service_img']."'>
 								<div class='card-div'>
 									<div>
-										<h3>".$service['service_name']."
+										<h3>".$service['funeral_name']."
 											<span>
 												<i class='fa-solid fa-star'></i>
 												<i class='fa-solid fa-star'></i>
@@ -50,10 +50,21 @@
 											".$service['service_desc']."
 										</p>
 										<div class='card-price trad'>₱ ".number_format($service['service_cost'], 2, '.', ',')."</div>
-										<button class='btn trad'>Add to Cart</button>
+										<form method='post'>
+											<button type='submit' name='btnadd' class='btn trad' onclick=\"return confirm('Are you sure you want to add this to cart?');\">Add to Cart</button>
+										</form>
 									</div>
 								</div>
 								";
+
+								if(isset($_POST['btnadd'])){
+									$attr_list = ["service_id", "seeker_id", "cart_qty"];
+									$data_list = [$service['service_id'], $_SESSION['seeker'], 1];
+									create("cart", $attr_list, qmark_generator(count($attr_list)), $data_list);
+
+									header("Location: cart.php?cart_success");
+									exit;
+								}
 							?>
 							
 						</div>
