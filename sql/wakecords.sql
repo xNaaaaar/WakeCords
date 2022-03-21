@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 11, 2022 at 03:51 PM
+-- Generation Time: Mar 21, 2022 at 02:59 PM
 -- Server version: 10.4.18-MariaDB
 -- PHP Version: 7.3.28
 
@@ -63,15 +63,8 @@ CREATE TABLE `cart` (
   `cart_id` int(8) NOT NULL,
   `service_id` int(8) NOT NULL,
   `seeker_id` int(8) NOT NULL,
-  `cart_qty` int(8) NOT NULL
+  `cart_qty` int(2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
---
--- Dumping data for table `cart`
---
-
-INSERT INTO `cart` (`cart_id`, `service_id`, `seeker_id`, `cart_qty`) VALUES
-(1, 3, 10, 1);
 
 -- --------------------------------------------------------
 
@@ -179,6 +172,7 @@ CREATE TABLE `payment` (
 CREATE TABLE `provider` (
   `provider_id` int(8) NOT NULL,
   `provider_company` varchar(25) NOT NULL,
+  `provider_desc` varchar(200) NOT NULL,
   `provider_fname` varchar(25) NOT NULL,
   `provider_mi` char(1) NOT NULL,
   `provider_lname` varchar(25) NOT NULL,
@@ -193,8 +187,8 @@ CREATE TABLE `provider` (
 -- Dumping data for table `provider`
 --
 
-INSERT INTO `provider` (`provider_id`, `provider_company`, `provider_fname`, `provider_mi`, `provider_lname`, `provider_type`, `provider_phone`, `provider_address`, `provider_email`, `provider_pass`) VALUES
-(1, '', 'Nicyl', '', 'Lapas', 'funeral', '', '', 'nicyl@gmail.com', '917b4e1bc1a0f75efeed0afcf703b8ea');
+INSERT INTO `provider` (`provider_id`, `provider_company`, `provider_desc`, `provider_fname`, `provider_mi`, `provider_lname`, `provider_type`, `provider_phone`, `provider_address`, `provider_email`, `provider_pass`) VALUES
+(1, '', '', 'Nicyl', '', 'Lapas', 'funeral', '', '', 'nicyl@gmail.com', '917b4e1bc1a0f75efeed0afcf703b8ea');
 
 -- --------------------------------------------------------
 
@@ -207,9 +201,17 @@ CREATE TABLE `purchase` (
   `seeker_id` int(8) NOT NULL,
   `service_id` int(8) NOT NULL,
   `purchase_total` decimal(9,2) NOT NULL,
-  `purchase_datetime` datetime NOT NULL,
+  `purchase_qty` int(2) NOT NULL,
+  `purchase_date` date NOT NULL,
   `purchase_status` varchar(15) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `purchase`
+--
+
+INSERT INTO `purchase` (`purchase_id`, `seeker_id`, `service_id`, `purchase_total`, `purchase_qty`, `purchase_date`, `purchase_status`) VALUES
+(10, 10, 1, '220000.00', 2, '2022-03-21', 'to pay');
 
 -- --------------------------------------------------------
 
@@ -234,15 +236,17 @@ CREATE TABLE `requirement` (
   `provider_id` int(8) DEFAULT NULL,
   `seeker_id` int(8) DEFAULT NULL,
   `req_type` varchar(20) NOT NULL,
-  `req_img` varchar(100) NOT NULL
+  `req_img` varchar(100) NOT NULL,
+  `req_status` varchar(15) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `requirement`
 --
 
-INSERT INTO `requirement` (`req_id`, `provider_id`, `seeker_id`, `req_type`, `req_img`) VALUES
-(1, NULL, 10, 'death certificate', '6220cb08d606a4.91479037.jpg');
+INSERT INTO `requirement` (`req_id`, `provider_id`, `seeker_id`, `req_type`, `req_img`, `req_status`) VALUES
+(1, NULL, 10, 'death certificate', '6220cb08d606a4.91479037.jpg', 'verified'),
+(2, NULL, 13, 'death certificate', '622c4d0cc5f490.06257154.jpg', 'pending');
 
 -- --------------------------------------------------------
 
@@ -280,9 +284,10 @@ CREATE TABLE `seeker` (
 --
 
 INSERT INTO `seeker` (`seeker_id`, `seeker_fname`, `seeker_mi`, `seeker_lname`, `seeker_address`, `seeker_phone`, `seeker_status`, `seeker_email`, `seeker_pass`) VALUES
-(10, 'Merry Joy', 'B', 'Blanco', 'Capitol Site', '09560376576', 'active', 'joyblanco@gmail.com', 'd1a4e3abf527d28d4ce9e76e7a7972c7'),
+(10, 'Merry Joy', 'G', 'Blanco', 'Capitol Site St', '09560376575', 'active', 'joyblanco@gmail.com', 'd1a4e3abf527d28d4ce9e76e7a7972c7'),
 (11, 'Lindor', NULL, 'Siton', NULL, NULL, 'inactive', 'lindor@gmail.com', 'd1a4e3abf527d28d4ce9e76e7a7972c7'),
-(12, 'John', NULL, 'Doe', NULL, NULL, 'inactive', 'johndoe@gmail.com', 'd763ec748433fb79a04f82bd46133d55');
+(12, 'John', NULL, 'Doe', NULL, NULL, 'inactive', 'johndoe@gmail.com', 'd763ec748433fb79a04f82bd46133d55'),
+(13, 'Jane', NULL, 'Doe', NULL, NULL, 'inactive', 'janedoe@gmail.com', 'a8939a5b9e9c468ef368765ea8e0dd5d');
 
 -- --------------------------------------------------------
 
@@ -297,6 +302,7 @@ CREATE TABLE `services` (
   `service_name` varchar(50) NOT NULL,
   `service_desc` varchar(500) NOT NULL,
   `service_cost` decimal(9,2) NOT NULL,
+  `service_qty` int(2) NOT NULL,
   `service_img` varchar(100) NOT NULL,
   `service_status` varchar(10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -305,10 +311,10 @@ CREATE TABLE `services` (
 -- Dumping data for table `services`
 --
 
-INSERT INTO `services` (`service_id`, `provider_id`, `service_type`, `service_name`, `service_desc`, `service_cost`, `service_img`, `service_status`) VALUES
-(1, 1, 'funeral', 'St. Peter', 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ad corrupti beatae magni rerum doloribus, vitae inventore. Tempore quod fugit commodi!', '110000.00', 'coffin.png', 'active'),
-(2, 1, 'funeral', 'St. Catherine', 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ad corrupti beatae magni rerum doloribus, vitae inventore. Tempore quod fugit commodi!', '80000.00', 'coffin.png', 'active'),
-(3, 1, 'funeral', 'St. Peter', 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ad corrupti beatae magni rerum doloribus, vitae inventore. Tempore quod fugit commodi!', '70000.00', 'coffin.png', 'active');
+INSERT INTO `services` (`service_id`, `provider_id`, `service_type`, `service_name`, `service_desc`, `service_cost`, `service_qty`, `service_img`, `service_status`) VALUES
+(1, 1, 'funeral', 'St. Peter', 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ad corrupti beatae magni rerum doloribus, vitae inventore. Tempore quod fugit commodi!', '110000.00', 10, 'coffin.png', 'active'),
+(2, 1, 'funeral', 'Cosmopolitan', 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ad corrupti beatae magni rerum doloribus, vitae inventore. Tempore quod fugit commodi!', '80000.00', 3, 'coffin.png', 'active'),
+(3, 1, 'funeral', 'St. Peter', 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ad corrupti beatae magni rerum doloribus, vitae inventore. Tempore quod fugit commodi!', '70000.00', 2, 'coffin.png', 'active');
 
 -- --------------------------------------------------------
 
@@ -462,7 +468,7 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `cart_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `cart_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `feedback`
@@ -480,7 +486,7 @@ ALTER TABLE `provider`
 -- AUTO_INCREMENT for table `purchase`
 --
 ALTER TABLE `purchase`
-  MODIFY `purchase_id` int(8) NOT NULL AUTO_INCREMENT;
+  MODIFY `purchase_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `request`
@@ -492,13 +498,13 @@ ALTER TABLE `request`
 -- AUTO_INCREMENT for table `requirement`
 --
 ALTER TABLE `requirement`
-  MODIFY `req_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `req_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `seeker`
 --
 ALTER TABLE `seeker`
-  MODIFY `seeker_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `seeker_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `services`
@@ -522,6 +528,13 @@ ALTER TABLE `cart`
 --
 ALTER TABLE `funeral`
   ADD CONSTRAINT `funeral_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `services` (`service_id`);
+
+--
+-- Constraints for table `purchase`
+--
+ALTER TABLE `purchase`
+  ADD CONSTRAINT `purchase_ibfk_1` FOREIGN KEY (`seeker_id`) REFERENCES `seeker` (`seeker_id`),
+  ADD CONSTRAINT `purchase_ibfk_2` FOREIGN KEY (`service_id`) REFERENCES `services` (`service_id`);
 
 --
 -- Constraints for table `services`
