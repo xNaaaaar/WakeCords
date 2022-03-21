@@ -46,7 +46,6 @@
 			</section>
 		</div>
 	</div>
-	<!-- FOOTER AREA -->
-	<?php include("others/footer-js.php"); ?>
-</body>
-</html>
+<!-- FOOTER AREA -->
+<?php include("others/footer-js.php"); ?>
+
