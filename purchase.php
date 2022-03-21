@@ -1,4 +1,5 @@
 <!-- HEAD AREA -->
+<?php include("others/functions.php"); ?>
 <?php include("others/head.php"); ?>
 
 <body>
@@ -32,50 +33,7 @@
 								<div>Status</div>
 								<div>Requests</div>
 							</div>
-							<div class="list">
-								<div>
-									<h3>Name sa nag rate
-										<span>
-											<!-- DATE -->
-											Purchased on: 02/22/2022
-										</span>
-									</h3>
-									<p>Lorem ipsum dolor, sit amet consectetur adipisicing elit...</p>
-								</div>
-								<div>
-									<span>canceled</span>
-								</div>
-								<div>
-									<button class="status">refund</button>
-									<button class="status">cancel</button>
-								</div>
-							</div>
-							<div class="list">
-								<div>
-									<h3>Name sa nag rate
-										<span>
-											<!-- DATE -->
-											Purchased on: 02/22/2022
-										</span>
-									</h3>
-									<p>Lorem ipsum dolor, sit amet consectetur adipisicing elit...</p>
-								</div>
-								<div></div>
-								<div></div>
-							</div>
-							<div class="list">
-								<div>
-									<h3>Name sa nag rate
-										<span>
-											<!-- DATE -->
-											Purchased on: 02/22/2022
-										</span>
-									</h3>
-									<p>Lorem ipsum dolor, sit amet consectetur adipisicing elit...</p>
-								</div>
-								<div></div>
-								<div></div>
-							</div>
+							<?php purchase_list(); ?>
 						</div>
 					</div>
 				</div>

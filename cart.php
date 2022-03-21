@@ -7,6 +7,11 @@
 	if(isset($_GET['cart_success'])){
 		echo "<script>alert('Successfully added to cart! View cart now!')</script>";
 	}
+
+	## CART SUCCESSFULLY DELETE
+	if(isset($_GET['cart_deleted'])){
+		echo "<script>alert('Successfully deleted!')</script>";
+	}
 ?>
 
 <body>
@@ -41,5 +46,7 @@
 			</section>
 		</div>
 	</div>
+	<!-- FOOTER AREA -->
+	<?php include("others/footer-js.php"); ?>
 </body>
 </html>

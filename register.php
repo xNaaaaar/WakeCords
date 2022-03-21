@@ -47,7 +47,5 @@
 		</div>
 	</div>
 
-	<!-- FOOTER JS -->
-	<?php include("others/footer-js.php"); ?>
-</body>
-</html>
+<!-- FOOTER JS -->
+<?php include("others/footer-js.php"); ?>

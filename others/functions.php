@@ -3,6 +3,7 @@
 	error_reporting(E_ERROR | E_WARNING | E_PARSE | E_NOTICE);
 	date_default_timezone_set('Asia/Manila');
 	require_once("others/db.php");
+	ob_start();
 	
 	## ADD TO CART
 	function add_to_cart(){
@@ -136,7 +137,10 @@
 		}
 	}
 	## DELETE FUNCTION
-	function delete(){}
+	function delete($table, $attr, $data){
+		## DELETE FROM {table} WHERE {attr} = {data}
+		return DB::query("DELETE FROM ".$table." WHERE ".$attr."=?", array($data), "DELETE");
+	}
 	## LIMIT DISPLAY TEXT
 	function limit_text($text, $limit) {
 		if (str_word_count($text, 0) > $limit) {
@@ -180,48 +184,114 @@
 		// read("cart", ["seeker_id"], [$_SESSION['seeker']]);
 
 		if(count($cart) > 0){
+			$i = 0;
 			foreach($cart as $results){
+				$total_cost = $results['service_cost'] * $results['cart_qty'];
 				echo "
 				<div class='my-cart'>
-					<div class='my-cart-con'>
+					<figure>
 						<img src='images/providers/".$results['service_type']."/".$results['provider_id']."/".$results['service_img']."' alt=''>
-						<h3>
-							".$results['funeral_name']."
-							<span>₱ ".number_format($results['service_cost'],2,'.',',')." <q>Qty: <input type='text' value='".$results['cart_qty']."'></q></span>
-						</h3>
+					</figure>
+					<div class='my-cart-details'>
+						<div class='my-cart-title'>
+							<h3>".$results['funeral_name']."</h3>
+							<p>".limit_text($results['service_desc'], 10)."</p>
+						</div>
+						<span class='qty'>x".$results['cart_qty']."</span>
+						<h3>₱ ".number_format($total_cost,2,'.',',')."</h3>
 					</div>
-					<div class='my-cart-qty'><i class='fa-solid fa-trash-can'></i></div>
+					<div class='my-cart-qty'><a href='deleting.php?table=cart&attr=cart_id&data=".$results['cart_id']."' onclick=\"return confirm('Are you sure you want to delete this to cart?');\"><i class='fa-solid fa-trash-can'></i></a></div>
 				</div>
 				";
+				$i++;
 			}
 
 			echo "
-			<div class='hr full-width'></div>
-			<div class='my-cart-con'>
-				<img class='none' src=''>
-				<div class='my-cart-total'>
-					<div class='total-sub'>
-						<p>Transaction fee:</p>
-						<h3>₱ 300.00</h3>
-					</div>
-					<div class='total-sub'>
-						<p>Total:</p>
-						<h3>₱ 333,300.00</h3>
-					</div>
-					<form action=''>
-						<div>
+			<form method='post'>
+				<div class='hr full-width'></div>
+				<div class='my-cart'>
+					<div class='my-cart-form'>
+						<div class='total-sub terms'>
 							<input class='radio-terms' type='radio' required>
 							<p>By checking this you agree to our <a href=''>terms and conditions</a>.</p>
 						</div>
-						<button class='btn'>Checkout</button>
-					</form>
+						<button type='submit' name='btncheckout' class='btn'>Checkout</button>
+					</div>
 				</div>
-			</div>
+			</form>
 			";
+
+			if(isset($_POST['btncheckout'])){
+				$attr_list = ["seeker_id", "service_id", "purchase_total", "purchase_qty", "purchase_date", "purchase_status"];
+				$cart_table = read("cart", ["seeker_id"], [$_SESSION['seeker']]);
+				
+				foreach($cart_table as $results){
+					$service_ = read("services", ["service_id"], [$results["service_id"]]);
+					$service_ = $service_[0];
+					$per_cost = $service_["service_cost"] * $results['cart_qty'];
+
+					$data_list = [$results['seeker_id'], $results['service_id'], $per_cost, $results['cart_qty'], date('Y-m-d'), "to pay"];
+					## CREATE PURCHASE
+					create("purchase", $attr_list, qmark_generator(count($attr_list)), $data_list);
+				}
+				## DELETE ALL DATA IN CART
+				delete("cart", "seeker_id", $_SESSION['seeker']);
+			}
 		}
 		else {
-			echo "<span class='note blue'>Note: Please upload a death certificate to proceed! Click <a href='profile.php'>here</a> to upload!</span>";
+			echo "<span class='note red'>Cart is empty! <a href='funeral.php'>Add to cart now!</a></span>";
 		}
+	}
+	## LIST OF PURCHASE
+	function purchase_list(){
+		$list = read("purchase", ["seeker_id"], [$_SESSION['seeker']]);
+		
+		if(count($list)>0){
+			foreach($list as $results){
+				$service_ = read("services", ["service_id"], [$results['service_id']]);
+				$service_ = $service_[0];
+
+				switch ($service_['service_type']){
+					case "funeral":
+						$differ_ = read("funeral", ["service_id"], [$service_['service_id']]);
+						$differ_ = $differ_[0];
+						break;
+				}
+				
+				echo "
+				<div class='list'>
+					<div>
+						<h3>".$differ_['funeral_name']."
+							<span>
+								<!-- DATE -->
+								Purchased on: ".date("F j, Y", strtotime($results['purchase_date']))."
+							</span>
+						</h3>
+						<p>".limit_text($service_['service_desc'], 10)."</p>
+					</div>
+					<div>
+						<span>".$results['purchase_status']."</span>
+					</div>
+					<div>
+				";
+
+				switch ($results['purchase_status']){
+					case "to pay":
+						echo "
+						<a href='#' class='status'>pay</a>
+						";
+						break;
+					case "";
+						break;
+				}
+
+				echo "
+					</div>
+				</div>
+				";
+			}	
+		}
+		else echo "<div class='note red'>You have no transaction yet!</div>";
 	}
 	## GENERATE QUESTION MARK
 	function qmark_generator($arr_length){
@@ -340,6 +410,14 @@
 			break;
 		}	
 	}
+	## STATUS COLOR
+	function status_color(){
+		$status = user_status();
+
+		if($status == "verified") return "green";
+		elseif($status == "pending") return "blue";
+		else return "red";
+	}
 	## UPDATE FUNCTION
 	function update($table, $attr_list, $data_list, $condition){
 		## UPDATE organizer SET orga_company=?, orga_fname=?, orga_lname=?, orga_mi=?, orga_address=?, orga_phone=?, orga_email=? WHERE orga_id=?"
@@ -424,11 +502,22 @@
 			switch ($user){
 				case "seeker":
 					$table = "requirement";
-					$attr_list = ["seeker_id", "req_type", "req_img"];
+					$attr_list = ["seeker_id", "req_type", "req_img", "req_status"];
+					## CHECK IF ALREADY UPLOADED REQS
+					$update_img = read($table, ["seeker_id"], [$user_id]);
+					array_push($data_list, $user_id, "death certificate", $imageName, "pending");
 
-					array_push($data_list, $user_id, "death certificate", $imageName);
-					create($table, $attr_list, qmark_generator(count($attr_list)), $data_list);
-
+					if(count($update_img) > 0){
+						$update_img = $update_img[0];
+						## DELETE THE IMAGE FILE
+						$path = "images/".$user."s/".$user_id."/".$update_img["req_img"];
+						if(!unlink($path)) echo "<script>alert('An error occurred in deleting image!')</script>";
+						
+						array_push($data_list, $update_img['req_id']);
+						update($table, $attr_list, $data_list, "req_id");
+					}
+					else create($table, $attr_list, qmark_generator(count($attr_list)), $data_list);
+					
 					header('Location: profile.php?updated');
 					exit;
 					break;
@@ -437,6 +526,13 @@
 					break;
 			}
 		}
+	}
+	## RETURN USER STATUS AFTER UPLOADING REQS
+	function user_status(){
+		$status = read("requirement", ["seeker_id"], [$_SESSION['seeker']]);
+		$status = $status[0];
+
+		return $status['req_status'];
 	}
 	## USER LOGIN TYPE
 	function user_type(){
@@ -448,4 +544,14 @@
 		}
 		return "admin";
 	}
+	## CHECK IF USER IS VERIFIED
+	function verified_bool(){
+		$status = read("requirement", ["seeker_id"], [$_SESSION['seeker']]);
+		$status = $status[0];
+
+		return ($status['req_status'] == "verified") ? true:false;
+	}
+
+	
+	
 	

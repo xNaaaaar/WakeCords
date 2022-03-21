@@ -32,6 +32,16 @@
 						<h2>Profile</h2>
 						<form class="profile" method="post">
 							<a class="btn-new" href="edit_profile.php">Update</a>
+							<?php
+								if(user_type() == "provider"){
+									echo "
+									<div>
+										<label for='label-name'>Company name</label>
+										<input type='text' id='label-name' placeholder='".$user["provider_company"]."' disabled>
+									</div>
+									";
+								}
+							?>
 							<div>
 								<label for="label-name">First name</label>
 								<input type="text" name="" id="label-name" placeholder="<?php echo (user_type() == 'seeker')?$user['seeker_fname']:$user['provider_fname']; ?>" disabled>
@@ -72,30 +82,38 @@
 					</div>
 
 					<div id="required" class="banner-div no-padding-top">
-						<h2>Requirements</h2>
+						<h2>Requirements
 						<?php
+							## USER STATUS [VERIFIED, NOT VERIFIED, PENDING]
 							$exist = false;
 							if(user_type() == "seeker"){
+								$status = user_status();
+								echo "<span class='btn status ".status_color()."'>".$status."</span>";
+								echo "</h2>";
+							
 								$exist = read_bool("requirement", ["seeker_id"], [$user['seeker_id']]);
+							
+								if(!$exist || $status == "not verified"){	
+									echo "
+									<div class='note red'>Note: Please upload a clear copy of death certificate to proceed.</div>
+									<form class='profile' method='post'>
+										<a class='btn-new' href='required.php'>Upload Requirement</a>
+									</form>"; 
+								}
+								
+								if($exist){
+									$image_name = read("requirement", ["seeker_id"], [$user['seeker_id']]);
+									$image_name = $image_name[0];
+	
+									echo "
+									<figure>	
+										<img src='images/".user_type()."s/".$user['seeker_id']."/".$image_name['req_img']."' alt=''>
+										<figcaption>Death Certificate</figcaption>	
+									</figure>";
+								}
 							}
 							
-							if ($exist){
-								$image_name = read("requirement", ["seeker_id"], [$user['seeker_id']]);
-								$image_name = $image_name[0];
-
-								echo "
-								<figure>	
-									<img src='images/".user_type()."s/".$user['seeker_id']."/".$image_name['req_img']."' alt=''>
-									<figcaption>Death Certificate</figcaption>	
-								</figure>";
-							}
-							else {
-								echo "
-								<div class='note red'>Note: Please upload a death certificate to proceed.</div>
-								<form class='profile' method='post'>
-									<a class='btn-new' href='required.php'>Upload Requirement</a>
-								</form>";
-							}
+							
 						?>
 					</div>
 				</div>
