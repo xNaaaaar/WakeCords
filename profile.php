@@ -1,7 +1,7 @@
 <!-- HEAD AREA -->
 <?php 
-	include("others/head.php"); 
 	include("others/functions.php");
+	include("others/head.php"); 
 
 	## SUCCESSFULLY LOGIN
 	if(isset($_GET['login'])) echo "<script>alert('Thank you for logging in!')</script>";

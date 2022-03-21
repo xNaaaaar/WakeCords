@@ -1,7 +1,7 @@
 <!-- HEAD AREA -->
 <?php 
-	include("others/head.php"); 
 	include("others/functions.php");
+	include("others/head.php"); 
 
 	if(isset($_POST['btnreg'])){
 		createUser($_POST['cbouser']);
