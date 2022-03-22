@@ -210,3 +210,30 @@ button.header-btn i{font-size:var(--size-7);}
 .banner-div.intro p{margin-top:20px;width:80%;}
 .banner-div.intro p a{color:var(--light-gray);}
 .banner-div.intro p a:hover{text-decoration:underline;}
+
+/* PAYMENT.PHP */
+.banner-section{padding:20px 25px;box-shadow:var(--shadow-4);background:#fff;border:1px solid #bbb;width:1000px;max-width:100%;margin:0 0 var(--size-6);min-height:0;}
+.banner-section > ul{width:100%;justify-content:space-between;text-align:left;margin-bottom:0;}
+.banner-section > ul:first-child{margin-bottom:var(--size-3);}
+.banner-section > ul li{width:30%;font-size:15px;}
+.banner-section > ul li h3{margin:0;}
+.banner-section .hr.full-width{margin:10px 0 20px;}
+
+.details h3{font-size:18px;}
+.details h3 ul{display:inline-block;margin:0 0 0 10px;}
+.details h3 ul li{display:inline-block;}
+.details h3 ul li i{font-size:24px;}
+.details-con{display:flex;justify-content:space-between;flex-wrap:wrap;position:relative;padding-bottom:var(--size-3);}
+.details-con div{width:48%;}
+.details-con div label{font-size:15px;}
+.details-con div input{border:1px solid var(--light-blue);height:40px;padding:0 10px;}
+
+/* STATUS.PHP */
+.order_status{padding:var(--size-7) 0 0;}
+.order_status div{min-height:50px;position:relative;padding:0 0 50px 50px;}
+.order_status div h3{margin:0;}
+.order_status div p{margin:0;font-size:15px;}
+.order_status div:before, .order_status div:after{content:"";width:21px;height:21px;background:#bbb;position:absolute;top:4px;left:0;border-radius:50%;}
+.order_status div.done:before, .order_status div.done:after{background:var(--green);}
+.order_status div:after{width:5px;height:100%;left:8px;border-radius:0;}
+.order_status div:last-child:after{display:none;}

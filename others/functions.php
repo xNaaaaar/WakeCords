@@ -275,14 +275,13 @@
 					<div>
 				";
 
-				switch ($results['purchase_status']){
-					case "to pay":
-						echo "
-						<a href='#' class='status'>pay</a>
-						";
-						break;
-					case "";
-						break;
+				## STATUS IS PAID
+				if($results['purchase_status'] == "paid"){
+					echo "<a href='status.php?purchaseid=".$results['purchase_id']."' class='status'>view</a>";
+				}
+				## STATUS IS TO PAY
+				if($results['purchase_status'] == "to pay"){
+					echo "<a href='payment.php?purchaseid=".$results['purchase_id']."' class='status'>pay</a>";
 				}
 
 				echo "
