@@ -30,8 +30,10 @@
 				<div class="wrapper">
 					<div class="banner-div">
 						<h2>Profile</h2>
+						<a class="btn btn-link-absolute" href="edit_profile.php">Update</a>
+
 						<form class="profile" method="post">
-							<a class="btn-new" href="edit_profile.php">Update</a>
+							
 							<?php
 								if(user_type() == "provider"){
 									echo "
@@ -68,8 +70,10 @@
 
 					<div class="banner-div no-padding-top">
 						<h2>Account</h2>
+						<a class="btn btn-link-absolute no-top" href="change_pass.php">Change Password</a>
+
 						<form class="profile" method="post">
-							<a class="btn-new" href="change_pass.php">Change Password</a>
+							
 							<div>
 								<label for="label-name">Email</label>
 								<input type="text" name="" id="label-name" placeholder="<?php echo (user_type() == 'seeker')?$user['seeker_email']:$user['provider_email']; ?>" disabled>
@@ -88,20 +92,18 @@
 							$exist = false;
 							if(user_type() == "seeker"){
 								$status = user_status();
-								echo "<span class='btn status ".status_color()."'>".$status."</span>";
+								if($status != "")
+									echo "<span class='btn status ".status_color()."'>".$status."</span>";
 								echo "</h2>";
 							
-								$exist = read_bool("requirement", ["seeker_id"], [$user['seeker_id']]);
-							
-								if(!$exist || $status == "not verified"){	
+								if($status == "" || $status == "not verified"){	
 									echo "
 									<div class='note red'>Note: Please upload a clear copy of death certificate to proceed.</div>
-									<form class='profile' method='post'>
-										<a class='btn-new' href='required.php'>Upload Requirement</a>
-									</form>"; 
+									<a class='btn btn-link-absolute no-top' href='required.php'>Upload Requirement</a>
+									"; 
 								}
-								
-								if($exist){
+								## IF UPLOADED REQUIREMENT
+								if($status != ""){
 									$image_name = read("requirement", ["seeker_id"], [$user['seeker_id']]);
 									$image_name = $image_name[0];
 	

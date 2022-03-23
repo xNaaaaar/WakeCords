@@ -251,20 +251,15 @@
 				$service_ = read("services", ["service_id"], [$results['service_id']]);
 				$service_ = $service_[0];
 
-				switch ($service_['service_type']){
-					case "funeral":
-						$differ_ = read("funeral", ["service_id"], [$service_['service_id']]);
-						$differ_ = $differ_[0];
-						break;
-				}
+				$differ_ = service_type($service_['service_type'], $service_['service_id']);
 				
 				echo "
 				<div class='list'>
 					<div>
-						<h3>".$differ_['funeral_name']."
+						<h3>".$differ_[1]." <mark class='btn status type'>".$service_['service_type']."</mark>
 							<span>
 								<!-- DATE -->
-								Purchased on: ".date("F j, Y", strtotime($results['purchase_date']))."
+								on: ".date("F j, Y", strtotime($results['purchase_date']))."
 							</span>
 						</h3>
 						<p>".limit_text($service_['service_desc'], 10)."</p>
@@ -311,6 +306,9 @@
 		else if(count($attr) == 2) {
 			return DB::query("SELECT * FROM ".$table." WHERE ".$attr[0]."=? and ".$attr[1]."=?", array($data[0], $data[1]), "READ");
 		}
+		else if(count($attr) == 3) {
+			return DB::query("SELECT * FROM ".$table." WHERE ".$attr[0]."=? and ".$attr[1]."=? and ".$attr[2]."=?", array($data[0], $data[1], $data[2]), "READ");
+		}
 			
 	}
 	## BOOLEAN READ FUNCTION
@@ -320,6 +318,18 @@
 			return true;
 		}
 		return false;	
+	}
+	## SERVICE TYPE
+	function service_type($type, $service_id){
+		switch($type){
+			case "funeral":
+				$result = read($type, ["service_id"], [$service_id]);
+				break;
+			case "flower":
+				break;
+		}
+
+		return $result[0];
 	}
 	## DISPLAY FUNERAL SERVICES
 	function services($type, $defer=NULL){
@@ -529,9 +539,13 @@
 	## RETURN USER STATUS AFTER UPLOADING REQS
 	function user_status(){
 		$status = read("requirement", ["seeker_id"], [$_SESSION['seeker']]);
-		$status = $status[0];
 
-		return $status['req_status'];
+		if(count($status)>0){
+			$status = $status[0];
+			return $status['req_status'];
+		}
+
+		return "";
 	}
 	## USER LOGIN TYPE
 	function user_type(){

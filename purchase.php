@@ -23,6 +23,7 @@
 					<div class="banner-div">
 						<h2>Transactions</h2>
 
+						<a class='btn btn-link-absolute' href="payment.php">Pay all at once</a>
 						<!-- TABS -->
 						<?php
 						$current_tab = "transact";
