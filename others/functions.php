@@ -242,6 +242,77 @@
 			echo "<span class='note red'>Cart is empty! <a href='funeral.php'>Add to cart now!</a></span>";
 		}
 	}
+	## NECESSARY UPDATE AFTER PAYING
+	function pay_purchase($type_list, $purchase_list){
+		## DECLARE DATA
+		if(service_type_exist_bool("funeral", $type_list) || service_type_exist_bool("church", $type_list) || service_type_exist_bool("headstone", $type_list)){
+			$txtdeceasedname = trim(ucwords($_POST['txtdeceasedname']));
+		}
+		if(!service_type_exist_bool("church", $type_list)){
+			$txtdeliveryadd = trim(ucwords($_POST['txtdeliveryadd']));
+		}
+		if(service_type_exist_bool("funeral", $type_list)){
+			$dtburial = $_POST['dtburial'];
+			$txtburialadd = trim(ucwords($_POST['txtburialadd']));
+
+			## ERROR TRAP
+			if(preg_match('/\d/', $txtdeceasedname)){
+				echo "<script>alert('Deceased name cannot have a number!')</script>";
+			}
+			else {
+				## INSERT DATA INTO FUNERAL
+				foreach($purchase_list as $results){
+					$attr_list = ["purchase_id", "deceased_name", "delivery_add", "burial_datetime", "burial_add"];
+					$data_list = [$results['purchase_id'], $txtdeceasedname, $txtdeliveryadd, date("Y-m-d H:i:s", strtotime($dtburial)), $txtburialadd];
+					##
+					create("details", $attr_list, qmark_generator(count($attr_list)), $data_list);
+
+					## PURCHASE STATUS 'to pay' TO 'paid'
+					update("purchase", ["purchase_status"], ["paid", $results['purchase_id']], "purchase_id");
+
+					## UPDATE SERVICE REMAINING QTY
+					$service = read("services", ["service_id"], [$results['service_id']]);
+					$service = $service[0];
+
+					$update_qty = $service['service_qty'] - $results['purchase_qty'];
+					update("services", ["service_qty"], [$update_qty, $results['service_id']], "service_id");
+
+					## IF SERVICE QTY = 0, UPDATE SERVICE STATUS TO INACTIVE
+					$service_ = read("services", ["service_id"], [$results['service_id']]);
+					$service_ = $service_[0];
+
+					if($service_['service_qty'] == 0){
+						update("services", ["service_status"], ["inactive", $results['service_id']], "service_id");
+					}
+				}		
+			}
+
+			
+			
+			
+		}
+		if(service_type_exist_bool("candle", $type_list)){
+			$datedeliverycandle = $_POST['datedeliverycandle'];
+		}
+		if(service_type_exist_bool("flower", $type_list)){
+			$datedeliveryflower = $_POST['datedeliveryflower'];
+			$txtribbonmsg = trim(ucwords($_POST['txtribbonmsg']));
+		}
+		if(service_type_exist_bool("headstone", $type_list)){
+			$datebirth = $_POST['datebirth'];
+			$datedeath = $_POST['datedeath'];
+			$txtmsg = trim(ucwords($_POST['txtmsg']));
+			$datedeliveryheadstone = $_POST['datedeliveryheadstone'];
+		}
+		if(service_type_exist_bool("catering", $type_list)){
+			$dtdelivery = $_POST['dtdelivery'];
+			$numpax = $_POST['numpax'];
+		}
+		if(service_type_exist_bool("church", $type_list)){
+			$txtcemaddress = trim(ucwords($_POST['txtcemaddress']));
+			## CHECK IF txtcemaddress IS EMPTY
+		}
+	}
 	## LIST OF PURCHASE
 	function purchase_list(){
 		$list = read("purchase", ["seeker_id"], [$_SESSION['seeker']]);
@@ -330,6 +401,15 @@
 		}
 
 		return $result[0];
+	}
+	## SERVICE TYPE EXISTS IN ARRAY BOOLEAN
+	function service_type_exist_bool($type, $type_list){
+		for($i=0;$i<count($type_list);$i++){
+			if($type == $type_list[$i]) {
+				return true;
+			}
+		}
+		return false;
 	}
 	## DISPLAY FUNERAL SERVICES
 	function services($type, $defer=NULL){

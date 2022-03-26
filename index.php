@@ -27,7 +27,7 @@
 				<img src="images/main-logo.png">
 			</div>
 			<form method="post">
-				<input type="email" name="emuser" placeholder="Username">
+				<input type="email" name="emuser" placeholder="Email Address">
 				<input type="password" name="passpw" placeholder="Password">
 				<p>
 					Forgot password? Click <a href="resetpass.php">here</a>.

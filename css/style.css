@@ -226,6 +226,7 @@ button.header-btn i{font-size:var(--size-7);}
 .details-con{display:flex;justify-content:space-between;flex-wrap:wrap;position:relative;padding-bottom:var(--size-3);}
 .details-con div{width:48%;}
 .details-con div label{font-size:15px;}
+.details-con div label span{color:var(--red);}
 .details-con div input{border:1px solid var(--light-blue);height:40px;padding:0 10px;}
 
 /* STATUS.PHP */

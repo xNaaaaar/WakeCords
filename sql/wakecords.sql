@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.1.0
+-- version 5.1.1
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 26, 2022 at 05:14 AM
--- Server version: 10.4.18-MariaDB
--- PHP Version: 7.3.28
+-- Generation Time: Mar 26, 2022 at 12:14 PM
+-- Server version: 10.4.22-MariaDB
+-- PHP Version: 7.4.27
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -80,6 +80,35 @@ CREATE TABLE `church` (
   `church_address` varchar(100) NOT NULL,
   `church_mass_sched` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `details`
+--
+
+CREATE TABLE `details` (
+  `purchase_id` int(8) NOT NULL,
+  `deceased_name` varchar(25) DEFAULT NULL,
+  `burial_datetime` datetime DEFAULT NULL,
+  `burial_add` varchar(100) DEFAULT NULL,
+  `delivery_add` varchar(100) DEFAULT NULL,
+  `delivery_date` date DEFAULT NULL,
+  `msg_ribbon` varchar(200) DEFAULT NULL,
+  `msg_headstone` varchar(200) DEFAULT NULL,
+  `birth_date` date DEFAULT NULL,
+  `death_date` date DEFAULT NULL,
+  `delivery_datetime` datetime DEFAULT NULL,
+  `num_pax` int(4) DEFAULT NULL,
+  `cemetery_add` varchar(100) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `details`
+--
+
+INSERT INTO `details` (`purchase_id`, `deceased_name`, `burial_datetime`, `burial_add`, `delivery_add`, `delivery_date`, `msg_ribbon`, `msg_headstone`, `birth_date`, `death_date`, `delivery_datetime`, `num_pax`, `cemetery_add`) VALUES
+(10, 'John Doe', '2022-04-09 19:06:00', 'This Is My Address', 'This Is My Address', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -211,7 +240,7 @@ CREATE TABLE `purchase` (
 --
 
 INSERT INTO `purchase` (`purchase_id`, `seeker_id`, `service_id`, `purchase_total`, `purchase_qty`, `purchase_date`, `purchase_status`) VALUES
-(10, 10, 1, '220000.00', 2, '2022-03-21', 'to pay'),
+(10, 10, 1, '220000.00', 2, '2022-03-21', 'paid'),
 (11, 10, 2, '80000.00', 1, '2022-03-23', 'to pay');
 
 -- --------------------------------------------------------
@@ -285,7 +314,7 @@ CREATE TABLE `seeker` (
 --
 
 INSERT INTO `seeker` (`seeker_id`, `seeker_fname`, `seeker_mi`, `seeker_lname`, `seeker_address`, `seeker_phone`, `seeker_status`, `seeker_email`, `seeker_pass`) VALUES
-(10, 'Merry Joy', 'G', 'Blanco', 'Capitol Site St', '09560376575', 'active', 'joyblanco@gmail.com', 'd250786e8127c338aa76955b8c1faab2'),
+(10, 'Joy', 'G', 'Blancoo', 'Capitol Site Street', '09560376575', 'active', 'joyblanco@gmail.com', 'd250786e8127c338aa76955b8c1faab2'),
 (11, 'Lindor', NULL, 'Siton', NULL, NULL, 'inactive', 'lindor@gmail.com', 'd250786e8127c338aa76955b8c1faab2'),
 (12, 'John', NULL, 'Doe', NULL, NULL, 'inactive', 'johndoe@gmail.com', 'd250786e8127c338aa76955b8c1faab2'),
 (13, 'Jane', NULL, 'Doe', NULL, NULL, 'inactive', 'janedoe@gmail.com', 'd250786e8127c338aa76955b8c1faab2');
@@ -313,7 +342,7 @@ CREATE TABLE `services` (
 --
 
 INSERT INTO `services` (`service_id`, `provider_id`, `service_type`, `service_name`, `service_desc`, `service_cost`, `service_qty`, `service_img`, `service_status`) VALUES
-(1, 1, 'funeral', 'St. Peter', 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ad corrupti beatae magni rerum doloribus, vitae inventore. Tempore quod fugit commodi!', '110000.00', 10, 'coffin.png', 'active'),
+(1, 1, 'funeral', 'St. Peter', 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ad corrupti beatae magni rerum doloribus, vitae inventore. Tempore quod fugit commodi!', '110000.00', 8, 'coffin.png', 'active'),
 (2, 1, 'funeral', 'Cosmopolitan', 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ad corrupti beatae magni rerum doloribus, vitae inventore. Tempore quod fugit commodi!', '80000.00', 3, 'coffin.png', 'active'),
 (3, 1, 'funeral', 'St. Peter', 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ad corrupti beatae magni rerum doloribus, vitae inventore. Tempore quod fugit commodi!', '70000.00', 2, 'coffin.png', 'active');
 
@@ -360,6 +389,12 @@ ALTER TABLE `cart`
 --
 ALTER TABLE `church`
   ADD KEY `service_id` (`service_id`);
+
+--
+-- Indexes for table `details`
+--
+ALTER TABLE `details`
+  ADD KEY `purchase_id` (`purchase_id`);
 
 --
 -- Indexes for table `feedback`
@@ -469,7 +504,7 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `cart_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `cart_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `feedback`
@@ -523,6 +558,12 @@ ALTER TABLE `services`
 ALTER TABLE `cart`
   ADD CONSTRAINT `cart_ibfk_1` FOREIGN KEY (`service_id`) REFERENCES `services` (`service_id`),
   ADD CONSTRAINT `cart_ibfk_2` FOREIGN KEY (`seeker_id`) REFERENCES `seeker` (`seeker_id`);
+
+--
+-- Constraints for table `details`
+--
+ALTER TABLE `details`
+  ADD CONSTRAINT `details_ibfk_1` FOREIGN KEY (`purchase_id`) REFERENCES `purchase` (`purchase_id`);
 
 --
 -- Constraints for table `funeral`
