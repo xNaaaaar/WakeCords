@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 21, 2022 at 02:59 PM
+-- Generation Time: Mar 26, 2022 at 05:14 AM
 -- Server version: 10.4.18-MariaDB
 -- PHP Version: 7.3.28
 
@@ -41,7 +41,7 @@ CREATE TABLE `admin` (
 --
 
 INSERT INTO `admin` (`admin_id`, `admin_fname`, `admin_mi`, `admin_lname`, `admin_email`, `admin_pass`) VALUES
-(1, 'Jonard', 'B', 'Malicay', 'malicay@gmail.com', '061917fcdcf6bf47b62884dab8da840e');
+(1, 'admin', 'a', 'admin', 'admin@wakecords.com', '0192023a7bbd73250516f069df18b500');
 
 -- --------------------------------------------------------
 
@@ -211,7 +211,8 @@ CREATE TABLE `purchase` (
 --
 
 INSERT INTO `purchase` (`purchase_id`, `seeker_id`, `service_id`, `purchase_total`, `purchase_qty`, `purchase_date`, `purchase_status`) VALUES
-(10, 10, 1, '220000.00', 2, '2022-03-21', 'to pay');
+(10, 10, 1, '220000.00', 2, '2022-03-21', 'to pay'),
+(11, 10, 2, '80000.00', 1, '2022-03-23', 'to pay');
 
 -- --------------------------------------------------------
 
@@ -284,10 +285,10 @@ CREATE TABLE `seeker` (
 --
 
 INSERT INTO `seeker` (`seeker_id`, `seeker_fname`, `seeker_mi`, `seeker_lname`, `seeker_address`, `seeker_phone`, `seeker_status`, `seeker_email`, `seeker_pass`) VALUES
-(10, 'Merry Joy', 'G', 'Blanco', 'Capitol Site St', '09560376575', 'active', 'joyblanco@gmail.com', 'd1a4e3abf527d28d4ce9e76e7a7972c7'),
-(11, 'Lindor', NULL, 'Siton', NULL, NULL, 'inactive', 'lindor@gmail.com', 'd1a4e3abf527d28d4ce9e76e7a7972c7'),
-(12, 'John', NULL, 'Doe', NULL, NULL, 'inactive', 'johndoe@gmail.com', 'd763ec748433fb79a04f82bd46133d55'),
-(13, 'Jane', NULL, 'Doe', NULL, NULL, 'inactive', 'janedoe@gmail.com', 'a8939a5b9e9c468ef368765ea8e0dd5d');
+(10, 'Merry Joy', 'G', 'Blanco', 'Capitol Site St', '09560376575', 'active', 'joyblanco@gmail.com', 'd250786e8127c338aa76955b8c1faab2'),
+(11, 'Lindor', NULL, 'Siton', NULL, NULL, 'inactive', 'lindor@gmail.com', 'd250786e8127c338aa76955b8c1faab2'),
+(12, 'John', NULL, 'Doe', NULL, NULL, 'inactive', 'johndoe@gmail.com', 'd250786e8127c338aa76955b8c1faab2'),
+(13, 'Jane', NULL, 'Doe', NULL, NULL, 'inactive', 'janedoe@gmail.com', 'd250786e8127c338aa76955b8c1faab2');
 
 -- --------------------------------------------------------
 
@@ -468,7 +469,7 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `cart_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `cart_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `feedback`
@@ -486,7 +487,7 @@ ALTER TABLE `provider`
 -- AUTO_INCREMENT for table `purchase`
 --
 ALTER TABLE `purchase`
-  MODIFY `purchase_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `purchase_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `request`
@@ -535,6 +536,12 @@ ALTER TABLE `funeral`
 ALTER TABLE `purchase`
   ADD CONSTRAINT `purchase_ibfk_1` FOREIGN KEY (`seeker_id`) REFERENCES `seeker` (`seeker_id`),
   ADD CONSTRAINT `purchase_ibfk_2` FOREIGN KEY (`service_id`) REFERENCES `services` (`service_id`);
+
+--
+-- Constraints for table `requirement`
+--
+ALTER TABLE `requirement`
+  ADD CONSTRAINT `requirement_ibfk_1` FOREIGN KEY (`seeker_id`) REFERENCES `seeker` (`seeker_id`);
 
 --
 -- Constraints for table `services`
