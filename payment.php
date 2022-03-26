@@ -92,7 +92,7 @@
 								if(service_type_exist_bool("funeral", $type_list) || service_type_exist_bool("church", $type_list) || service_type_exist_bool("headstone", $type_list)) {
 									echo "
 									<div class='details-con no-padding'>
-										<div>
+										<div class='single'>
 											<label>Deceased name <span>*<span></label>
 											<input type='text' name='txtdeceasedname' required>
 										</div>
@@ -103,7 +103,7 @@
 								if(!service_type_exist_bool("church", $type_list)){
 									echo "
 									<div class='details-con no-padding'>
-										<div>
+										<div class='single'>
 											<label>Delivery address <span>*<span></label>
 											<input type='text' name='txtdeliveryadd' required>
 										</div>

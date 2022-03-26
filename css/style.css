@@ -224,13 +224,33 @@ button.header-btn i{font-size:var(--size-7);}
 .details h3 ul li{display:inline-block;}
 .details h3 ul li i{font-size:24px;}
 .details-con{display:flex;justify-content:space-between;flex-wrap:wrap;position:relative;padding-bottom:var(--size-3);}
+.details-con div.single{width:100%;}
 .details-con div{width:48%;}
 .details-con div label{font-size:15px;}
 .details-con div label span{color:var(--red);}
 .details-con div input{border:1px solid var(--light-blue);height:40px;padding:0 10px;}
 
 /* STATUS.PHP */
-.order_status{padding:var(--size-7) 0 0;}
+.order-con{display:flex;justify-content:space-between;column-gap:20px;}
+.order-info{width:45%;}
+
+.receipt, .additional-info{width:100%;text-align:center;margin:0 0 20px;padding:40px 20px;background:none;border:1px solid #aaa;box-shadow:var(--shadow-4);}
+.receipt figure{width:100px;height:100px;margin-inline:auto;margin-bottom:20px;}
+.receipt figure img{width:100%;}
+.receipt-details {border:1px solid #aaa;box-shadow:var(--shadow-4);padding:20px;width:300px;max-width:100%;border-radius:5px;margin-inline:auto;margin-block:20px;}
+.receipt-details h5 em{font-size:12px;line-height:18px;display:block;margin:-5px 0 10px;}
+.receipt-details p{font-size:13px;margin:0;line-height:18px;}
+
+.additional-info {text-align:left;position:relative;}
+.additional-info input {border:1px solid #aaa;box-shadow:var(--shadow-4);}
+.additional-info a {position:absolute;top:25px;right:0;font-size:15px;padding:10px 20px;}
+
+.table ul{display:flex;justify-content:space-between;column-gap:2px;flex-wrap:nowrap;margin-bottom:10px;text-align:right;}
+.table ul li{width:25%;padding-right:10px;font-size:14px;}
+.table ul.head li{background-color:var(--dark-blue);color:#fff;}
+.table .hr.full-width{width:100%;margin-bottom:20px;}
+
+.order_status{padding:var(--size-7) 0 0;width:55%;}
 .order_status div{min-height:50px;position:relative;padding:0 0 50px 50px;}
 .order_status div h3{margin:0;}
 .order_status div p{margin:0;font-size:15px;}
