@@ -30,10 +30,6 @@
 						<span>> Payment</span></h2>
 						
 						<form method="post">
-							<dialog>
-								<h3>asdasd</h3>
-								<p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Ducimus, soluta!</p>
-							</dialog>
 							<!-- PURCHASE DETAILS -->
 							<div class="banner-section card">
 								<ul>
@@ -86,6 +82,7 @@
 							<!-- ADDITIONAL DETAILS -->
 							<div class="banner-section details card">
 								<h3>Additional Details</h3>
+								<div class="note blue"><i class="fa-solid fa-circle-question"></i> Take note that you can always update this data inputted later.</div>
 								
 								<?php
 								## DECEASE NAME FOR FUNERAL, CHURCH, HEADSTONE
@@ -221,19 +218,19 @@
 
 								<div class="details-con">
 									<div>
-										<label for="label-name">Account Name: </label>
+										<label for="label-name">Account Name <span>*<span></label>
 										<input type="text" name="txtaccname">
 									</div>
 									<div>
-										<label for="label-name">Card Number: </label>
+										<label for="label-name">Card Number <span>*<span></label>
 										<input type="text" name="txtcard" minlength='16' maxlength='16'>
 									</div>
 									<div>
-										<label for="label-name">Expiration Date: </label>
+										<label for="label-name">Expiration Date <span>*<span></label>
 										<input type="month" name="mthexpiry">
 									</div>
 									<div>
-										<label for="label-name">CVV: </label>
+										<label for="label-name">CVV <span>*<span></label>
 										<input type="text" name="txtcvv" minlength='3' maxlength='3'>
 									</div>
 								</div>
@@ -245,6 +242,9 @@
 
 							if(isset($_POST['btnpay'])){
 								pay_purchase($type_list, $list);
+
+								header("Location: thanks.php");
+								exit;
 							}
 
 							?>

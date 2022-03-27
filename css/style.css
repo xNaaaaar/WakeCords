@@ -55,7 +55,8 @@ select{border:1px solid #ccc;}
 /* .card-0:hover{background:var(--gray-7);color:#fff !important;} */
 /* .card-0:hover .btn{color:var(--gray-8);background:#fff;} */
 
-.note{padding:10px 23px;color:#fff;position:relative;overflow:hidden;width:fit-content;margin-bottom:var(--size-4);}
+.note{padding:10px 23px 10px 12px;color:#fff;position:relative;overflow:hidden;width:fit-content;margin-bottom:var(--size-2);font-size:15px;}
+.note i{margin-inline:5px;}
 .note:before{content:"";position:absolute;background:hsl(0,100%,40%);width:6px;height:100%;top:0;left:0;}
 .note.red{background:hsl(0,100%,60%);}
 .note.red a{color:hsl(0,100%,20%);}
@@ -265,3 +266,15 @@ button.header-btn i{font-size:var(--size-7);}
 
 .status.type{font-size:10px;padding:2px 10px;margin:0 0 0 5px;background:#748cab;border:none;vertical-align:top;}
 .status.type:hover{background:#748cab;color:#fff;}
+
+/* THANK YOU PAGE */
+.thank-you {display:flex;justify-content:center;align-items:center;height:calc(100vh - var(--size-11));text-align:center;}
+.thanks {width:100%;}
+.thanks h2{margin-bottom:var(--size-10);}
+.thanks i {font-size:80px;color:var(--green);margin-bottom:var(--size-5);}
+.thanks p {font-size:16px;margin:0;}
+.thanks ol li {display:inline-block;padding-inline:5px;position:relative;line-height:15px;}
+.thanks ol li:before {content:'';width:2px;height:100%;position:absolute;top:0;right:-3px;background-color:#0d1321;}
+.thanks ol li:last-child:before {display:none;}
+.thanks ol li a {color:#0d1321;}
+.thanks ol li a:hover {text-decoration:underline;color:#3e5c76;}

@@ -212,7 +212,7 @@
 				<div class='my-cart'>
 					<div class='my-cart-form'>
 						<div class='total-sub terms'>
-							<input class='radio-terms' type='radio' required>
+							<input class='radio-terms' type='radio' name='radio' required>
 							<p>By checking this you agree to our <a href=''>terms and conditions</a>.</p>
 						</div>
 						<button type='submit' name='btncheckout' class='btn'>Checkout</button>
@@ -236,10 +236,13 @@
 				}
 				## DELETE ALL DATA IN CART
 				delete("cart", "seeker_id", $_SESSION['seeker']);
+
+				header("Location: payment.php");
+				exit;
 			}
 		}
 		else {
-			echo "<span class='note red'>Cart is empty! <a href='funeral.php'>Add to cart now!</a></span>";
+			echo "<span class='note red'><i class='fa-solid fa-circle-exclamation'></i>Cart is empty! <a href='funeral.php'>Add to cart now!</a></span>";
 		}
 	}
 	## NECESSARY UPDATE AFTER PAYING
@@ -357,6 +360,10 @@
 			}	
 		}
 		else echo "<div class='note red'>You have no transaction yet!</div>";
+	}
+	## PURCHASE PROGRESS
+	function purchase_progress($status, $num){
+		return ($status == $num) ? 'done':'';
 	}
 	## GENERATE QUESTION MARK
 	function qmark_generator($arr_length){
@@ -640,9 +647,13 @@
 	## CHECK IF USER IS VERIFIED
 	function verified_bool(){
 		$status = read("requirement", ["seeker_id"], [$_SESSION['seeker']]);
-		$status = $status[0];
+		
+		if(count($status)>0){
+			$status = $status[0];
 
-		return ($status['req_status'] == "verified") ? true:false;
+			return ($status['req_status'] == "verified") ? true:false;
+		}
+		else return false;
 	}
 
 	

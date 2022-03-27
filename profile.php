@@ -49,7 +49,7 @@
 								<input type="text" name="" id="label-name" placeholder="<?php echo (user_type() == 'seeker')?$user['seeker_fname']:$user['provider_fname']; ?>" disabled>
 							</div>
 							<div>
-								<label for="label-name">Middle name</label>
+								<label for="label-name">Middle initial</label>
 								<input type="text" name="" id="label-name" placeholder="<?php echo (user_type() == 'seeker')?$user['seeker_mi']:$user['provider_mi']; ?>" disabled>
 							</div>
 							<div>

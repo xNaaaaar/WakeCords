@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 26, 2022 at 12:14 PM
+-- Generation Time: Mar 27, 2022 at 10:11 AM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 7.4.27
 
@@ -108,7 +108,9 @@ CREATE TABLE `details` (
 --
 
 INSERT INTO `details` (`purchase_id`, `deceased_name`, `burial_datetime`, `burial_add`, `delivery_add`, `delivery_date`, `msg_ribbon`, `msg_headstone`, `birth_date`, `death_date`, `delivery_datetime`, `num_pax`, `cemetery_add`) VALUES
-(10, 'John Doe', '2022-04-09 19:06:00', 'This Is My Address', 'This Is My Address', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+(10, 'John Doe', '2022-04-09 19:06:00', 'This Is My Address', 'This Is My Address', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(11, 'John Doe', '2022-04-16 15:14:00', 'This Is My Address', 'This Is My Address', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(14, 'John Doe', '2022-04-16 15:14:00', 'This Is My Address', 'This Is My Address', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -232,16 +234,19 @@ CREATE TABLE `purchase` (
   `purchase_total` decimal(9,2) NOT NULL,
   `purchase_qty` int(2) NOT NULL,
   `purchase_date` date NOT NULL,
-  `purchase_status` varchar(15) NOT NULL
+  `purchase_status` varchar(15) NOT NULL,
+  `purchase_progress` int(2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `purchase`
 --
 
-INSERT INTO `purchase` (`purchase_id`, `seeker_id`, `service_id`, `purchase_total`, `purchase_qty`, `purchase_date`, `purchase_status`) VALUES
-(10, 10, 1, '220000.00', 2, '2022-03-21', 'paid'),
-(11, 10, 2, '80000.00', 1, '2022-03-23', 'to pay');
+INSERT INTO `purchase` (`purchase_id`, `seeker_id`, `service_id`, `purchase_total`, `purchase_qty`, `purchase_date`, `purchase_status`, `purchase_progress`) VALUES
+(10, 10, 1, '220000.00', 2, '2022-03-21', 'paid', 0),
+(11, 10, 2, '80000.00', 1, '2022-03-23', 'paid', 0),
+(13, 14, 1, '110000.00', 1, '2022-03-27', 'to pay', 0),
+(14, 10, 2, '80000.00', 1, '2022-03-27', 'paid', 0);
 
 -- --------------------------------------------------------
 
@@ -276,7 +281,8 @@ CREATE TABLE `requirement` (
 
 INSERT INTO `requirement` (`req_id`, `provider_id`, `seeker_id`, `req_type`, `req_img`, `req_status`) VALUES
 (1, NULL, 10, 'death certificate', '6220cb08d606a4.91479037.jpg', 'verified'),
-(2, NULL, 13, 'death certificate', '622c4d0cc5f490.06257154.jpg', 'pending');
+(2, NULL, 13, 'death certificate', '622c4d0cc5f490.06257154.jpg', 'pending'),
+(3, NULL, 14, 'death certificate', '6240038f3f6390.99031927.png', 'not verified');
 
 -- --------------------------------------------------------
 
@@ -314,10 +320,11 @@ CREATE TABLE `seeker` (
 --
 
 INSERT INTO `seeker` (`seeker_id`, `seeker_fname`, `seeker_mi`, `seeker_lname`, `seeker_address`, `seeker_phone`, `seeker_status`, `seeker_email`, `seeker_pass`) VALUES
-(10, 'Joy', 'G', 'Blancoo', 'Capitol Site Street', '09560376575', 'active', 'joyblanco@gmail.com', 'd250786e8127c338aa76955b8c1faab2'),
+(10, 'Merry Joy', 'G', 'Blanco', 'Capitol Site Street', '09560376575', 'active', 'joyblanco@gmail.com', 'd250786e8127c338aa76955b8c1faab2'),
 (11, 'Lindor', NULL, 'Siton', NULL, NULL, 'inactive', 'lindor@gmail.com', 'd250786e8127c338aa76955b8c1faab2'),
 (12, 'John', NULL, 'Doe', NULL, NULL, 'inactive', 'johndoe@gmail.com', 'd250786e8127c338aa76955b8c1faab2'),
-(13, 'Jane', NULL, 'Doe', NULL, NULL, 'inactive', 'janedoe@gmail.com', 'd250786e8127c338aa76955b8c1faab2');
+(13, 'Jane', NULL, 'Doe', NULL, NULL, 'inactive', 'janedoe@gmail.com', 'd250786e8127c338aa76955b8c1faab2'),
+(14, 'Bernadette', 'G', 'Lapas', 'Mabolo', '09090909090', 'inactive', 'Blapas@gmail.com', '711037ae9ed6036d7de8e252dddd57b8');
 
 -- --------------------------------------------------------
 
@@ -343,7 +350,7 @@ CREATE TABLE `services` (
 
 INSERT INTO `services` (`service_id`, `provider_id`, `service_type`, `service_name`, `service_desc`, `service_cost`, `service_qty`, `service_img`, `service_status`) VALUES
 (1, 1, 'funeral', 'St. Peter', 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ad corrupti beatae magni rerum doloribus, vitae inventore. Tempore quod fugit commodi!', '110000.00', 8, 'coffin.png', 'active'),
-(2, 1, 'funeral', 'Cosmopolitan', 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ad corrupti beatae magni rerum doloribus, vitae inventore. Tempore quod fugit commodi!', '80000.00', 3, 'coffin.png', 'active'),
+(2, 1, 'funeral', 'Cosmopolitan', 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ad corrupti beatae magni rerum doloribus, vitae inventore. Tempore quod fugit commodi!', '80000.00', 1, 'coffin.png', 'active'),
 (3, 1, 'funeral', 'St. Peter', 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ad corrupti beatae magni rerum doloribus, vitae inventore. Tempore quod fugit commodi!', '70000.00', 2, 'coffin.png', 'active');
 
 -- --------------------------------------------------------
@@ -504,7 +511,7 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `cart_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `cart_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `feedback`
@@ -522,7 +529,7 @@ ALTER TABLE `provider`
 -- AUTO_INCREMENT for table `purchase`
 --
 ALTER TABLE `purchase`
-  MODIFY `purchase_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `purchase_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `request`
@@ -534,13 +541,13 @@ ALTER TABLE `request`
 -- AUTO_INCREMENT for table `requirement`
 --
 ALTER TABLE `requirement`
-  MODIFY `req_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `req_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `seeker`
 --
 ALTER TABLE `seeker`
-  MODIFY `seeker_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `seeker_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `services`

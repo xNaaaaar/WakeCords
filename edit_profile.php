@@ -35,7 +35,7 @@
 								<input type="text" name="txtfn" id="label-name" value="<?php echo (user_type() == 'seeker')?$user['seeker_fname']:$user['provider_fname']; ?>" required>
 							</div>
 							<div>
-								<label for="label-name">Middle name</label>
+								<label for="label-name">Middle initial</label>
 								<input type="text" name="txtmi" id="label-name" value="<?php echo (user_type() == 'seeker')?$user['seeker_mi']:$user['provider_mi']; ?>" maxlength="1" required>
 							</div>
 							<div>

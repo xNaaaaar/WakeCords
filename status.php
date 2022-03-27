@@ -21,7 +21,7 @@
 			<section class="banner-con">
 				<div class="wrapper">
 					<div class="banner-div">
-						<h2><a href="purchase.php">Purchase</a> <span>> Purchase Progress Status</span></h2>
+						<h2><a href="purchase.php">Purchase</a> <span>> Status</span></h2>
 						
 						<div class="order-con">
 							<div class="order-info">
@@ -98,8 +98,8 @@
 										<ul>
 											<li>".$service[1]."</li>
 											<li>".$purchase['purchase_qty']."</li>
-											<li>₱ ".$purchase['service_cost']."</li>
-											<li>₱ ".$purchase['purchase_total']."</li>
+											<li>₱ ".number_format($purchase['service_cost'],2,'.',',')."</li>
+											<li>₱ ".number_format($purchase['purchase_total'],2,'.',',')."</li>
 										</ul>
 										";
 										?>
@@ -120,23 +120,23 @@
 								</div>
 							</div>
 							<div class='order_status'>
-								<div class='done'>
+								<div class='<?php echo purchase_progress($purchase['purchase_progress'], 1); ?>'>
 									<h3>Preparing the wake</h3>
 									<p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Molestiae, nemo.</p>
 								</div>
-								<div>
+								<div class='<?php echo purchase_progress($purchase['purchase_progress'], 2); ?>'>
 									<h3>Wake is ready</h3>
 									<p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Molestiae, nemo.</p>
 								</div>
-								<div>
+								<div class='<?php echo purchase_progress($purchase['purchase_progress'], 3); ?>'>
 									<h3>Wake is delivered (optional)</h3>
 									<p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Molestiae, nemo.</p>
 								</div>
-								<div>
+								<div class='<?php echo purchase_progress($purchase['purchase_progress'], 4); ?>'>
 									<h3>Service provider received payment</h3>
 									<p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Molestiae, nemo.</p>
 								</div>
-								<div>
+								<div class='<?php echo purchase_progress($purchase['purchase_progress'], 5); ?>'>
 									<h3>Done</h3>
 									<p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Molestiae, nemo.</p>
 								</div>

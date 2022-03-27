@@ -72,8 +72,7 @@
 									$data_list = [$service['service_id'], $_SESSION['seeker'], $cbomaxqty];
 									create("cart", $attr_list, qmark_generator(count($attr_list)), $data_list);
 
-									header("Location: cart.php?cart_success");
-									exit;
+									echo "<script>alert('Successfully added to cart!')</script>";
 								}
 							?>
 							
