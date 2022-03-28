@@ -245,6 +245,15 @@
 			echo "<span class='note red'><i class='fa-solid fa-circle-exclamation'></i>Cart is empty! <a href='funeral.php'>Add to cart now!</a></span>";
 		}
 	}
+	function password_generator(){
+		$characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    	$charactersLength = strlen($characters);
+    	$randomString = '';
+   		##
+		for ($i = 0; $i < 8; $i++) $randomString = $randomString . $characters[rand(0, $charactersLength - 1)];
+		##
+        return $randomString;
+	}
 	## NECESSARY UPDATE AFTER PAYING
 	function pay_purchase($type_list, $purchase_list){
 		## DECLARE DATA
