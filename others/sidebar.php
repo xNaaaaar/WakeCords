@@ -6,10 +6,30 @@
     </a>
   </li>
   <li class="sidebar-list">
-    <a class="sidebar-link <?php echo ($this_page == 'services')?'active':''; ?>" href="get_started.php" title="Services">
-      <i class="fa-solid fa-clipboard-check"></i>
-      <div>Get Started</div>
-    </a>
+    <?php
+      if(user_type() == "seeker"){
+    ?>
+      <a class="sidebar-link <?php echo ($this_page == 'services')?'active':''; ?>" href="get_started.php" title="Services">
+        <i class="fa-solid fa-clipboard-check"></i>
+        <div>Get Started</div>
+      </a>
+    <?php
+      } elseif(user_type() == "provider"){
+    ?>
+      <a class="sidebar-link <?php echo ($this_page == 'services')?'active':''; ?>" href="get_started.php" title="Services">
+        <i class="fa-solid fa-clipboard-check"></i>
+        <div>Services</div>
+      </a>
+    <?php
+      } else {
+    ?>
+      <a class="sidebar-link <?php echo ($this_page == 'services')?'active':''; ?>" href="get_started.php" title="Services">
+        <i class="fa-solid fa-clipboard-check"></i>
+        <div>Users</div>
+      </a>
+    <?php
+      }
+    ?>
   </li>
   <li class="sidebar-list">
     <a class="sidebar-link <?php echo ($this_page == 'feedback')?'active':''; ?>" href="feedback.php" title="Feedback">
@@ -24,10 +44,16 @@
     </a>
   </li>
   <li class="sidebar-list">
-    <a class="sidebar-link <?php echo ($this_page == 'contact')?'active':''; ?>" href="contact.php" title="Contact Us">
-      <i class="fas fa-phone-square"></i>
-      <div>Contact Us</div>
-    </a>
+    <?php
+      if(user_type() != "admin"){
+    ?>
+      <a class="sidebar-link <?php echo ($this_page == 'contact')?'active':''; ?>" href="contact.php" title="Contact Us">
+        <i class="fas fa-phone-square"></i>
+        <div>Contact Us</div>
+      </a>
+    <?php
+      }
+    ?>
   </li>
   <li class="sidebar-list">
     <a class="sidebar-link" href="logout.php" title="Logout" onclick='return confirm("Are you sure you want to logout?");'>

@@ -125,16 +125,16 @@
 	## USER LOGIN ID
 	function current_user(){
 		if(isset($_SESSION['seeker'])){
-			$seeker = read("seeker", ["seeker_id"], [$_SESSION['seeker']]);
-			return $seeker[0];
+			$user = read("seeker", ["seeker_id"], [$_SESSION['seeker']]);
 		}
 		else if(isset($_SESSION['provider'])){
-			$provider = read("provider", ["provider_id"], [$_SESSION['provider']]);
-			return $provider[0];
+			$user = read("provider", ["provider_id"], [$_SESSION['provider']]);
 		}
 		else {
-			## TBD
+			$user = read("admin", ["admin_id"], [$_SESSION['admin']]);	
 		}
+
+		return $user[0];
 	}
 	## DELETE FUNCTION
 	function delete($table, $attr, $data){
@@ -157,6 +157,7 @@
 
 		$seeker_acc = read("seeker", ["seeker_email", "seeker_pass"], [$emuser, $passpw]);
 		$provider_acc = read("provider", ["provider_email", "provider_pass"], [$emuser, $passpw]);
+		$admin_acc = read("admin", ["admin_email", "admin_pass"], [$emuser, $passpw]);
 
 		## SEEKER ACCOUNT
 		if(count($seeker_acc)>0){
@@ -175,6 +176,13 @@
 			exit;
 		}
 		## ADMIN ACCOUNT
+		else if(count($admin_acc)>0){
+			$admin_acc = $admin_acc[0];
+			$_SESSION['admin'] = $admin_acc['admin_id'];
+
+			header('Location: profile.php?login');
+			exit;
+		}
 		else echo "<script>alert('Email address or password is incorrect!')</script>";
 	}
 	## DISPLAY CART

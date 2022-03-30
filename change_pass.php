@@ -6,7 +6,12 @@
 	$user = current_user();
 
 	if(isset($_POST['btnupdate'])){
-		change_password("seeker", $user["seeker_email"], $user["seeker_pass"]);
+		if(user_type() == "seeker")
+			change_password("seeker", $user["seeker_email"], $user["seeker_pass"]);
+		else if(user_type() == "provider")
+			change_password("provider", $user["provider_email"], $user["provider_pass"]);
+		else if(user_type() == "admin")
+			change_password("admin", $user["admin_email"], $user["admin_pass"]);
 	}
 ?>
 
@@ -29,7 +34,6 @@
 					<div class="banner-div">
 						<h2><a href="profile.php">Profile</a> <span>> Change Password</span></h2>
 						<form class="profile column" method="post">
-							<button class="btn-new" type="submit" name="btnupdate">Update</button>
 							<div>
 								<label for="label-name">Current Password</label>
 								<input type="password" name="pw_cpass" id="label-name" required>
@@ -42,6 +46,7 @@
 								<label for="label-name">Retype New Password</label>
 								<input type="password" name="pw_rpass" id="label-name" required>
 							</div>
+							<button class="btn btn-link-absolute higher-top" type="submit" name="btnupdate">Update</button>
 						</form>
 					</div>
 				</div>

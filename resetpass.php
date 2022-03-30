@@ -10,20 +10,17 @@
 		$provider = read("provider", ["provider_email"], [$emuser]);
 		$admin = read("admin", ["admin_email"], [$emuser]);
 
-		$temp_pass = password_generator();
+		$temp_pass = password_generator(); ## GENERATES RANDOM 8-LETTER PASSWORD
 
 		$subject = "Reset Password";
-		$txt = "Hi there,\nThank you! Please be advice that you must change your password after logging in.\nYou can use this temporary password: ".$temp_pass;
-		// $txt = str_replace("\n.", "\n..", $txt);
-		
+		$txt = "Hi there,\n\nPlease be advice that you must change your password after logging in.\nYou can use this temporary password: ".$temp_pass;
+		$txt .= "\n\n\nBest regards,\nTeam Wakecords";
 
 		if(empty($seeker) && empty($provider) && empty($admin)){
 			echo "<script>alert('Email not registered yet! Please provide a registered email!')</script>";
 		}
 		else {
 			if(mail($emuser, $subject, $txt)){
-				echo "<script>alert('Please check your email for you temporary password!')</script>";
-
 				if(!empty($seeker)) {
 					$seeker = $seeker[0];
 					update("seeker", ["seeker_pass"], [md5($temp_pass), $emuser], "seeker_email");
@@ -36,6 +33,8 @@
 					$admin = $admin[0];
 					update("admin", ["admin_pass"], [md5($temp_pass), $emuser], "admin_email");
 				}
+				##
+				echo "<script>alert('Please check your email for you temporary password!')</script>";
 			}
 			else
 				echo "<script>alert('Error sending email!')</script>";

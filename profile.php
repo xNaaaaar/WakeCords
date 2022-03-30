@@ -29,20 +29,21 @@
 			<section class="banner-con">
 				<div class="wrapper">
 					<div class="banner-div">
-						<h2>Profile</h2>
+						<h2>Profile <mark class="btn status type"><?php echo user_type(); ?></mark></h2>
 						<a class="btn btn-link-absolute" href="edit_profile.php">Update</a>
 
 						<form class="profile" method="post">
 							
 							<?php
-								if(user_type() == "provider"){
-									echo "
-									<div>
-										<label for='label-name'>Company name</label>
-										<input type='text' id='label-name' placeholder='".$user["provider_company"]."' disabled>
-									</div>
-									";
-								}
+								if(user_type() != "admin"){
+									if(user_type() == "provider"){
+										echo "
+										<div>
+											<label for='label-name'>Company name</label>
+											<input type='text' id='label-name' placeholder='".$user["provider_company"]."' disabled>
+										</div>
+										";
+									}
 							?>
 							<div>
 								<label for="label-name">First name</label>
@@ -64,28 +65,72 @@
 								<label for="label-name">Phone</label>
 								<input type="text" name="" id="label-name" placeholder="<?php echo (user_type() == 'seeker')?$user['seeker_phone']:$user['provider_phone']; ?>" disabled>
 							</div>
+
+							<?php
+								} else {
+								## FOR ADMIN
+							?>
+							
+							<div>
+								<label for="label-name">First name</label>
+								<input type="text" name="" id="label-name" placeholder="<?php echo $user['admin_fname']; ?>" disabled>
+							</div>
+							<div>
+								<label for="label-name">Middle initial</label>
+								<input type="text" name="" id="label-name" placeholder="<?php echo $user['admin_mi']; ?>" disabled>
+							</div>
+							<div>
+								<label for="label-name">Last name</label>
+								<input type="text" name="" id="label-name" placeholder="<?php echo $user['admin_lname']; ?>" disabled>
+							</div>
+
+							<?php
+								}
+							?>
 							
 						</form>
 					</div>
 
 					<div class="banner-div no-padding-top">
 						<h2>Account</h2>
-						<a class="btn btn-link-absolute no-top" href="change_pass.php">Change Password</a>
+						<div class="links">
+							<?php
+							if(user_type() == "admin") echo "<a class='btn' href=''><i class='fa-solid fa-plus'></i> Add Admin</a>";
+							?>
+							<a class="btn margin-inline-0" href="change_pass.php">Change Password</a>
+						</div>
 
 						<form class="profile" method="post">
-							
+							<?php
+							if(user_type() != "admin"){
+							## FOR USER
+							?>
 							<div>
 								<label for="label-name">Email</label>
 								<input type="text" name="" id="label-name" placeholder="<?php echo (user_type() == 'seeker')?$user['seeker_email']:$user['provider_email']; ?>" disabled>
 							</div>
+							<?php
+							} else {
+							## FOR ADMIN
+							?>
+							<div>
+								<label for="label-name">Email</label>
+								<input type="text" name="" id="label-name" placeholder="<?php echo $user['admin_email']; ?>" disabled>
+							</div>
+							<?php
+							}
+							?>
 							<div>
 								<label for="label-name">Password</label>
 								<input type="text" name="" id="label-name" placeholder="********" disabled>
 							</div>
 						</form>
 					</div>
-
-					<div id="required" class="banner-div no-padding-top">
+					
+					<?php 
+					## FOR NON-ADMIN
+					if(user_type() != "admin"){ ?>
+					<div id="required" class="banner-div no-padding-top">	
 						<h2>Requirements
 						<?php
 							## USER STATUS [VERIFIED, NOT VERIFIED, PENDING]
@@ -114,8 +159,7 @@
 									</figure>";
 								}
 							}
-							
-							
+						}
 						?>
 					</div>
 				</div>
