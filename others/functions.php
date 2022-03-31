@@ -50,17 +50,15 @@
 	function createUser($user){
 		$txtfn = trim(ucwords($_POST['txtfn']));
 		$txtln = trim(ucwords($_POST['txtln']));
-		$cbouser = $_POST['cbouser'];
 		$emea = trim($_POST['emea']);
 		$passpw = md5($_POST['passpw']);
 
 		$check_seeker_email = read("seeker", ["seeker_email"], [$emea]);
 		$check_provider_email = read("provider", ["provider_email"], [$emea]);
-		//$check_admin_email = read("admin", "admin_email", $emea);
+		$check_admin_email = read("admin", ["admin_email"], [$emea]);
 
 		## CHECK IF EMAIL ALREADY EXIST
-		//if(count($check_seeker_email)>0 || count($check_provider_email)>0 || count($check_admin_email)>0){
-		if(count($check_seeker_email)>0 || count($check_provider_email)>0){
+		if(count($check_seeker_email)>0 || count($check_provider_email)>0 || count($check_admin_email)>0){
 			echo "<script>alert('Email address already exists!')</script>";
 		}
 		else {
@@ -115,10 +113,22 @@
 						}
 
 						break;
+					
+					case "admin":
+						$txtmi = ucwords($_POST['txtmi']);
+						$table = "admin";
+						$attr_list = ['admin_fname', 'admin_mi', 'admin_lname', 'admin_email', 'admin_pass'];
+						array_push($data_list, $txtfn, $txtmi, $txtln, $emea, $passpw);
+
+						create($table, $attr_list, qmark_generator(count($attr_list)), $data_list);
+						break;
 				}
 
 				## SUCCESSFUL MESSAGE
-				header("Location: index.php?success");
+				if($user == "admin")
+					echo "<script>alert('Admin new account successfully created!')</script>";
+				else
+					header("Location: index.php?success");
 			}
 		}	
 	}
@@ -393,7 +403,7 @@
 		return $arr;
 	}
 	## READ FUNCTION
-	function read($table, $attr, $data){
+	function read($table, $attr=[], $data=[]){
 		## SELECT * FROM joiner WHERE joiner_email=?
 		if(count($attr) == 1){
 			return DB::query("SELECT * FROM ".$table." WHERE ".$attr[0]."=?", array($data[0]), "READ");
@@ -404,7 +414,9 @@
 		else if(count($attr) == 3) {
 			return DB::query("SELECT * FROM ".$table." WHERE ".$attr[0]."=? and ".$attr[1]."=? and ".$attr[2]."=?", array($data[0], $data[1], $data[2]), "READ");
 		}
-			
+		else {
+			return DB::query("SELECT * FROM ".$table, array(), "READ");
+		}	
 	}
 	## BOOLEAN READ FUNCTION
 	function read_bool($table, $attr, $data){
@@ -477,9 +489,10 @@
 
 					if(count($services) > 0){
 						foreach($services as $results){
-							echo "
-							<div class='card-0 no-padding'>
-								<a href='funeral_tradition_this.php?service_id=".$results['service_id']."'>
+							## VIEW ONLY FOR ADMIN
+							if(user_type() == "admin"){
+								echo "
+								<div class='card-0 no-padding'>
 									<img src='images/providers/".$results['service_type']."/".$results['provider_id']."/".$results['service_img']."'>
 									<h3>".$results['funeral_name']."
 										<span>
@@ -493,9 +506,32 @@
 										".limit_text($results['service_desc'], 10)."
 									</p>
 									<div class='card-price'>₱ ".number_format($results['service_cost'], 2, '.', ',')."</div>
-								</a>
-							</div>
-							";
+								</div>
+								";
+							}
+							## FOR SEEKERS
+							else {
+								echo "
+								<div class='card-0 no-padding'>
+									<a href='funeral_tradition_this.php?service_id=".$results['service_id']."'>
+										<img src='images/providers/".$results['service_type']."/".$results['provider_id']."/".$results['service_img']."'>
+										<h3>".$results['funeral_name']."
+											<span>
+												<i class='fa-solid fa-star'></i>
+												<i class='fa-solid fa-star'></i>
+												<i class='fa-solid fa-star'></i>
+												<i class='fa-solid fa-star'></i>
+											</span>
+										</h3>
+										<p>
+											".limit_text($results['service_desc'], 10)."
+										</p>
+										<div class='card-price'>₱ ".number_format($results['service_cost'], 2, '.', ',')."</div>
+									</a>
+								</div>
+								";
+							}
+							
 						}
 					}
 					else echo "<div class='note red'>No funeral services posted!</div>";
@@ -563,8 +599,15 @@
 		$txtfn = trim(ucwords($_POST['txtfn']));
 		$txtmi = trim(ucwords($_POST['txtmi']));
 		$txtln = trim(ucwords($_POST['txtln']));
-		$txtaddress = trim(ucwords($_POST['txtaddress']));
-		$txtphone = trim($_POST['txtphone']);
+		##
+		if(user_type() == "admin"){
+			$txtaddress = "";
+			$txtphone = 0;
+		}
+		else {
+			$txtaddress = trim(ucwords($_POST['txtaddress']));
+			$txtphone = trim($_POST['txtphone']);
+		}
 		## ERROR TRAP
 		if(preg_match('/\d/', $txtfn)){
 			echo "<script>alert('Firstname cannot have a number!')</script>";
@@ -576,7 +619,7 @@
 			echo "<script>alert('Lastname cannot have a number!')</script>";
 		}
 		else if(!preg_match('/\d/', $txtphone)){
-			echo "<script>alert('Lastname cannot have a number!')</script>";
+			echo "<script>alert('Phone cannot have a letter!')</script>";
 		}
 		else {
 			$data_list = [];
@@ -594,6 +637,25 @@
 					break;
 
 				case "provider":
+					$attr_list = ["provider_fname", "provider_mi", "provider_lname", "provider_address", "provider_phone"];
+					$condition = "provider_email";
+
+					array_push($data_list, $txtfn, $txtmi, $txtln, $txtaddress, $txtphone, $email);
+					update($user, $attr_list, $data_list, $condition);
+
+					header('Location: profile.php?updated');
+					exit;
+					break;
+
+				case "admin":
+					$attr_list = ["admin_fname", "admin_mi", "admin_lname"];
+					$condition = "admin_email";
+
+					array_push($data_list, $txtfn, $txtmi, $txtln, $email);
+					update($user, $attr_list, $data_list, $condition);
+
+					header('Location: profile.php?updated');
+					exit;
 					break;
 			}
 		}
@@ -639,6 +701,72 @@
 					break;
 			}
 		}
+	}
+	## DISPALY ALL USERS
+	function users($user_type){
+		if($user_type == "seeker"){
+			$user = read($user_type);
+			$_SESSION['num'] = 0;
+			$count = 0;
+			##
+			if(count($user)>0){
+				foreach($user as $results){
+					$reqs = read("requirement", ["seeker_id"], [$results['seeker_id']]);
+					echo "
+						<div class='list data'>
+							<div>".$results['seeker_id']."</div>
+							<div>".$results['seeker_fname']." ".$results['seeker_lname']."</div>
+							<div>".$results['seeker_address']."</div>
+							<div>".$results['seeker_phone']."</div>
+							<div>".$results['seeker_email']."</div>";
+					
+					if(!empty($reqs)){
+						$count++;
+						$reqs = $reqs[0];
+						echo "
+							<div>".$reqs['req_status']."</div>
+							<div>
+								<a href='admin_users.php?id=".$count."' onclick='open_modal();' class='img-link'>
+									<figure>
+										<img src='images/seekers/".$results['seeker_id']."/".$reqs['req_img']."'>
+									</figure>
+								</a>
+							</div>
+						";
+
+						if($reqs['req_status'] == "pending")
+							echo "<div><a href='' class='verify btn status'>verify</a></div>";
+						else 
+							echo "<div> — </div>";
+
+						
+						
+						echo "
+						</div>
+
+						<dialog class='modal-img' id='modal-img".$count."'>
+							<button onclick='close_modal();'>+</button>
+							<figure class='open-image'>
+								<img src='images/seekers/".$results['seeker_id']."/".$reqs['req_img']."'>
+							</figure>
+						</dialog>
+						";
+					}
+					else {
+						echo "
+							<div> — </div>
+							<div> — </div>
+							<div> — </div>
+						</div>
+						";
+					}
+				}
+			}
+		}
+		else {
+
+		}
+		
 	}
 	## RETURN USER STATUS AFTER UPLOADING REQS
 	function user_status(){

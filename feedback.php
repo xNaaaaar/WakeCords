@@ -1,5 +1,8 @@
 <!-- HEAD AREA -->
-<?php include("others/head.php"); ?>
+<?php 
+	include("others/functions.php");
+	include("others/head.php"); 
+?>
 
 <body>
 	<div class="container">

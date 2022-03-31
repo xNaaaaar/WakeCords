@@ -95,7 +95,7 @@
 						<h2>Account</h2>
 						<div class="links">
 							<?php
-							if(user_type() == "admin") echo "<a class='btn' href=''><i class='fa-solid fa-plus'></i> Add Admin</a>";
+							if(user_type() == "admin") echo "<a class='btn' href='admin_add.php'><i class='fa-solid fa-plus'></i> Add Admin</a>";
 							?>
 							<a class="btn margin-inline-0" href="change_pass.php">Change Password</a>
 						</div>
@@ -133,35 +133,63 @@
 					<div id="required" class="banner-div no-padding-top">	
 						<h2>Requirements
 						<?php
-							## USER STATUS [VERIFIED, NOT VERIFIED, PENDING]
-							$exist = false;
-							if(user_type() == "seeker"){
-								$status = user_status();
-								if($status != "")
-									echo "<span class='btn status ".status_color()."'>".$status."</span>";
-								echo "</h2>";
-							
-								if($status == "" || $status == "not verified"){	
-									echo "
-									<div class='note red'>Note: Please upload a clear copy of death certificate to proceed.</div>
-									<a class='btn btn-link-absolute no-top' href='required.php'>Upload Requirement</a>
-									"; 
-								}
-								## IF UPLOADED REQUIREMENT
-								if($status != ""){
-									$image_name = read("requirement", ["seeker_id"], [$user['seeker_id']]);
-									$image_name = $image_name[0];
-	
-									echo "
-									<figure>	
-										<img src='images/".user_type()."s/".$user['seeker_id']."/".$image_name['req_img']."' alt=''>
-										<figcaption>Death Certificate</figcaption>	
-									</figure>";
-								}
+						## USER STATUS [VERIFIED, NOT VERIFIED, PENDING]
+						$exist = false;
+						if(user_type() == "seeker"){
+							$status = user_status();
+							if($status != "")
+								echo "<span class='btn status ".status_color()."'>".$status."</span>";
+							echo "</h2>";
+						
+							if($status == "" || $status == "not verified"){	
+								echo "
+								<div class='note red'>Note: Please upload a clear copy of death certificate to proceed.</div>
+								<a class='btn btn-link-absolute no-top' href='required.php'>Upload Requirement</a>
+								"; 
+							}
+							## IF UPLOADED REQUIREMENT
+							if($status != ""){
+								$image_name = read("requirement", ["seeker_id"], [$user['seeker_id']]);
+								$image_name = $image_name[0];
+
+								echo "
+								<figure>	
+									<img src='images/".user_type()."s/".$user['seeker_id']."/".$image_name['req_img']."' alt=''>
+									<figcaption>Death Certificate</figcaption>	
+								</figure>";
 							}
 						}
 						?>
 					</div>
+					<?php
+					## FOR ADMIN
+					} else {
+						$admin = read("admin");
+						echo "
+						<div class='banner-ratings profile-lists'>
+							<h2>Admins</h2>
+							<div class='list'>
+								<div>ID#</div>
+								<div>Name</div>
+								<div>Email Address</div>
+							</div>
+						";
+
+						foreach($admin as $results){
+							echo "
+							<div class='list data'>
+								<div>".$results['admin_id']."</div>
+								<div>".$results['admin_fname']." ".$results['admin_mi'].". ".$results['admin_lname']."</div>
+								<div>".$results['admin_email']."</div>
+							</div>
+							";
+						}
+
+						echo"
+						</div>
+						";
+					}
+					?>
 				</div>
 			</section>
 		</div>

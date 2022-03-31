@@ -22,7 +22,7 @@
 							<i class="fa-solid fa-circle-check"></i>	
 							<h2>Thank you for purchasing!</h2>
 
-							<p>You can also browse here:</p>
+							<p>You can also browse more services or check your purchases:</p>
 							<ol>
 								<li><a href="funeral.php">Services</a></li>
 								<li><a href="purchase.php">Purchases</a></li>

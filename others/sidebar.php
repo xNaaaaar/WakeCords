@@ -5,6 +5,19 @@
       <div>Profile</div>
     </a>
   </li>
+  <?php
+    ## FOR ADMIN
+    if(user_type() == "admin"){
+  ?>
+  <li class="sidebar-list">
+    <a class="sidebar-link <?php echo ($this_page == 'users')?'active':''; ?>" href="admin_users.php" title="Feedback">
+      <i class="fa-solid fa-users"></i>
+      <div>Users</div>
+    </a>
+  </li>
+  <?php
+    }
+  ?>
   <li class="sidebar-list">
     <?php
       if(user_type() == "seeker"){
@@ -23,9 +36,9 @@
     <?php
       } else {
     ?>
-      <a class="sidebar-link <?php echo ($this_page == 'services')?'active':''; ?>" href="get_started.php" title="Services">
+      <a class="sidebar-link <?php echo ($this_page == 'services')?'active':''; ?>" href="funeral.php" title="Services">
         <i class="fa-solid fa-clipboard-check"></i>
-        <div>Users</div>
+        <div>Services</div>
       </a>
     <?php
       }
@@ -43,18 +56,19 @@
       <div>Transactions</div>
     </a>
   </li>
+  <?php
+    ## FOR NON-ADMIN
+    if(user_type() != "admin"){
+  ?>
   <li class="sidebar-list">
-    <?php
-      if(user_type() != "admin"){
-    ?>
-      <a class="sidebar-link <?php echo ($this_page == 'contact')?'active':''; ?>" href="contact.php" title="Contact Us">
-        <i class="fas fa-phone-square"></i>
-        <div>Contact Us</div>
-      </a>
-    <?php
-      }
-    ?>
+    <a class="sidebar-link <?php echo ($this_page == 'contact')?'active':''; ?>" href="contact.php" title="Contact Us">
+      <i class="fas fa-phone-square"></i>
+      <div>Contact Us</div>
+    </a>
   </li>
+  <?php
+    }
+  ?>
   <li class="sidebar-list">
     <a class="sidebar-link" href="logout.php" title="Logout" onclick='return confirm("Are you sure you want to logout?");'>
       <i class="fa-solid fa-right-from-bracket"></i>
