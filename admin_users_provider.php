@@ -38,13 +38,15 @@
 						<!-- TABS -->
 						<?php
 						$current_tab = "users";
-						$this_tab = "seeker";
+						$this_tab = "provider";
 						include("others/tabs.php");?>
 						
 						<div class='banner-ratings profile-lists div-7'>
 							<div class='list'>
 								<div>ID#</div>
+								<div>Company</div>
 								<div>Name</div>
+								<div>Type</div>
 								<div>Address</div>
 								<div>Phone</div>
 								<div>Email</div>
@@ -53,7 +55,7 @@
 								<div>Actions</div>
 							</div>
 
-							<?php users("seeker"); ?>
+							<?php users("provider"); ?>
 						</div>
 					</div>
 				</div>

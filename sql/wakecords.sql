@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.1.0
+-- version 5.1.1
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 01, 2022 at 03:21 PM
--- Server version: 10.4.18-MariaDB
--- PHP Version: 7.3.28
+-- Generation Time: Apr 02, 2022 at 04:47 PM
+-- Server version: 10.4.22-MariaDB
+-- PHP Version: 7.4.27
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -166,8 +166,7 @@ CREATE TABLE `funeral` (
 
 INSERT INTO `funeral` (`service_id`, `funeral_name`, `funeral_type`) VALUES
 (1, 'St. Jude', 'traditional'),
-(2, 'St. Thomas', 'cremation'),
-(3, 'St. Catherine', 'cremation');
+(2, 'St. Thomas', 'cremation');
 
 -- --------------------------------------------------------
 
@@ -220,7 +219,7 @@ CREATE TABLE `provider` (
 --
 
 INSERT INTO `provider` (`provider_id`, `provider_company`, `provider_desc`, `provider_fname`, `provider_mi`, `provider_lname`, `provider_type`, `provider_phone`, `provider_address`, `provider_email`, `provider_pass`) VALUES
-(1, '', '', 'Nicyl', '', 'Lapas', 'funeral', '', '', 'nicyl@gmail.com', '917b4e1bc1a0f75efeed0afcf703b8ea');
+(1, 'St. Peter', '', 'Nicyl', 'D', 'Lapas', 'funeral', '09090909090', 'Mabolo', 'nicyl@gmail.com', 'd7e73fb6980b78278c69b4e9f024f16a');
 
 -- --------------------------------------------------------
 
@@ -282,8 +281,9 @@ CREATE TABLE `requirement` (
 
 INSERT INTO `requirement` (`req_id`, `provider_id`, `seeker_id`, `req_type`, `req_img`, `req_status`) VALUES
 (1, NULL, 10, 'death certificate', '6220cb08d606a4.91479037.jpg', 'verified'),
-(2, NULL, 13, 'death certificate', '622c4d0cc5f490.06257154.jpg', 'pending'),
-(3, NULL, 14, 'death certificate', '6240038f3f6390.99031927.png', 'not verified');
+(2, NULL, 13, 'death certificate', '6247da321a0a64.72029108.jpg', 'verified'),
+(3, NULL, 14, 'death certificate', '6240038f3f6390.99031927.png', 'not verified'),
+(4, 1, NULL, 'business permit', '6248240f08d326.27804580.jpg', 'pending');
 
 -- --------------------------------------------------------
 
@@ -352,7 +352,7 @@ CREATE TABLE `services` (
 
 INSERT INTO `services` (`service_id`, `provider_id`, `service_type`, `service_name`, `service_desc`, `service_cost`, `service_qty`, `service_img`, `service_status`) VALUES
 (1, 1, 'funeral', 'St. Peter', 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ad corrupti beatae magni rerum doloribus, vitae inventore. Tempore quod fugit commodi!', '110000.00', 8, 'coffin.png', 'active'),
-(2, 1, 'funeral', 'Cosmopolitan', 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ad corrupti beatae magni rerum doloribus, vitae inventore. Tempore quod fugit commodi!', '80000.00', 1, 'coffin.png', 'active'),
+(2, 1, 'funeral', 'St. Peter', 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ad corrupti beatae magni rerum doloribus, vitae inventore. Tempore quod fugit commodi!', '80000.00', 1, 'coffin.png', 'active'),
 (3, 1, 'funeral', 'St. Peter', 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ad corrupti beatae magni rerum doloribus, vitae inventore. Tempore quod fugit commodi!', '70000.00', 2, 'coffin.png', 'active');
 
 -- --------------------------------------------------------
@@ -543,7 +543,7 @@ ALTER TABLE `request`
 -- AUTO_INCREMENT for table `requirement`
 --
 ALTER TABLE `requirement`
-  MODIFY `req_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `req_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `seeker`

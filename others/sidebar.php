@@ -29,7 +29,7 @@
     <?php
       } elseif(user_type() == "provider"){
     ?>
-      <a class="sidebar-link <?php echo ($this_page == 'services')?'active':''; ?>" href="get_started.php" title="Services">
+      <a class="sidebar-link <?php echo ($this_page == 'services')?'active':''; ?>" href="services.php" title="Services">
         <i class="fa-solid fa-clipboard-check"></i>
         <div>Services</div>
       </a>
@@ -44,14 +44,25 @@
       }
     ?>
   </li>
-  <li class="sidebar-list">
+  <!-- <li class="sidebar-list">
     <a class="sidebar-link <?php echo ($this_page == 'feedback')?'active':''; ?>" href="feedback.php" title="Feedback">
       <i class="fas fa-box"></i>
       <div>Feedback</div>
     </a>
-  </li>
+  </li> -->
   <li class="sidebar-list">
-    <a class="sidebar-link <?php echo ($this_page == 'transact')?'active':''; ?>" href="cart.php" title="Transactions">
+    <?php
+    if(user_type() == 'admin'){
+      $link = "<a class='sidebar-link ";
+      $link .= ($this_page == 'transact')?'active':'';
+      $link .= "' href='admin_transact.php' title='Transactions'>";
+    } else {
+      $link = "<a class='sidebar-link ";
+      $link .= ($this_page == 'transact')?'active':'';
+      $link .= "' href='cart.php' title='Transactions'>";
+    }
+    echo $link;
+    ?>
       <i class="fas fa-hands-helping"></i>
       <div>Transactions</div>
     </a>

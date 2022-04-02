@@ -3,10 +3,11 @@
 	include("others/functions.php");
 	include("others/head.php"); 
 
-	$user = current_user();
-
 	if(isset($_POST['btnupdate'])){
-		upload_required("seeker", $user['seeker_id']);
+		if(isset($_SESSION['seeker']))
+			upload_required("seeker", $_SESSION['seeker']);
+		else
+			upload_required("provider", $_SESSION['provider']);
 	}
 ?>
 

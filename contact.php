@@ -1,5 +1,8 @@
 <!-- HEAD AREA -->
-<?php include("others/head.php"); ?>
+<?php 
+	include("others/functions.php");
+	include("others/head.php"); 
+?>
 
 <body>
 	<div class="container">
@@ -11,7 +14,7 @@
 
 			<!-- SIDEBAR AREA -->
 			<?php 
-			$this_page = "profile";
+			$this_page = "contact";
 			include("others/sidebar.php"); ?>
 
 			<!-- BANNER CONTENT -->

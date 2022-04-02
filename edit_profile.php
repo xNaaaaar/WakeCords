@@ -54,6 +54,14 @@
 							}
 							else {
 							## FOR NON-ADMIN
+								if(user_type() == "provider"){
+									echo "
+									<div>
+										<label>Company name</label>
+										<input type='text' name='txtcn' value='".$user['provider_company']."' required>
+									</div>
+									";
+								}
 							?>
 								<div>
 									<label for="label-name">First name</label>

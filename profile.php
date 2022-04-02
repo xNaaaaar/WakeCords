@@ -135,30 +135,54 @@
 						<?php
 						## USER STATUS [VERIFIED, NOT VERIFIED, PENDING]
 						$exist = false;
-						if(user_type() == "seeker"){
+						if(user_type() == "seeker" || user_type() == "provider"){
 							$status = user_status();
 							if($status != "")
 								echo "<span class='btn status ".status_color()."'>".$status."</span>";
 							echo "</h2>";
 						
 							if($status == "" || $status == "not verified"){	
+								if(user_type() == "seeker")
+									echo "<div class='note red'><i class='fa-solid fa-circle-exclamation'></i> Note: Please upload a clear copy of death certificate to proceed.</div>";
+								else 
+									echo "<div class='note red'><i class='fa-solid fa-circle-exclamation'></i> Note: Please upload a clear copy of business permit to proceed.</div>";
 								echo "
-								<div class='note red'>Note: Please upload a clear copy of death certificate to proceed.</div>
 								<a class='btn btn-link-absolute no-top' href='required.php'>Upload Requirement</a>
 								"; 
 							}
 							## IF UPLOADED REQUIREMENT
 							if($status != ""){
-								$image_name = read("requirement", ["seeker_id"], [$user['seeker_id']]);
+								if(user_type() == "seeker")
+									$image_name = read("requirement", ["seeker_id"], [$user['seeker_id']]);
+								else
+									$image_name = read("requirement", ["provider_id"], [$user['provider_id']]);
+								
 								$image_name = $image_name[0];
 
+								if($status == "pending")
+									echo "<div class='note blue'><i class='fa-solid fa-circle-info'></i> Note: Please wait for admin's verification.</div>";
+
 								echo "
-								<figure>	
-									<img src='images/".user_type()."s/".$user['seeker_id']."/".$image_name['req_img']."' alt=''>
-									<figcaption>Death Certificate</figcaption>	
-								</figure>";
+								
+								<figure>
+									<figcaption>Click to view <mark id='open-img'>".$image_name['req_type']."</mark>.</figcaption>	
+								</figure>
+								
+								<dialog class='modal-img' id='modal-img'>
+									<button id='close-img'>+</button>
+									<figure class='open-image'>
+								";
+									if(user_type() == "seeker")
+										echo "<img src='images/".user_type()."s/".$user['seeker_id']."/".$image_name['req_img']."'>";
+									else 
+										echo "<img src='images/".user_type()."s/".$user['provider_type']."/".$user['provider_id']."/".$image_name['req_img']."'>";
+								echo "
+									</figure>
+								</dialog>
+								";
 							}
 						}
+
 						?>
 					</div>
 					<?php
@@ -194,5 +218,18 @@
 			</section>
 		</div>
 	</div>
+	<script>
+		let img = document.querySelector('#modal-img');
+		let open = document.querySelector('#open-img');
+		let close = document.querySelector('#close-img');
+
+		open.addEventListener('click', () => {
+			img.showModal();
+		})
+
+		close.addEventListener('click', () => {
+			img.close();
+		})
+	</script>
 </body>
 </html>

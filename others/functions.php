@@ -5,10 +5,6 @@
 	require_once("others/db.php");
 	ob_start();
 	
-	## ADD TO CART
-	function add_to_cart(){
-		
-	}
 	## UPDATE PASSWORD
 	function change_password($user, $email, $password){
 		$pw_cpass = trim(md5($_POST['pw_cpass']));
@@ -28,17 +24,23 @@
 				case "seeker":
 					$attr_list = ["seeker_pass"];
 					$condition = "seeker_email";
-
-					array_push($data_list, $pw_npass, $email);
-					update($user, $attr_list, $data_list, $condition);
-
-					header('Location: profile.php?updated');
-					exit;
 					break;
 					
 				case "provider":
+					$attr_list = ["provider_pass"];
+					$condition = "provider_email";
+					break;
+
+				case "admin":
+					$attr_list = ["admin_pass"];
+					$condition = "admin_email";
 					break;
 			}
+			array_push($data_list, $pw_npass, $email);
+			update($user, $attr_list, $data_list, $condition);
+
+			header('Location: profile.php?updated');
+			exit;
 		}
 	}
 	## CREATE FUNCTION
@@ -343,9 +345,67 @@
 			## CHECK IF txtcemaddress IS EMPTY
 		}
 	}
+	## PROVIDER'S SERVICES
+	function provider_services($type=''){
+		$provider = provider();
+		## DIFFER IN PROVIDER TYPE
+		switch($provider['provider_type']){
+			## FOR FUNERAL
+			case "funeral":
+				$services = DB::query("SELECT * FROM services s JOIN funeral f ON s.service_id=f.service_id WHERE provider_id=? AND funeral_type=?", array($provider['provider_id'], $type), "READ");
+
+				if(count($services) > 0){
+					foreach($services as $results){
+						echo "
+						<div class='card-0 no-padding'>
+							<a href='funeral_tradition_this.php?service_id=".$results['service_id']."'>
+								<img src='images/providers/".$results['service_type']."/".$results['provider_id']."/".$results['service_img']."'>
+								<h3>".$results['funeral_name']."
+									<span>
+										<i class='fa-solid fa-star'></i>
+										<i class='fa-solid fa-star'></i>
+										<i class='fa-solid fa-star'></i>
+										<i class='fa-solid fa-star'></i>
+									</span>
+								</h3>
+								<p>
+									".limit_text($results['service_desc'], 10)."
+								</p>
+								<div class='card-price'>₱ ".number_format($results['service_cost'], 2, '.', ',')."</div>
+							</a>
+							<div class='buttons'>
+								<a href='#' class=''><i class='fa-solid fa-pen-to-square'></i></a>
+						"; 
+							if(!service_is_booked($results['service_id']))
+								echo "<a href='deleting.php?table=funeral&attr=service_id&data=".$results['service_id']."&url=services' onclick='return confirm(\"Are you sure you want to delete this coffin?\");'><i class='fa-solid fa-trash-can'></i></a>";
+						echo "
+							</div>
+						</div>
+						";
+					}
+				}
+				else {
+
+				}
+				break;
+		}
+		
+		## IF FUNERAL, EITHER TRADITIONAL or CREMATION
+
+	}
+	## PROVIDER'S TYPE
+	function provider(){
+		$type = read("provider", ["provider_id"], [$_SESSION['provider']]);
+		$type = $type[0];
+
+		return $type;
+	}
 	## LIST OF PURCHASE
 	function purchase_list(){
-		$list = read("purchase", ["seeker_id"], [$_SESSION['seeker']]);
+		if(isset($_SESSION['seeker']))
+			$list = read("purchase", ["seeker_id"], [$_SESSION['seeker']]);
+		else
+			$list = read('purchase');
 		
 		if(count($list)>0){
 			foreach($list as $results){
@@ -371,14 +431,14 @@
 					<div>
 				";
 
-				## STATUS IS PAID
-				if($results['purchase_status'] == "paid"){
+				if(isset($_SESSION['seeker'])){
+					## STATUS IS PAID
+					if($results['purchase_status'] == "paid")
 					echo "<a href='status.php?purchaseid=".$results['purchase_id']."' class='status'>view</a>";
-				}
-				## STATUS IS TO PAY
-				if($results['purchase_status'] == "to pay"){
-					echo "<a href='payment.php?purchaseid=".$results['purchase_id']."' class='status'>pay</a>";
-				}
+					## STATUS IS TO PAY
+					if($results['purchase_status'] == "to pay")
+						echo "<a href='payment.php?purchaseid=".$results['purchase_id']."' class='status'>pay</a>";
+				}				
 
 				echo "
 					</div>
@@ -425,6 +485,41 @@
 			return true;
 		}
 		return false;	
+	}
+	## ADDING NEW SERVICE
+	function service_adding(){
+		## DECLARE VARIABLES
+		$txtfn = trim(ucwords($_POST['txtfn']));
+		$cbotype = $_POST['cbotype'];
+		$numprice = $_POST['numprice'];
+		$numqty = $_POST['numqty'];
+		$txtdesc = trim($_POST['txtdesc']);
+
+		$provider = provider();
+		$imageName = upload_image("file_img", "images/providers/".$provider['provider_type']."/".$_SESSION['provider']."/");
+		## ERROR TRAPPINGS
+		if($imageName === 1){
+			echo "<script>alert('An error occurred in uploading your image!')</script>";
+		}
+		else if($imageName === 2){
+			echo "<script>alert('File type is not allowed!')</script>";
+		}
+		else {
+			$data_list = [];
+			$table = "services";
+
+			switch ($provider['provider_type']){
+				case "funeral":
+					$attr_list = ["provider_id", "service_type", "service_name", "service_desc", "service_cost", "service_qty", "service_img", "service_status"];
+					array_push($data_list, $provider['provider_id'], $provider['provider_type'], $provider['provider_company'], $txtdesc, $numprice, $numqty, $imageName, "active");
+					## ADDED TO SERVICES
+					create($table, $attr_list, qmark_generator(count($attr_list)), $data_list);
+					$service = read("services", ["service_img"], [$imageName]);
+					$service = $service[0];
+					## ADD TO SPECIFIC TYPE
+					create("funeral", ["service_id", "funeral_name", "funeral_type"], qmark_generator(3), [$service['service_id'], $txtfn, $cbotype]);
+					break;
+			}
 	}
 	## SERVICE TYPE
 	function service_type($type, $service_id){
@@ -559,6 +654,14 @@
 			break;
 		}	
 	}
+	## CHECK IF SPECIFIC SERVICE IS BOOKED
+	function service_is_booked($service_id){
+		$service = DB::query("SELECT * FROM services s JOIN purchase p ON s.service_id = p.service_id WHERE s.service_id=?", array($service_id), "READ");
+
+		if(count($service) > 0)
+			return true;
+		return false;
+	}
 	## STATUS COLOR
 	function status_color(){
 		$status = user_status();
@@ -605,6 +708,9 @@
 			$txtphone = 0;
 		}
 		else {
+			if(user_type() == "provider")
+				$txtcn = trim(ucwords($_POST['txtcn']));
+
 			$txtaddress = trim(ucwords($_POST['txtaddress']));
 			$txtphone = trim($_POST['txtphone']);
 		}
@@ -632,19 +738,15 @@
 					array_push($data_list, $txtfn, $txtmi, $txtln, $txtaddress, $txtphone, $email);
 					update($user, $attr_list, $data_list, $condition);
 
-					header('Location: profile.php?updated');
-					exit;
 					break;
 
 				case "provider":
-					$attr_list = ["provider_fname", "provider_mi", "provider_lname", "provider_address", "provider_phone"];
+					$attr_list = ["provider_company", "provider_fname", "provider_mi", "provider_lname", "provider_address", "provider_phone"];
 					$condition = "provider_email";
 
-					array_push($data_list, $txtfn, $txtmi, $txtln, $txtaddress, $txtphone, $email);
+					array_push($data_list, $txtcn, $txtfn, $txtmi, $txtln, $txtaddress, $txtphone, $email);
 					update($user, $attr_list, $data_list, $condition);
 
-					header('Location: profile.php?updated');
-					exit;
 					break;
 
 				case "admin":
@@ -654,16 +756,23 @@
 					array_push($data_list, $txtfn, $txtmi, $txtln, $email);
 					update($user, $attr_list, $data_list, $condition);
 
-					header('Location: profile.php?updated');
-					exit;
 					break;
 			}
+
+			header('Location: profile.php?updated');
+			exit;
 		}
 	}
 	## UPLOAD REQUIREMENTS
 	function upload_required($user, $user_id){
-		$imageName = upload_image("file_req", "images/".$user."s/".$user_id."/");
-		
+		if($user == "seeker")
+			$imageName = upload_image("file_req", "images/".$user."s/".$user_id."/");
+		else {
+			$provider = read("provider", ["provider_id"], [$_SESSION['provider']]);
+			$provider = $provider[0];
+			$imageName = upload_image("file_req", "images/".$user."s/".$provider['provider_type']."/".$user_id."/");
+		}
+
 		## ERROR TRAPPINGS
 		if($imageName === 1){
 			echo "<script>alert('An error occurred in uploading your image!')</script>";
@@ -673,10 +782,10 @@
 		}
 		else {
 			$data_list = [];
+			$table = "requirement";
 
 			switch ($user){
 				case "seeker":
-					$table = "requirement";
 					$attr_list = ["seeker_id", "req_type", "req_img", "req_status"];
 					## CHECK IF ALREADY UPLOADED REQS
 					$update_img = read($table, ["seeker_id"], [$user_id]);
@@ -693,20 +802,36 @@
 					}
 					else create($table, $attr_list, qmark_generator(count($attr_list)), $data_list);
 					
-					header('Location: profile.php?updated');
-					exit;
 					break;
 					
 				case "provider":
+					$attr_list = ["provider_id", "req_type", "req_img", "req_status"];
+					## CHECK IF ALREADY UPLOADED REQS
+					$update_img = read($table, ["provider_id"], [$user_id]);
+					array_push($data_list, $user_id, "business permit", $imageName, "pending");
+
+					if(count($update_img) > 0){
+						$update_img = $update_img[0];
+						## DELETE THE IMAGE FILE
+						$path = "images/".$user."s/".$provider['provider_type']."/".$user_id."/".$update_img["req_img"];
+						if(!unlink($path)) echo "<script>alert('An error occurred in deleting image!')</script>";
+						
+						array_push($data_list, $update_img['req_id']);
+						update($table, $attr_list, $data_list, "req_id");
+					}
+					else create($table, $attr_list, qmark_generator(count($attr_list)), $data_list);
+
 					break;
 			}
+
+			header('Location: profile.php?updated');
+			exit;
 		}
 	}
 	## DISPALY ALL USERS
 	function users($user_type){
 		if($user_type == "seeker"){
 			$user = read($user_type);
-			$_SESSION['num'] = 0;
 			$count = 0;
 			##
 			if(count($user)>0){
@@ -734,13 +859,15 @@
 							</div>
 						";
 
-						if($reqs['req_status'] == "pending")
-							echo "<div><a href='' class='verify btn status'>verify</a></div>";
-						else 
-							echo "<div> — </div>";
+						if($reqs['req_status'] == "pending"){
+							echo "
+							<div>
+								<a href='admin_users.php?verify=".$reqs['req_id']."' class='verify btn status' onclick='return confirm(\"Are you sure you want to verify this requirement?\");'>verify</a>
+								<a href='admin_users.php?reject=".$reqs['req_id']."' class='verify btn status' onclick='return confirm(\"Are you sure you want to reject this requirement?\");'>reject</a>
+							</div>
+							";
+						} else echo "<div> — </div>";
 
-						
-						
 						echo "
 						</div>
 
@@ -763,14 +890,77 @@
 				}
 			}
 		}
-		else {
+		## FOR PROVIDER
+		else if($user_type == "provider") {
+			$user = read($user_type);
+			$count = 0;
+			##
+			if(count($user)>0){
+				foreach($user as $results){
+					$reqs = read("requirement", ["provider_id"], [$results['provider_id']]);
+					echo "
+						<div class='list data'>
+							<div>".$results['provider_id']."</div>
+							<div>".$results['provider_company']."</div>
+							<div>".$results['provider_fname']." ".$results['provider_lname']."</div>
+							<div>".$results['provider_type']."</div>
+							<div>".$results['provider_address']."</div>
+							<div>".$results['provider_phone']."</div>
+							<div>".$results['provider_email']."</div>";
+					
+					if(!empty($reqs)){
+						$count++;
+						$reqs = $reqs[0];
+						echo "
+							<div>".$reqs['req_status']."</div>
+							<div>
+								<a href='admin_users_provider.php?id=".$count."' onclick='open_modal();' class='img-link'>
+									<figure>
+										<img src='images/providers/".$results['provider_type']."/".$results['provider_id']."/".$reqs['req_img']."'>
+									</figure>
+								</a>
+							</div>
+						";
 
+						if($reqs['req_status'] == "pending"){
+							echo "
+							<div>
+								<a href='admin_users_provider.php?verify=".$reqs['req_id']."' class='verify btn status' onclick='return confirm(\"Are you sure you want to verify this requirement?\");'>verify</a>
+								<a href='admin_users_provider.php?reject=".$reqs['req_id']."' class='verify btn status' onclick='return confirm(\"Are you sure you want to reject this requirement?\");'>reject</a>
+							</div>
+							";
+						} else echo "<div> — </div>";
+
+						echo "
+						</div>
+
+						<dialog class='modal-img' id='modal-img".$count."'>
+							<button onclick='close_modal();'>+</button>
+							<figure class='open-image'>
+								<img src='images/providers/".$results['provider_type']."/".$results['provider_id']."/".$reqs['req_img']."'>
+							</figure>
+						</dialog>
+						";
+					}
+					else {
+						echo "
+							<div> — </div>
+							<div> — </div>
+							<div> — </div>
+						</div>
+						";
+					}
+				}
+			}
 		}
 		
 	}
 	## RETURN USER STATUS AFTER UPLOADING REQS
 	function user_status(){
-		$status = read("requirement", ["seeker_id"], [$_SESSION['seeker']]);
+		if(isset($_SESSION['seeker']))
+			$status = read("requirement", ["seeker_id"], [$_SESSION['seeker']]);
+		else if(isset($_SESSION['provider']))
+			$status = read("requirement", ["provider_id"], [$_SESSION['provider']]);
 
 		if(count($status)>0){
 			$status = $status[0];
