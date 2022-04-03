@@ -26,10 +26,10 @@
 				<select name="cbouser" onchange="is_orga(this);" required>
 					<option value="">Select Option</option>
 					<option value="seek">Seeker</option>
-					<option value="orga">Organizer</option>
+					<option value="orga">Provider</option>
 				</select>
 				<select name="cboorga" id="for_orga">
-					<option value="">Select Organizer Option</option>
+					<option value="">Select Provider Option</option>
 					<option value="funeral">Funeral Homes</option>
 					<option value="church">Church</option>
 					<option value="candle">Candle Maker</option>

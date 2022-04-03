@@ -29,12 +29,12 @@
     <?php
       } elseif(user_type() == "provider"){
     ?>
-      <a class="sidebar-link <?php echo ($this_page == 'services')?'active':''; ?>" href="services.php" title="Services">
+      <a class="sidebar-link <?php echo ($this_page == 'services')?'active':''; ?>" <?php echo (is_subscribed()) ? "href='services.php'":"style='cursor:no-drop;'"; ?> title="Services">
         <i class="fa-solid fa-clipboard-check"></i>
         <div>Services</div>
       </a>
     <?php
-      } else {
+      } elseif(user_type() == "admin") {
     ?>
       <a class="sidebar-link <?php echo ($this_page == 'services')?'active':''; ?>" href="funeral.php" title="Services">
         <i class="fa-solid fa-clipboard-check"></i>

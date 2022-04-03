@@ -1,5 +1,8 @@
 <!-- HEAD AREA -->
-<?php include("others/head.php"); ?>
+<?php 
+	include("others/functions.php");
+	include("others/head.php"); 
+?>
 
 <body>
 	<div class="container">
@@ -20,13 +23,30 @@
 					<div class="banner-div thank-you">
 						<div class="thanks">
 							<i class="fa-solid fa-circle-check"></i>	
-							<h2>Thank you for purchasing!</h2>
+							<?php
+							if(user_type() == "seeker"){
+								echo "
+								<h2>Thank you for purchasing!</h2>
 
-							<p>You can also browse more services or check your purchases:</p>
-							<ol>
-								<li><a href="funeral.php">Services</a></li>
-								<li><a href="purchase.php">Purchases</a></li>
-							</ol>
+								<p>You can also browse more services or check your purchases:</p>
+								<ol>
+									<li><a href='funeral.php'>Services</a></li>
+									<li><a href='purchase.php'>Purchases</a></li>
+								</ol>
+								";
+							}
+							else if(user_type() == "provider"){
+								echo "
+								<h2>Thank you for subscribing!</h2>
+
+								<p>You can also browse profile or check your services purchases:</p>
+								<ol>
+									<li><a href='profile.php'>Profile</a></li>
+									<li><a href='purchase.php'>Purchases</a></li>
+								</ol>
+								";
+							}
+							?>
 						</div>
 					</div>
 				</div>

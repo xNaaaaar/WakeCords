@@ -153,6 +153,17 @@
 		## DELETE FROM {table} WHERE {attr} = {data}
 		return DB::query("DELETE FROM ".$table." WHERE ".$attr."=?", array($data), "DELETE");
 	}
+	## SUBSCRIBED PROVIDER
+	function is_subscribed(){
+		$provider = read("subscription", ["provider_id"], [$_SESSION['provider']]);
+		if(count($provider) > 0){
+			$provider = $provider[0];
+
+			if(date("Y-m-d") <= $provider['subs_description'])
+				return true;
+		}
+		return false;
+	}
 	## LIMIT DISPLAY TEXT
 	function limit_text($text, $limit) {
 		if (str_word_count($text, 0) > $limit) {
@@ -373,21 +384,26 @@
 								</p>
 								<div class='card-price'>₱ ".number_format($results['service_cost'], 2, '.', ',')."</div>
 							</a>
-							<div class='buttons'>
-								<a href='#' class=''><i class='fa-solid fa-pen-to-square'></i></a>
+							<div class='buttons'>	
 						"; 
-							if(!service_is_booked($results['service_id']))
-								echo "<a href='deleting.php?table=funeral&attr=service_id&data=".$results['service_id']."&url=services' onclick='return confirm(\"Are you sure you want to delete this coffin?\");'><i class='fa-solid fa-trash-can'></i></a>";
+
+						if(!service_is_booked($results['service_id'])){
+							echo "
+							<a href='services_add.php?id=".$results['service_id']."&book=false&edit' class=''><i class='fa-solid fa-pen-to-square'></i></a>
+							<a href='deleting.php?table=funeral&attr=service_id&data=".$results['service_id']."&url=services' onclick='return confirm(\"Are you sure you want to delete this coffin?\");'><i class='fa-solid fa-trash-can'></i></a>";
+						}
+						else {
+							echo "<a href='services_add.php?id=".$results['service_id']."&edit' class=''><i class='fa-solid fa-pen-to-square'></i></a>";
+						}
+
 						echo "
 							</div>
 						</div>
 						";
 					}
 				}
-				else {
-
-				}
-				break;
+				else echo "<div class='note red'><i class='fa-solid fa-circle-exclamation'></i> Note: No posted services yet.</div>";
+			break;
 		}
 		
 		## IF FUNERAL, EITHER TRADITIONAL or CREMATION
@@ -518,8 +534,20 @@
 					$service = $service[0];
 					## ADD TO SPECIFIC TYPE
 					create("funeral", ["service_id", "funeral_name", "funeral_type"], qmark_generator(3), [$service['service_id'], $txtfn, $cbotype]);
-					break;
+					## 
+					echo "<script>alert('Successfully added new service!')</script>";
+				break;
 			}
+		}
+	}
+	## EDITING SERVICE
+	function service_editing($id){
+		$numqty = $_POST['numqty'];
+		$txtdesc = $_POST['txtdesc'];
+
+		update("services", ["service_qty", "service_desc"], [$numqty, $txtdesc, $id], "service_id");
+		header("Location: services.php?updated");
+		exit;
 	}
 	## SERVICE TYPE
 	function service_type($type, $service_id){
@@ -669,6 +697,38 @@
 		if($status == "verified") return "green";
 		elseif($status == "pending") return "blue";
 		else return "red";
+	}
+	## PAYMENT FOR SUBSCRIPTION
+	function subs_payment($type, $cost){
+		$current = date("Y-m-d");
+		$start_date = strtotime(date("Y-m-d"));
+		$subs = "subscription";
+		$attr_list = ["provider_id","subs_startdate","subs_duedate","subs_description","subs_cost"];
+		$data_list = [$_SESSION['provider'], $current];
+		##
+		if($type == "monthly"){
+			$end_date = date("Y-m-d", strtotime("+1 month", $start_date));
+		}
+		else if($type == "yearly"){
+			$end_date = date("Y-m-d", strtotime("+1 year", $start_date));
+		}
+		##
+		array_push($data_list, $end_date, $_SESSION['subs_desc'], $cost);
+		create($subs, $attr_list, qmark_generator(count($attr_list)), $data_list);
+	}
+	## DETERMINE IF THIS SUBSCRIPTION IS A MONTH OR YEAR
+	function subscription(){
+		$subs = read("subscription", ["provider_id"], [$_SESSION['provider']]);
+		$subs = $subs[0];
+
+		$date_started = strtotime($subs['subs_startdate']);
+		$date_ended = strtotime($subs['subs_duedate']);
+		$diff = ($date_ended - $date_started)/60/60/24;
+
+		if($diff >= 28 && $diff <= 31)
+			return "monthly";
+		else if($diff == 365)
+			return "yearly";
 	}
 	## UPDATE FUNCTION
 	function update($table, $attr_list, $data_list, $condition){

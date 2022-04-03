@@ -165,7 +165,7 @@
 								echo "
 								
 								<figure>
-									<figcaption>Click to view <mark id='open-img'>".$image_name['req_type']."</mark>.</figcaption>	
+									<figcaption>Click to view <mark id='open-img'>".$image_name['req_type']."</mark></figcaption>	
 								</figure>
 								
 								<dialog class='modal-img' id='modal-img'>
@@ -213,12 +213,83 @@
 						</div>
 						";
 					}
+
+					## FOR PROVIDER ONLY
+					if(user_type() == "provider" && $status == "verified"){
+					?>
+					<div class="banner-div no-padding-top" style="padding-top:var(--size-6);">
+						
+						<?php
+						if(is_subscribed()){
+							$subs = read("subscription", ["provider_id"], [$_SESSION['provider']]);
+							$subs = $subs[0];
+							echo "
+							<h2>Subscription <mark class='btn status type'>".subscription()."</mark></h2>
+							<div class='banner-ratings profile-lists'>
+								<div class='list' style='margin-bottom:0;'>
+									<div>Start Date</div>
+									<div>Expiry Date</div>
+									<div>Paid</div>
+								</div>
+								<div class='list data'>
+									<div>".date("M j, Y", strtotime($subs['subs_startdate']))."</div>
+									<div>".date("M j, Y", strtotime($subs['subs_duedate']))."</div>
+									<div>₱ ".number_format($subs['subs_cost'],2,'.',',')."</div>
+								</div>
+							</div>
+							";
+						}
+						else {
+							$_SESSION['subs_desc'] = "Provider can post and boost their service in an affordable amount.";
+							echo "
+							<h2>Subscription</h2>
+							<figure>
+								<figcaption>Click to <mark id='open-subs'>subscribe</mark></figcaption>	
+							</figure>
+
+							<dialog class='modal-img' id='modal-subs'>
+								<button id='close-subs'>+</button>
+								<div class='subscription'>
+									<div class='month'>
+										<h2>PH</h2>
+										<h3>200 / month</h3>
+										<p>".$_SESSION['subs_desc']."</p>
+										<a href='payment_subs.php?monthly' class='btn'>Subscribe Now</a>
+									</div>
+									<div class='year'>
+										<h2>PH</h2>
+										<h3>2000 / year</h3>
+										<mark>save 20%</mark>
+										<p>".$_SESSION['subs_desc']."</p>
+										<a href='payment_subs.php?yearly' class='btn'>Subscribe Now</a>
+									</div>
+								</div>
+							</dialog>
+							";
+							
+							// $current = strtotime(date("2022-02-01"));
+							// $month = date("Y-m-d", strtotime("+1 month", $current));
+							// $this_date = date("2022-03-01");
+							## CAN COMPARE DATE BY [PHP DATE FUNCTION]
+							// if($this_date >= date("Y-m-d", strtotime($current)) && $this_date <= $month){
+							// 	echo "Yes";
+							// } else {
+							// 	echo "No";
+							// }
+							## CAN GET THE DIFFERENCE DATE BY [PHP STRTOTIME FUNCTION]
+							// echo (strtotime($this_date) - $current)/60/60/24;
+						}
+						?>
+					</div>
+					<?php
+					}
 					?>
 				</div>
 			</section>
 		</div>
 	</div>
 	<script>
+		// FOR REQUIREMENTS MODAL
 		let img = document.querySelector('#modal-img');
 		let open = document.querySelector('#open-img');
 		let close = document.querySelector('#close-img');
@@ -229,6 +300,19 @@
 
 		close.addEventListener('click', () => {
 			img.close();
+		})
+		
+		// FOR SUBSCRIPTION MODAL
+		let subs = document.querySelector('#modal-subs');
+		let open_subs = document.querySelector('#open-subs');
+		let close_subs = document.querySelector('#close-subs');
+
+		open_subs.addEventListener('click', () => {
+			subs.showModal();
+		})
+
+		close_subs.addEventListener('click', () => {
+			subs.close();
 		})
 	</script>
 </body>

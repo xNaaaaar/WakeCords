@@ -6,6 +6,10 @@
 	if(isset($_GET['deleted'])){
 		echo "<script>alert('Successfully deleted!')</script>";
 	}
+
+	if(isset($_GET['updated'])){
+		echo "<script>alert('Successfully updated!')</script>";
+	}
 ?>
 
 <body>
