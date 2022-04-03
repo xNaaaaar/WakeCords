@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.1.1
+-- version 5.1.0
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 02, 2022 at 04:47 PM
--- Server version: 10.4.22-MariaDB
--- PHP Version: 7.4.27
+-- Generation Time: Apr 03, 2022 at 11:09 AM
+-- Server version: 10.4.18-MariaDB
+-- PHP Version: 7.3.28
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -166,7 +166,8 @@ CREATE TABLE `funeral` (
 
 INSERT INTO `funeral` (`service_id`, `funeral_name`, `funeral_type`) VALUES
 (1, 'St. Jude', 'traditional'),
-(2, 'St. Thomas', 'cremation');
+(2, 'St. Thomas', 'cremation'),
+(9, 'St. Benedicto', 'cremation');
 
 -- --------------------------------------------------------
 
@@ -219,7 +220,8 @@ CREATE TABLE `provider` (
 --
 
 INSERT INTO `provider` (`provider_id`, `provider_company`, `provider_desc`, `provider_fname`, `provider_mi`, `provider_lname`, `provider_type`, `provider_phone`, `provider_address`, `provider_email`, `provider_pass`) VALUES
-(1, 'St. Peter', '', 'Nicyl', 'D', 'Lapas', 'funeral', '09090909090', 'Mabolo', 'nicyl@gmail.com', 'd7e73fb6980b78278c69b4e9f024f16a');
+(1, 'St. Peter', '', 'Nicyl', 'D', 'Lapas', 'funeral', '09090909090', 'Mabolo', 'nicyl@gmail.com', 'd7e73fb6980b78278c69b4e9f024f16a'),
+(2, '', '', 'Flower', '', 'Provider', 'flower', '', '', 'flower@provider.com', 'd7e73fb6980b78278c69b4e9f024f16a');
 
 -- --------------------------------------------------------
 
@@ -283,7 +285,7 @@ INSERT INTO `requirement` (`req_id`, `provider_id`, `seeker_id`, `req_type`, `re
 (1, NULL, 10, 'death certificate', '6220cb08d606a4.91479037.jpg', 'verified'),
 (2, NULL, 13, 'death certificate', '6247da321a0a64.72029108.jpg', 'verified'),
 (3, NULL, 14, 'death certificate', '6240038f3f6390.99031927.png', 'not verified'),
-(4, 1, NULL, 'business permit', '6248240f08d326.27804580.jpg', 'pending');
+(4, 1, NULL, 'business permit', '6248240f08d326.27804580.jpg', 'verified');
 
 -- --------------------------------------------------------
 
@@ -325,8 +327,7 @@ INSERT INTO `seeker` (`seeker_id`, `seeker_fname`, `seeker_mi`, `seeker_lname`, 
 (11, 'Lindor', NULL, 'Siton', NULL, NULL, 'inactive', 'lindor@gmail.com', 'd250786e8127c338aa76955b8c1faab2'),
 (12, 'John', NULL, 'Doe', NULL, NULL, 'inactive', 'johndoe@gmail.com', 'd250786e8127c338aa76955b8c1faab2'),
 (13, 'Jane', NULL, 'Doe', NULL, NULL, 'inactive', 'janedoe@gmail.com', 'd250786e8127c338aa76955b8c1faab2'),
-(14, 'Bernadette', 'G', 'Lapas', 'Mabolo', '09090909090', 'inactive', 'Blapas@gmail.com', '711037ae9ed6036d7de8e252dddd57b8'),
-(15, 'Melnar', NULL, 'Ancit', NULL, NULL, 'inactive', 'narancit@gmail.com', 'e93ff6979683e7b179bcee52d1d809c8');
+(14, 'Bernadette', 'G', 'Lapas', 'Mabolo', '09090909090', 'inactive', 'Blapas@gmail.com', '711037ae9ed6036d7de8e252dddd57b8');
 
 -- --------------------------------------------------------
 
@@ -351,9 +352,9 @@ CREATE TABLE `services` (
 --
 
 INSERT INTO `services` (`service_id`, `provider_id`, `service_type`, `service_name`, `service_desc`, `service_cost`, `service_qty`, `service_img`, `service_status`) VALUES
-(1, 1, 'funeral', 'St. Peter', 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ad corrupti beatae magni rerum doloribus, vitae inventore. Tempore quod fugit commodi!', '110000.00', 8, 'coffin.png', 'active'),
+(1, 1, 'funeral', 'St. Peter', 'The final part of the funeral liturgy occurs at the cemetery.  A priest, deacon or funeral director leads a brief prayer to help those who are mourning leave their loved one in the hands of God.', '110000.00', 5, 'coffin.png', 'active'),
 (2, 1, 'funeral', 'St. Peter', 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ad corrupti beatae magni rerum doloribus, vitae inventore. Tempore quod fugit commodi!', '80000.00', 1, 'coffin.png', 'active'),
-(3, 1, 'funeral', 'St. Peter', 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ad corrupti beatae magni rerum doloribus, vitae inventore. Tempore quod fugit commodi!', '70000.00', 2, 'coffin.png', 'active');
+(9, 1, 'funeral', 'St. Peter', 'An important part of grieving and of honouring the life of a person is the releasing of their remains to the earth.  A committal is the gathering of a small community, often just close family & friends, and the presider, at the graveside or mausoleum.', '100000.00', 5, '6249572712ddd5.72232742.png', 'active');
 
 -- --------------------------------------------------------
 
@@ -368,6 +369,13 @@ CREATE TABLE `subscription` (
   `subs_description` varchar(200) NOT NULL,
   `subs_cost` decimal(7,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `subscription`
+--
+
+INSERT INTO `subscription` (`provider_id`, `subs_startdate`, `subs_duedate`, `subs_description`, `subs_cost`) VALUES
+(1, '2022-04-03', '2022-05-03', 'Provider can post and boost their service in an affordable amount.', '200.00');
 
 --
 -- Indexes for dumped tables
@@ -525,7 +533,7 @@ ALTER TABLE `feedback`
 -- AUTO_INCREMENT for table `provider`
 --
 ALTER TABLE `provider`
-  MODIFY `provider_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `provider_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `purchase`
@@ -555,7 +563,7 @@ ALTER TABLE `seeker`
 -- AUTO_INCREMENT for table `services`
 --
 ALTER TABLE `services`
-  MODIFY `service_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `service_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- Constraints for dumped tables
