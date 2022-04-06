@@ -208,6 +208,22 @@
 		}
 		else echo "<script>alert('Email address or password is incorrect!')</script>";
 	}
+	## TYPE [notify, success, error]
+	function messaging($type, $msg){
+		switch($type){
+			case "notify":
+				echo "<div class='note blue'><i class='fa-solid fa-circle-info'></i> ".$msg."</div>";
+			break;
+			##
+			case "success":
+				echo "<div class='note green'><i class='fa-solid fa-circle-check'></i> ".$msg."</div>";
+			break;
+			##
+			case "error":
+				echo "<div class='note red'><i class='fa-solid fa-circle-xmark'></i> ".$msg."</div>";
+			break;
+		}
+	}
 	## DISPLAY CART
 	function my_cart(){
 		$cart = DB::query("SELECT * FROM services s JOIN cart c ON s.service_id=c.service_id JOIN seeker skr ON skr.seeker_id=c.seeker_id JOIN funeral f ON f.service_id=s.service_id WHERE c.seeker_id=?", array($_SESSION['seeker']), "READ");
@@ -243,7 +259,7 @@
 				<div class='my-cart'>
 					<div class='my-cart-form'>
 						<div class='total-sub terms'>
-							<input class='radio-terms' type='radio' name='radio' required>
+							<input class='radio-terms' type='checkbox' name='radio' required>
 							<p>By checking this you agree to our <a href=''>terms and conditions</a>.</p>
 						</div>
 						<button type='submit' name='btncheckout' class='btn'>Checkout</button>
@@ -273,8 +289,35 @@
 			}
 		}
 		else {
-			echo "<span class='note red'><i class='fa-solid fa-circle-exclamation'></i>Cart is empty! <a href='funeral.php'>Add to cart now!</a></span>";
+			echo messaging("error", "Your cart is empty! <a href='funeral.php'>Click here to add to cart!");
 		}
+	}
+	## NOT SUBSCRIBED OR EXPIRED
+	function not_subs($msg){
+		echo "
+		<figure>
+			<figcaption>Click to <mark id='open-subs'>subscribe</mark></figcaption>	
+		</figure>
+
+		<dialog class='modal-img' id='modal-subs'>
+			<button id='close-subs'>+</button>
+			<div class='subscription'>
+				<div class='month'>
+					<h2>PH</h2>
+					<h3>200 / month</h3>
+					<p>".$msg."</p>
+					<a href='payment_subs.php?monthly' class='btn'>Subscribe Now</a>
+				</div>
+				<div class='year'>
+					<h2>PH</h2>
+					<h3>2000 / year</h3>
+					<mark>save 20%</mark>
+					<p>".$msg."</p>
+					<a href='payment_subs.php?yearly' class='btn'>Subscribe Now</a>
+				</div>
+			</div>
+		</dialog>
+		";
 	}
 	function password_generator(){
 		$characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -359,50 +402,58 @@
 	## PROVIDER'S SERVICES
 	function provider_services($type=''){
 		$provider = provider();
+		$services = DB::query("SELECT * FROM services s JOIN funeral f ON s.service_id=f.service_id WHERE provider_id=? AND funeral_type=?", array($provider['provider_id'], $type), "READ");
 		## DIFFER IN PROVIDER TYPE
 		switch($provider['provider_type']){
 			## FOR FUNERAL
 			case "funeral":
-				$services = DB::query("SELECT * FROM services s JOIN funeral f ON s.service_id=f.service_id WHERE provider_id=? AND funeral_type=?", array($provider['provider_id'], $type), "READ");
+			##
+			if(count($services) > 0){
+				foreach($services as $results){
+					echo "
+					<div class='card-0 no-padding'>
+						<a href='funeral_tradition_this.php?service_id=".$results['service_id']."'>
+							<img src='images/providers/".$results['service_type']."/".$results['provider_id']."/".$results['service_img']."'>
+							<h3>".$results['funeral_name']."
+								<span>
+									<i class='fa-solid fa-star'></i>
+									<i class='fa-solid fa-star'></i>
+									<i class='fa-solid fa-star'></i>
+									<i class='fa-solid fa-star'></i>
+								</span>
+							</h3>
+							<p>
+								".limit_text($results['service_desc'], 10)."
+							</p>
+							<div class='card-price'>₱ ".number_format($results['service_cost'], 2, '.', ',')."</div>
+						</a>
+						<div class='buttons'>	
+					"; 
 
-				if(count($services) > 0){
-					foreach($services as $results){
+					if(!service_is_booked($results['service_id'])){
 						echo "
-						<div class='card-0 no-padding'>
-							<a href='funeral_tradition_this.php?service_id=".$results['service_id']."'>
-								<img src='images/providers/".$results['service_type']."/".$results['provider_id']."/".$results['service_img']."'>
-								<h3>".$results['funeral_name']."
-									<span>
-										<i class='fa-solid fa-star'></i>
-										<i class='fa-solid fa-star'></i>
-										<i class='fa-solid fa-star'></i>
-										<i class='fa-solid fa-star'></i>
-									</span>
-								</h3>
-								<p>
-									".limit_text($results['service_desc'], 10)."
-								</p>
-								<div class='card-price'>₱ ".number_format($results['service_cost'], 2, '.', ',')."</div>
-							</a>
-							<div class='buttons'>	
-						"; 
-
-						if(!service_is_booked($results['service_id'])){
-							echo "
-							<a href='services_add.php?id=".$results['service_id']."&book=false&edit' class=''><i class='fa-solid fa-pen-to-square'></i></a>
-							<a href='deleting.php?table=funeral&attr=service_id&data=".$results['service_id']."&url=services' onclick='return confirm(\"Are you sure you want to delete this coffin?\");'><i class='fa-solid fa-trash-can'></i></a>";
-						}
-						else {
-							echo "<a href='services_add.php?id=".$results['service_id']."&edit' class=''><i class='fa-solid fa-pen-to-square'></i></a>";
-						}
-
-						echo "
-							</div>
-						</div>
-						";
+						<a href='services_add.php?id=".$results['service_id']."&book=false&edit' class=''><i class='fa-solid fa-pen-to-square'></i></a>
+						<a href='deleting.php?table=funeral&attr=service_id&data=".$results['service_id']."&url=services' onclick='return confirm(\"Are you sure you want to delete this coffin?\");'><i class='fa-solid fa-trash-can'></i></a>";
 					}
+					else {
+						echo "<a href='services_add.php?id=".$results['service_id']."&edit' class=''><i class='fa-solid fa-pen-to-square'></i></a>";
+					}
+
+					echo "
+						</div>
+					</div>
+					";
 				}
-				else echo "<div class='note red'><i class='fa-solid fa-circle-exclamation'></i> Note: No posted services yet.</div>";
+			}
+			else messaging("error", "No posted services yet!");
+			break;
+
+			case "church":
+			##
+			if(count($services) > 0){
+
+			}
+			else messaging("error", "No posted services yet!");
 			break;
 		}
 		
@@ -410,11 +461,13 @@
 
 	}
 	## PROVIDER'S TYPE
-	function provider(){
-		$type = read("provider", ["provider_id"], [$_SESSION['provider']]);
-		$type = $type[0];
-
-		return $type;
+	function provider($id=0){
+		if($id == 0) 
+			$type = read("provider", ["provider_id"], [$_SESSION['provider']]);
+		else
+			$type = read("provider", ["provider_id"], [$id]);
+		
+		return $type[0];
 	}
 	## LIST OF PURCHASE
 	function purchase_list(){
@@ -447,13 +500,17 @@
 					<div>
 				";
 
-				if(isset($_SESSION['seeker'])){
-					## STATUS IS PAID
-					if($results['purchase_status'] == "paid")
+				## STATUS IS PAID
+				if($results['purchase_status'] == "paid")
 					echo "<a href='status.php?purchaseid=".$results['purchase_id']."' class='status'>view</a>";
+
+				if(isset($_SESSION['seeker'])){
+					
 					## STATUS IS TO PAY
-					if($results['purchase_status'] == "to pay")
+					if($results['purchase_status'] == "to pay"){
 						echo "<a href='payment.php?purchaseid=".$results['purchase_id']."' class='status'>pay</a>";
+						echo "<a href='deleting.php?table=purchase&attr=purchase_id&data=".$results['purchase_id']."&url=purchase' class='status' onclick='return confirm(\"Are you sure you want to delete this purchase?\");'>delete</a>";
+					}		
 				}				
 
 				echo "
@@ -462,11 +519,11 @@
 				";
 			}	
 		}
-		else echo "<div class='note red'>You have no transaction yet!</div>";
+		else messaging("error", "You have no transactions yet!");
 	}
 	## PURCHASE PROGRESS
 	function purchase_progress($status, $num){
-		return ($status == $num) ? 'done':'';
+		return ($status >= $num) ? 'done':'';
 	}
 	## GENERATE QUESTION MARK
 	function qmark_generator($arr_length){
@@ -604,7 +661,7 @@
 							";
 						}
 					}
-					else echo "<div class='note red'>No funeral services posted!</div>";
+					else messaging("error", "No funeral services posted!");
 				}
 				## DIFFERENTIATE BETWEEN FUNERAL TYPE 
 				else {
@@ -657,7 +714,7 @@
 							
 						}
 					}
-					else echo "<div class='note red'>No funeral services posted!</div>";
+					else messaging("error", "No funeral services posted!");
 				}
 			break;
 
@@ -730,10 +787,49 @@
 		else if($diff == 365)
 			return "yearly";
 	}
+	## IF SUBSCRIPTION IS EXPIRED
+	function subscription_expired($subs_list){
+		$expired = false;
+		foreach($subs_list as $result){
+			if(date("Y-m-d") >= date("Y-m-d", strtotime($result['subs_duedate'])))
+				$expired = true;
+			else 
+				$expired = false;
+		}
+		return $expired;
+	}
 	## UPDATE FUNCTION
 	function update($table, $attr_list, $data_list, $condition){
 		## UPDATE organizer SET orga_company=?, orga_fname=?, orga_lname=?, orga_mi=?, orga_address=?, orga_phone=?, orga_email=? WHERE orga_id=?"
 		DB::query("UPDATE ".$table." SET ".join("=?, ", $attr_list)."=? WHERE ".$condition."=?", $data_list, "UPDATE");
+	}
+	function update_details($type){
+		$txtname = trim(ucwords($_POST['txtname']));
+		$txtbdt = $_POST['txtbdt'];
+		$txtbadd = trim(ucwords($_POST['txtbadd']));
+		$txtdadd = trim(ucwords($_POST['txtdadd']));
+
+		switch($type){
+			case "funeral":
+				## ERROR TRAPPING
+				if(preg_match('/\d/', $txtname)){
+					echo "<script>alert('Firstname cannot have a number!')</script>";
+				}
+				else {
+					$table = "details";
+					$attr_list = ["deceased_name","burial_datetime","burial_add","delivery_add"];
+					$data_list = [$txtname, date("Y-m-d H:i:s", strtotime($txtbdt)), $txtbadd, $txtdadd, $_GET['purchaseid']];
+
+					update($table, $attr_list, $data_list, "purchase_id");
+
+					header("Location: status.php?purchaseid=".$_GET['purchaseid']."&updated");
+					exit;
+				}
+			break;
+
+			case "church":
+			break;
+		}
 	}
 	## UPLOAD SINGLE IMAGE
 	function upload_image($name, $target){

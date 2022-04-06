@@ -60,7 +60,7 @@
 								echo"
 												</select>
 											</div>
-											<button type='submit' name='btnadd' class='btn trad' onclick=\"return confirm('Are you sure you want to add this to cart?');\">Add to Cart</button>
+											<button type='submit' name='btnadd' class='btn trad' onclick=\"return confirm('Are you sure you want to add this to cart?');\">Book</button>
 										</form>
 									</div>
 								</div>

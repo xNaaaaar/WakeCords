@@ -82,9 +82,10 @@
 							<!-- ADDITIONAL DETAILS -->
 							<div class="banner-section details card">
 								<h3>Additional Details</h3>
-								<div class="note blue"><i class="fa-solid fa-circle-question"></i> Take note that you can always update this data inputted later.</div>
 								
 								<?php
+								## TYPE [notify, success, error]
+								messaging("notify", "Note: Take note that you can always update this data inputted later.");
 								## DECEASE NAME FOR FUNERAL, CHURCH, HEADSTONE
 								if(service_type_exist_bool("funeral", $type_list) || service_type_exist_bool("church", $type_list) || service_type_exist_bool("headstone", $type_list)) {
 									echo "

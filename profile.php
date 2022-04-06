@@ -10,6 +10,9 @@
 	if(isset($_GET['updated'])) echo "<script>alert('Updated successfully!')</script>";
 
 	$user = current_user();
+
+	## SUBSCRIPTION DESCRIPTION
+	$_SESSION['subs_desc'] = "Provider can post and boost their service in an affordable amount.";
 ?>
 
 <body>
@@ -29,7 +32,7 @@
 			<section class="banner-con">
 				<div class="wrapper">
 					<div class="banner-div">
-						<h2>Profile <mark class="btn status type"><?php echo user_type(); ?></mark></h2>
+						<h2>Profile</h2>
 						<a class="btn btn-link-absolute" href="edit_profile.php">Update</a>
 
 						<form class="profile" method="post">
@@ -142,13 +145,16 @@
 							echo "</h2>";
 						
 							if($status == "" || $status == "not verified"){	
-								if(user_type() == "seeker")
-									echo "<div class='note red'><i class='fa-solid fa-circle-exclamation'></i> Note: Please upload a clear copy of death certificate to proceed.</div>";
-								else 
-									echo "<div class='note red'><i class='fa-solid fa-circle-exclamation'></i> Note: Please upload a clear copy of business permit to proceed.</div>";
-								echo "
-								<a class='btn btn-link-absolute no-top' href='required.php'>Upload Requirement</a>
-								"; 
+								if(user_type() == "seeker"){
+									## TYPE [notify, success, error]
+									messaging("error", "Note: Please upload a clear copy of death certificate to proceed.");
+								}
+								else {
+									## TYPE [notify, success, error]
+									messaging("error", "Note: Please upload a clear copy of business permit to proceed.");
+								}
+
+								echo "<a class='btn btn-link-absolute no-top' href='required.php'>Upload Requirement</a>"; 
 							}
 							## IF UPLOADED REQUIREMENT
 							if($status != ""){
@@ -159,8 +165,10 @@
 								
 								$image_name = $image_name[0];
 
-								if($status == "pending")
-									echo "<div class='note blue'><i class='fa-solid fa-circle-info'></i> Note: Please wait for admin's verification.</div>";
+								if($status == "pending") {
+									## TYPE [notify, success, error]
+									messaging("notify", "Note: Please wait for admin's verification.");
+								}
 
 								echo "
 								
@@ -222,62 +230,43 @@
 						<?php
 						if(is_subscribed()){
 							$subs = read("subscription", ["provider_id"], [$_SESSION['provider']]);
-							$subs = $subs[0];
-							echo "
-							<h2>Subscription <mark class='btn status type'>".subscription()."</mark></h2>
-							<div class='banner-ratings profile-lists'>
-								<div class='list' style='margin-bottom:0;'>
-									<div>Start Date</div>
-									<div>Expiry Date</div>
-									<div>Paid</div>
-								</div>
-								<div class='list data'>
-									<div>".date("M j, Y", strtotime($subs['subs_startdate']))."</div>
-									<div>".date("M j, Y", strtotime($subs['subs_duedate']))."</div>
-									<div>₱ ".number_format($subs['subs_cost'],2,'.',',')."</div>
-								</div>
-							</div>
-							";
+							
+							if(count($subs) > 0){
+								## IF SUBSCRIPTION IS EXPIRED 
+								$latest_sub = $subs[count($subs)-1];
+								if(date("Y-m-d") >= date("Y-m-d", strtotime($latest_sub['subs_duedate']))){
+									echo "<h2>Subscription <mark class='btn status type' style='background-color:var(--red);'>expired</mark></h2>";
+									not_subs($_SESSION['subs_desc']);
+								}
+								else 
+									echo "<h2>Subscription <mark class='btn status type'>".subscription()."</mark></h2>";
+								##
+								echo "
+								<div class='hr full-width' style='margin-top:10px;margin-bottom:20px;'></div>
+								<div class='banner-ratings profile-lists'>
+									<div class='list' >
+										<div>Start Date</div>
+										<div>Expiry Date</div>
+										<div>Paid</div>
+									</div>
+								";
+								##
+								foreach($subs as $result){
+									echo "
+									<div class='list data' style='margin-bottom:0;'>
+										<div>".date("M j, Y", strtotime($result['subs_startdate']))."</div>
+										<div>".date("M j, Y", strtotime($result['subs_duedate']))."</div>
+										<div>₱ ".number_format($result['subs_cost'],2,'.',',')."</div>
+									</div>
+									";
+								}
+								##
+								echo "</div>";
+							}
 						}
 						else {
-							$_SESSION['subs_desc'] = "Provider can post and boost their service in an affordable amount.";
-							echo "
-							<h2>Subscription</h2>
-							<figure>
-								<figcaption>Click to <mark id='open-subs'>subscribe</mark></figcaption>	
-							</figure>
-
-							<dialog class='modal-img' id='modal-subs'>
-								<button id='close-subs'>+</button>
-								<div class='subscription'>
-									<div class='month'>
-										<h2>PH</h2>
-										<h3>200 / month</h3>
-										<p>".$_SESSION['subs_desc']."</p>
-										<a href='payment_subs.php?monthly' class='btn'>Subscribe Now</a>
-									</div>
-									<div class='year'>
-										<h2>PH</h2>
-										<h3>2000 / year</h3>
-										<mark>save 20%</mark>
-										<p>".$_SESSION['subs_desc']."</p>
-										<a href='payment_subs.php?yearly' class='btn'>Subscribe Now</a>
-									</div>
-								</div>
-							</dialog>
-							";
-							
-							// $current = strtotime(date("2022-02-01"));
-							// $month = date("Y-m-d", strtotime("+1 month", $current));
-							// $this_date = date("2022-03-01");
-							## CAN COMPARE DATE BY [PHP DATE FUNCTION]
-							// if($this_date >= date("Y-m-d", strtotime($current)) && $this_date <= $month){
-							// 	echo "Yes";
-							// } else {
-							// 	echo "No";
-							// }
-							## CAN GET THE DIFFERENCE DATE BY [PHP STRTOTIME FUNCTION]
-							// echo (strtotime($this_date) - $current)/60/60/24;
+							echo "<h2>Subscription</h2>";
+							not_subs($_SESSION['subs_desc']);
 						}
 						?>
 					</div>

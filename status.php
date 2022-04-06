@@ -2,6 +2,9 @@
 <?php 
 	include("others/functions.php"); 
 	include("others/head.php");
+
+	if(isset($_GET['updated']))
+		echo "<script>alert('Successfully updated!')</script>";
 ?>
 
 <body>
@@ -41,7 +44,10 @@
 
 								<div class="additional-info card">
 									<h3>Additional details</h3>
+
 									<?php
+									## TYPE [notify, success, error]
+									messaging("notify", "Note: ");
 									##
 									switch($purchase['service_type']){
 										case "funeral":
@@ -50,7 +56,7 @@
 											<input type='text' disabled value='".$details['deceased_name']."'>
 
 											<label>Burial datetime</label>
-											<input type='text' disabled value='".date("M j, Y - H:i:s", strtotime($details['burial_datetime']))."'>
+											<input type='text' disabled value='".date("M j, Y - h:i a", strtotime($details['burial_datetime']))."'>
 
 											<label>Burial address</label>
 											<input type='text' disabled value='".$details['burial_add']."'>
@@ -61,9 +67,12 @@
 											";
 											break;
 									}
+
+									if($purchase['purchase_progress'] == 0 && isset($_SESSION['seeker']))
+										echo "<a class='btn' href='status_details.php?purchaseid=".$_GET['purchaseid']."'>Update details</a>";
 									?>
 									
-									<a class='btn' href="">Update details</a>
+									
 								</div>
 								<div class="receipt card">
 									<figure>

@@ -2,7 +2,7 @@
   <li class="sidebar-list">
     <a class="sidebar-link <?php echo ($this_page == 'profile')?'active':''; ?>" href="profile.php" title="Profile">
       <i class="fa-solid fa-user"></i>
-      <div>Profile</div>
+      <div>Profile <mark class="btn status type"><?php echo user_type(); ?></mark></div>
     </a>
   </li>
   <?php
@@ -28,8 +28,13 @@
       </a>
     <?php
       } elseif(user_type() == "provider"){
+        $subs = read("subscription", ["provider_id"], [$_SESSION['provider']]);
+        $is_expired = subscription_expired($subs);
     ?>
-      <a class="sidebar-link <?php echo ($this_page == 'services')?'active':''; ?>" <?php echo (is_subscribed()) ? "href='services.php'":"style='cursor:no-drop;'"; ?> title="Services">
+      <a class="sidebar-link <?php echo ($this_page == 'services')?'active':''; ?>" 
+      <?php echo (is_subscribed()) ? ($is_expired) ? "style='cursor:no-drop;'":"href='services.php'":"style='cursor:no-drop;'"; 
+      ?> 
+      title="Services">
         <i class="fa-solid fa-clipboard-check"></i>
         <div>Services</div>
       </a>
@@ -56,7 +61,13 @@
       $link = "<a class='sidebar-link ";
       $link .= ($this_page == 'transact')?'active':'';
       $link .= "' href='admin_transact.php' title='Transactions'>";
-    } else {
+    }
+    else if(user_type() == 'provider') {
+      $link = "<a class='sidebar-link ";
+      $link .= ($this_page == 'transact')?'active':'';
+      $link .= "' href='purchase.php' title='Transactions'>";
+    }
+    else {
       $link = "<a class='sidebar-link ";
       $link .= ($this_page == 'transact')?'active':'';
       $link .= "' href='cart.php' title='Transactions'>";

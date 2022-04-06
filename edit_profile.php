@@ -55,12 +55,14 @@
 							else {
 							## FOR NON-ADMIN
 								if(user_type() == "provider"){
-									$value = (empty($user['provider_company'])) ? 'required':'disabled';
+									$value = (empty($user['provider_company'])) ? 'required':'readonly';
+									## TYPE [notify, success, error]
+									messaging("error", "Note: You can only edit company name once.");
+
 									echo "
-									<div class='note red'><i class='fa-solid fa-circle-exclamation'></i> Note: You can only edit company name once.</div>
 									<div>
 										<label>Company name</label>
-										<input type='text' name='txtcn' value='".$user['provider_company']."' ".$value.">
+										<input class='".$value."' type='text' name='txtcn' value='".$user['provider_company']."' ".$value.">
 									</div>
 									";
 								}
