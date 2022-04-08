@@ -34,6 +34,10 @@
 					<div class="banner-div">
 						<h2>Profile</h2>
 						<a class="btn btn-link-absolute" href="edit_profile.php">Update</a>
+						<?php
+						if(isset($_SESSION['provider']))
+							messaging("notify", "Note: Company logo can be updated and shown at the upper right corner.");
+						?>
 
 						<form class="profile" method="post">
 							

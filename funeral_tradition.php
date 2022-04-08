@@ -3,7 +3,7 @@
 	include("others/functions.php");
 	include("others/head.php"); 
 
-	$_SESSION['service_name'] = $_GET['service_name'];
+	// $_SESSION['service_name'] = $_GET['service_name'];
 ?>
 
 <body>

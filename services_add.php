@@ -88,7 +88,8 @@
 							</div>
 							<div>
 								<label >Description</label>
-								<input type="text" name="txtdesc" value="<?php echo $service['service_desc']; ?>" required>
+								<!-- <input type="text" name="txtdesc" value="<?php echo $service['service_desc']; ?>" required> -->
+								<textarea name="txtdesc" placeholder='Please also specify the size of the casket and if for adult/child.'><?php echo $service['service_desc']; ?></textarea>
 							</div>
 						</form>
 						<?php
@@ -111,17 +112,18 @@
 									<option value="cremation">Cremation</option>
 								</select>
 							</div>
-							<div>
+							<div style='width:24%'>
 								<label >Price</label>
 								<input type="number" name="numprice" placeholder="Ex. 80000" required>
 							</div>
-							<div>
+							<div style='width:24%'>
 								<label >Quantity</label>
 								<input type="number" name="numqty" required>
 							</div>
-							<div>
+							<div style='width:100%'>
 								<label >Description</label>
-								<input type="text" name="txtdesc" required>
+								<!-- <input type="text" name="txtdesc" required> -->
+								<textarea name="txtdesc" placeholder='Please also specify the size of the casket and if for adult/child.'></textarea>
 							</div>
 							<button class="btn btn-link-absolute higher-top" type="submit" name="btnadd">Add Service</button>
 						</form>

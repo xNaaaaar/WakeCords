@@ -35,7 +35,7 @@
 					<option value="candle">Candle Maker</option>
 					<option value="headstone">Headstone Maker</option>
 					<option value="flower">Flower Shop</option>
-					<option value="food_cater">Food Catering</option>
+					<option value="catering">Food Catering</option>
 				</select>
 				<input type="email" name="emea" placeholder="Email Address" required>
 				<input type="password" name="passpw" placeholder="Password" required>

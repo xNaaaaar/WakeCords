@@ -5,6 +5,8 @@
 
 	if(isset($_GET['updated']))
 		echo "<script>alert('Successfully updated!')</script>";
+
+
 ?>
 
 <body>
@@ -25,6 +27,12 @@
 				<div class="wrapper">
 					<div class="banner-div">
 						<h2><a href="purchase.php">Purchase</a> <span>> Status</span></h2>
+						<?php
+						## UPDATE PROGRESS STATUS FOR PROVIDER
+						if(isset($_SESSION['provider']) && !progress_limits($_GET['purchaseid']))
+							echo "<a class='btn btn-link-absolute' href='updating.php?id=".$_GET['purchaseid']."&purchase' onclick='return confirm(\"Are you sure you want to update purchase progress?\");'>Update Progress</a>";
+						?>
+						
 						
 						<div class="order-con">
 							<div class="order-info">
@@ -43,14 +51,21 @@
 								?>
 
 								<div class="additional-info card">
-									<h3>Additional details</h3>
+									<h3><?php echo (isset($_SESSION['seeker'])) ? "Additional":"Contact"; ?> Details</h3>
 
 									<?php
 									## TYPE [notify, success, error]
-									messaging("notify", "Note: ");
+									if(isset($_SESSION['seeker'])) messaging("notify", "Note: ");
 									##
 									switch($purchase['service_type']){
 										case "funeral":
+											if(isset($_SESSION['provider'])){
+												echo "
+												<label>".$purchase['seeker_fname']." ".$purchase['seeker_lname']."</label>
+												<label><b>".$purchase['seeker_phone']."</b></label>
+												<div class='hr full-width'></div>
+												";
+											}
 											echo "
 											<label>Deceased name</label>
 											<input type='text' disabled value='".$details['deceased_name']."'>
@@ -123,32 +138,39 @@
 											<li></li>
 											<li></li>
 											<li><h3>Total:</h3></li>
-											<li>₱ <?php echo number_format($total,2,'.',',');?></li>
+											<li><h3>₱ <?php echo number_format($total,2,'.',',');?></h3></li>
 										</ul>
 									</div>
 								</div>
 							</div>
 							<div class='order_status'>
+							
+								<?php 
+								## FUNERAL SERVICES
+								if($purchase['service_type'] == 'funeral'){ ?>
+
 								<div class='<?php echo purchase_progress($purchase['purchase_progress'], 1); ?>'>
-									<h3>Preparing the wake</h3>
-									<p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Molestiae, nemo.</p>
+									<h3>Preparing wake</h3>
+									<p>Funeral Home is now processing the wake.</p>
 								</div>
 								<div class='<?php echo purchase_progress($purchase['purchase_progress'], 2); ?>'>
 									<h3>Wake is ready</h3>
-									<p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Molestiae, nemo.</p>
+									<p>Funeral Home has now prepared the wake and is ready for delivery.</p>
 								</div>
 								<div class='<?php echo purchase_progress($purchase['purchase_progress'], 3); ?>'>
 									<h3>Wake is delivered (optional)</h3>
-									<p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Molestiae, nemo.</p>
+									<p>Funeral Home has delivered the wake in the location and is ready for viewing.</p>
 								</div>
 								<div class='<?php echo purchase_progress($purchase['purchase_progress'], 4); ?>'>
-									<h3>Service provider received payment</h3>
-									<p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Molestiae, nemo.</p>
+									<h3>Wake is ready for viewing</h3>
+									<p>Wake is available for visitation.</p>
 								</div>
 								<div class='<?php echo purchase_progress($purchase['purchase_progress'], 5); ?>'>
 									<h3>Done</h3>
-									<p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Molestiae, nemo.</p>
+									<p>Funeral Home has completed the transaction.</p>
 								</div>
+
+								<?php } ?>
 							</div>
 						</div>
 					</div>

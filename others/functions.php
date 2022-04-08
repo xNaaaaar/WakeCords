@@ -399,6 +399,43 @@
 			## CHECK IF txtcemaddress IS EMPTY
 		}
 	}
+	## CHECKS PURCHASE PROGRESS IF LIMIT
+	function progress_limits($id){
+		## LIMITATIONS
+		$church = $candle = $headstone = $flower = $catering = 4;
+		$funeral = 5;
+
+		$purchase = DB::query("SELECT * FROM purchase a JOIN services b ON a.service_id = b.service_id WHERE purchase_id = ?", array($id), "READ");
+		$purchase = $purchase[0];
+
+		switch($purchase['service_type']){
+			case "funeral":
+				if($purchase['purchase_progress'] == $funeral) return true;
+			break;
+
+			case "church":
+				if($purchase['purchase_progress'] == $church) return true;
+			break;
+
+			case "headstone":
+				if($purchase['purchase_progress'] == $headstone) return true;
+			break;
+
+			case "candle":
+				if($purchase['purchase_progress'] == $candle) return true;
+			break;
+
+			case "flower":
+				if($purchase['purchase_progress'] == $flower) return true;
+			break;
+
+			case "catering":
+				if($purchase['purchase_progress'] == $catering) return true;
+			break;
+		}
+
+		return false;
+	}
 	## PROVIDER'S SERVICES
 	function provider_services($type=''){
 		$provider = provider();
@@ -637,14 +674,14 @@
 			case "funeral":
 				## DISPLAY ALL
 				if ($defer == NULL) {
-					$services = DB::query("SELECT * FROM services GROUP BY service_name", array(), "READ");
+					$provider = read("provider", ["provider_type"], [$type]);
 
-					if(count($services) > 0){
-						foreach($services as $results){
+					if(count($provider) > 0){
+						foreach($provider as $result){
 							echo "
 							<div class='card-0'>
-								<img src='images/providers/".$results['service_type']."/".$results['provider_id']."/".$results['service_img']."'>
-								<h3>".$results['service_name']."
+								<img src='images/providers/".$result['provider_type']."/".$result['provider_id']."/".$result['provider_logo']."'>
+								<h3>".$result['provider_company']."
 									<span>
 										(5 reviews)
 										<i class='fa-solid fa-star'></i>
@@ -654,9 +691,9 @@
 									</span>
 								</h3>
 								<p>
-									".limit_text($results['service_desc'], 10)."
+									".limit_text($result['provider_desc'], 10)."
 								</p>
-								<a class='btn' href='funeral_tradition.php?service_name=".$results['service_name']."'>View</a>
+								<a class='btn' href='funeral_tradition.php?id=".$result['provider_id']."'>View</a>
 							</div>
 							";
 						}
@@ -665,7 +702,7 @@
 				}
 				## DIFFERENTIATE BETWEEN FUNERAL TYPE 
 				else {
-					$services = DB::query("SELECT * FROM services s JOIN funeral f ON s.service_id = f.service_id WHERE service_name = ? AND funeral_type = ?", array($_SESSION['service_name'], $defer), "READ");
+					$services = DB::query("SELECT * FROM services s JOIN funeral f ON s.service_id = f.service_id WHERE provider_id = ? AND funeral_type = ?", array($_GET['id'], $defer), "READ");
 
 					if(count($services) > 0){
 						foreach($services as $results){
@@ -858,14 +895,20 @@
 		$txtfn = trim(ucwords($_POST['txtfn']));
 		$txtmi = trim(ucwords($_POST['txtmi']));
 		$txtln = trim(ucwords($_POST['txtln']));
+		$provider = provider();
 		##
 		if(user_type() == "admin"){
 			$txtaddress = "";
 			$txtphone = 0;
 		}
 		else {
-			if(user_type() == "provider")
+			if(user_type() == "provider"){
 				$txtcn = trim(ucwords($_POST['txtcn']));
+
+				if(empty($provider['provider_logo']))
+					$imageName = upload_image("file_logo", "images/providers/".$provider['provider_type']."/".$_SESSION['provider']."/");
+			}
+				
 
 			$txtaddress = trim(ucwords($_POST['txtaddress']));
 			$txtphone = trim($_POST['txtphone']);
@@ -888,8 +931,8 @@
 
 			switch ($user){
 				case "seeker":
-					$attr_list = ["seeker_fname", "seeker_mi", "seeker_lname", "seeker_address", "seeker_phone"];
 					$condition = "seeker_email";
+					$attr_list = ["seeker_fname", "seeker_mi", "seeker_lname", "seeker_address", "seeker_phone"];
 
 					array_push($data_list, $txtfn, $txtmi, $txtln, $txtaddress, $txtphone, $email);
 					update($user, $attr_list, $data_list, $condition);
@@ -897,17 +940,22 @@
 					break;
 
 				case "provider":
-					$attr_list = ["provider_company", "provider_fname", "provider_mi", "provider_lname", "provider_address", "provider_phone"];
 					$condition = "provider_email";
-
+					$attr_list = ["provider_company", "provider_fname", "provider_mi", "provider_lname", "provider_address", "provider_phone"];
 					array_push($data_list, $txtcn, $txtfn, $txtmi, $txtln, $txtaddress, $txtphone, $email);
+					##
+					if(isset($imageName)){
+						array_unshift($attr_list, "provider_logo");
+						array_unshift($data_list, $imageName);
+					}
+					##
 					update($user, $attr_list, $data_list, $condition);
 
 					break;
 
 				case "admin":
-					$attr_list = ["admin_fname", "admin_mi", "admin_lname"];
 					$condition = "admin_email";
+					$attr_list = ["admin_fname", "admin_mi", "admin_lname"];
 
 					array_push($data_list, $txtfn, $txtmi, $txtln, $email);
 					update($user, $attr_list, $data_list, $condition);

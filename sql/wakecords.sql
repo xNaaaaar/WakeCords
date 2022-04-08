@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 03, 2022 at 11:09 AM
+-- Generation Time: Apr 08, 2022 at 11:40 AM
 -- Server version: 10.4.18-MariaDB
 -- PHP Version: 7.3.28
 
@@ -41,8 +41,9 @@ CREATE TABLE `admin` (
 --
 
 INSERT INTO `admin` (`admin_id`, `admin_fname`, `admin_mi`, `admin_lname`, `admin_email`, `admin_pass`) VALUES
-(1, 'Admiiin', 'I', 'Admiiin', 'admin@wakecords.com', '0192023a7bbd73250516f069df18b500'),
-(2, 'New Admin', 'N', 'New Admin', 'admin1@wakecords.com', '0192023a7bbd73250516f069df18b500');
+(1, 'Admn', 'Z', 'Admn', 'admin@wakecords.com', '0192023a7bbd73250516f069df18b500'),
+(2, 'New Admin', 'N', 'New Admin', 'admin1@wakecords.com', '0192023a7bbd73250516f069df18b500'),
+(3, 'Admiin', 'A', 'Admiin', 'admin2@wakecords.com', '0192023a7bbd73250516f069df18b500');
 
 -- --------------------------------------------------------
 
@@ -109,9 +110,7 @@ CREATE TABLE `details` (
 --
 
 INSERT INTO `details` (`purchase_id`, `deceased_name`, `burial_datetime`, `burial_add`, `delivery_add`, `delivery_date`, `msg_ribbon`, `msg_headstone`, `birth_date`, `death_date`, `delivery_datetime`, `num_pax`, `cemetery_add`) VALUES
-(10, 'John Doe', '2022-04-09 19:06:00', 'This Is My Address', 'This Is My Address', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(11, 'John Doe', '2022-04-16 15:14:00', 'This Is My Address', 'This Is My Address', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(14, 'John Doe', '2022-04-16 15:14:00', 'This Is My Address', 'This Is My Address', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+(10, 'Jan-Jan Dowll', '2022-04-12 13:00:00', 'This Is My New Updated Address', 'This Is My New Updated Address', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -203,6 +202,7 @@ CREATE TABLE `payment` (
 
 CREATE TABLE `provider` (
   `provider_id` int(8) NOT NULL,
+  `provider_logo` varchar(100) NOT NULL,
   `provider_company` varchar(25) NOT NULL,
   `provider_desc` varchar(200) NOT NULL,
   `provider_fname` varchar(25) NOT NULL,
@@ -219,9 +219,10 @@ CREATE TABLE `provider` (
 -- Dumping data for table `provider`
 --
 
-INSERT INTO `provider` (`provider_id`, `provider_company`, `provider_desc`, `provider_fname`, `provider_mi`, `provider_lname`, `provider_type`, `provider_phone`, `provider_address`, `provider_email`, `provider_pass`) VALUES
-(1, 'St. Peter', '', 'Nicyl', 'D', 'Lapas', 'funeral', '09090909090', 'Mabolo', 'nicyl@gmail.com', 'd7e73fb6980b78278c69b4e9f024f16a'),
-(2, '', '', 'Flower', '', 'Provider', 'flower', '', '', 'flower@provider.com', 'd7e73fb6980b78278c69b4e9f024f16a');
+INSERT INTO `provider` (`provider_id`, `provider_logo`, `provider_company`, `provider_desc`, `provider_fname`, `provider_mi`, `provider_lname`, `provider_type`, `provider_phone`, `provider_address`, `provider_email`, `provider_pass`) VALUES
+(1, '624ef83a912521.12037345.jpg', 'Cosmopolitan', '', 'Nicyl', 'D', 'Lapas', 'funeral', '09090909090', 'Mabolo', 'nicyl@gmail.com', 'd7e73fb6980b78278c69b4e9f024f16a'),
+(2, '', '', '', 'Flower', '', 'Provider', 'flower', '', '', 'flower@provider.com', 'd7e73fb6980b78278c69b4e9f024f16a'),
+(3, '', 'Cosmopolitan', '', 'Melnar', 'B', 'Ancit', 'church', '09560376576', 'Sitio Granada Quiot Pardo, Cebu City Philippines', 'narancit@gmail.com', 'd7e73fb6980b78278c69b4e9f024f16a');
 
 -- --------------------------------------------------------
 
@@ -246,9 +247,7 @@ CREATE TABLE `purchase` (
 
 INSERT INTO `purchase` (`purchase_id`, `seeker_id`, `service_id`, `purchase_total`, `purchase_qty`, `purchase_date`, `purchase_status`, `purchase_progress`) VALUES
 (10, 10, 1, '220000.00', 2, '2022-03-21', 'paid', 0),
-(11, 10, 2, '80000.00', 1, '2022-03-23', 'paid', 0),
-(13, 14, 1, '110000.00', 1, '2022-03-27', 'to pay', 0),
-(14, 10, 2, '80000.00', 1, '2022-03-27', 'paid', 0);
+(17, 10, 1, '110000.00', 1, '2022-04-07', 'to pay', 0);
 
 -- --------------------------------------------------------
 
@@ -285,7 +284,8 @@ INSERT INTO `requirement` (`req_id`, `provider_id`, `seeker_id`, `req_type`, `re
 (1, NULL, 10, 'death certificate', '6220cb08d606a4.91479037.jpg', 'verified'),
 (2, NULL, 13, 'death certificate', '6247da321a0a64.72029108.jpg', 'verified'),
 (3, NULL, 14, 'death certificate', '6240038f3f6390.99031927.png', 'not verified'),
-(4, 1, NULL, 'business permit', '6248240f08d326.27804580.jpg', 'verified');
+(4, 1, NULL, 'business permit', '6248240f08d326.27804580.jpg', 'verified'),
+(5, 3, NULL, 'business permit', '62497c52bc1541.38904101.jpg', 'verified');
 
 -- --------------------------------------------------------
 
@@ -352,7 +352,7 @@ CREATE TABLE `services` (
 --
 
 INSERT INTO `services` (`service_id`, `provider_id`, `service_type`, `service_name`, `service_desc`, `service_cost`, `service_qty`, `service_img`, `service_status`) VALUES
-(1, 1, 'funeral', 'St. Peter', 'The final part of the funeral liturgy occurs at the cemetery.  A priest, deacon or funeral director leads a brief prayer to help those who are mourning leave their loved one in the hands of God.', '110000.00', 5, 'coffin.png', 'active'),
+(1, 1, 'funeral', 'St. Peter', 'The final part of the funeral liturgy occurs at the cemetery.  ', '110000.00', 3, 'coffin.png', 'active'),
 (2, 1, 'funeral', 'St. Peter', 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ad corrupti beatae magni rerum doloribus, vitae inventore. Tempore quod fugit commodi!', '80000.00', 1, 'coffin.png', 'active'),
 (9, 1, 'funeral', 'St. Peter', 'An important part of grieving and of honouring the life of a person is the releasing of their remains to the earth.  A committal is the gathering of a small community, often just close family & friends, and the presider, at the graveside or mausoleum.', '100000.00', 5, '6249572712ddd5.72232742.png', 'active');
 
@@ -375,7 +375,9 @@ CREATE TABLE `subscription` (
 --
 
 INSERT INTO `subscription` (`provider_id`, `subs_startdate`, `subs_duedate`, `subs_description`, `subs_cost`) VALUES
-(1, '2022-04-03', '2022-05-03', 'Provider can post and boost their service in an affordable amount.', '200.00');
+(1, '2022-03-03', '2022-04-03', 'Provider can post and boost their service in an affordable amount.', '200.00'),
+(3, '2022-04-03', '2023-04-03', 'Provider can post and boost their service in an affordable amount.', '2000.00'),
+(1, '2022-04-06', '2022-05-06', 'Provider can post and boost their service in an affordable amount.', '200.00');
 
 --
 -- Indexes for dumped tables
@@ -515,13 +517,13 @@ ALTER TABLE `subscription`
 -- AUTO_INCREMENT for table `admin`
 --
 ALTER TABLE `admin`
-  MODIFY `admin_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `admin_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `cart_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `cart_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT for table `feedback`
@@ -533,13 +535,13 @@ ALTER TABLE `feedback`
 -- AUTO_INCREMENT for table `provider`
 --
 ALTER TABLE `provider`
-  MODIFY `provider_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `provider_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `purchase`
 --
 ALTER TABLE `purchase`
-  MODIFY `purchase_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `purchase_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `request`
@@ -551,7 +553,7 @@ ALTER TABLE `request`
 -- AUTO_INCREMENT for table `requirement`
 --
 ALTER TABLE `requirement`
-  MODIFY `req_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `req_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `seeker`
@@ -563,7 +565,7 @@ ALTER TABLE `seeker`
 -- AUTO_INCREMENT for table `services`
 --
 ALTER TABLE `services`
-  MODIFY `service_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `service_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- Constraints for dumped tables
@@ -606,6 +608,12 @@ ALTER TABLE `requirement`
 --
 ALTER TABLE `services`
   ADD CONSTRAINT `services_ibfk_1` FOREIGN KEY (`provider_id`) REFERENCES `provider` (`provider_id`);
+
+--
+-- Constraints for table `subscription`
+--
+ALTER TABLE `subscription`
+  ADD CONSTRAINT `subscription_ibfk_1` FOREIGN KEY (`provider_id`) REFERENCES `provider` (`provider_id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

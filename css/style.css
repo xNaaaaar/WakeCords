@@ -32,11 +32,11 @@ h2 a:hover:after{transform:scaleX(1);transform-origin:bottom left;}
 p{font-family:Roboto Slab,serif;margin-bottom:25px;}
 button:hover{cursor:pointer;}
 
-input, textarea, select{display:block;width:100%;height:50px;margin-bottom:15px;border-radius:5px;padding:0 15px;font:500 16px/30px Poppins,sans-serif;resize:none;}
+input, textarea, select{display:block;width:100%;height:50px;margin-bottom:15px;border-radius:5px;padding:0 15px;font:500 16px/30px Poppins,sans-serif;resize:none;border:1px solid #000;}
 input[type="checkbox"].radio-terms{width:20px;height:20px;margin:0;border-radius:0;padding:0;}
 input:disabled{border:1px solid gray !important;background:#ccc;}
 input.readonly{border:1px solid gray !important;background:#ccc;}
-select{border:1px solid #ccc;}
+textarea{padding:10px 15px;height:150px;}
 
 .btn{display:inline-block;width:fit-content;background:var(--light-gray);color:#fff;text-align:center;text-decoration:none;letter-spacing:2px;margin-right:25px;font:600 18px/20px Poppins,sans-serif;padding:15px 20px;border-radius:5px;}
 .btn .none{cursor:no-drop;}
@@ -47,7 +47,7 @@ select{border:1px solid #ccc;}
 
 .card{background:var(--gray-5);width:auto;min-height:300px;padding:70px 40px;border-radius:5px;margin:0 25px;}
 .card-0{display:block;border:1px solid var(--gray-2);width:280px;height:auto;box-shadow:var(--shadow-4);border-radius:10px;margin:15px 0;position:relative;overflow:hidden;padding:0 0 75px;}
-.card-0 img{height:200px;padding:0 15px;}
+.card-0 img{height:210px;padding:15px;}
 .card-0.each_rate{width:100%;display:flex;justify-content:space-between;column-gap:var(--size-5);padding:15px 30px 15px 15px;}
 .card-0.each_rate img, .card-0.each_rate .rate_desc, .card-0.each_rate form{width:32%;}
 .card-0.each_rate .rate_desc{display:flex;align-items:center;}
@@ -76,13 +76,13 @@ select{border:1px solid #ccc;}
 .note.blue a{color:hsl(180, 75%, 20%);}
 .note.red a:hover, .note.green a:hover, .note.blue a:hover{text-decoration:underline;}
 
-
 /* HEADER AREA */
 .header{display:flex;justify-content:space-between;box-shadow:var(--shadow-4);padding:var(--size-3);position:fixed;width:100%;height:var(--header-height);background:var(--gray-4);align-items:center;z-index:100;}
 img.header-logo{width:40px;height:40px;}
 button.header-btn{background:none;}
 button.header-btn i{font-size:var(--size-7);}
 .header picture{display:flex;justify-content:space-between;align-items:center;column-gap:10px;}
+.header picture svg{width:40px;height:40px;}
 .header picture a{color:var(--light-gray);position:relative;display:block;}
 .header picture a span{font-size:10px;position:absolute;top:-2px;right:-7px;background:hsl(0,100%,40%);color:#fff;width:15px;height:15px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
 .header picture a:hover{color:var(--light-blue);}
@@ -156,9 +156,9 @@ button.header-btn i{font-size:var(--size-7);}
 /* PROFILE.PHP AREA */
 .banner-div form.profile{display:flex;justify-content:space-between;flex-wrap:wrap;position:relative;padding-bottom:var(--size-3);}
 .banner-div form.profile.column{flex-direction:column;}
-.banner-div form.profile .btn-new{position:absolute;top:-65px;right:0;background:var(--light-blue);padding:5px 30px;color:#fff;border-radius:10px;font:500 18px/30px Poppins,sans-serif;}
-.banner-div form.profile .btn-new:hover{background:var(--light-gray);}
-.banner-div form.profile div{width:48%;}
+/* .banner-div form.profile .btn-new{position:absolute;top:-65px;right:0;background:var(--light-blue);padding:5px 30px;color:#fff;border-radius:10px;font:500 18px/30px Poppins,sans-serif;}
+.banner-div form.profile .btn-new:hover{background:var(--light-gray);} */
+.banner-div form.profile div{width:49.3%;}
 .banner-div form.profile input{border:1px solid var(--light-blue);}
 .banner-div h2 span.btn.status{display:inline-block;font-size:12px;margin:0;position:absolute;top:50%;left:300px;transform:translateY(-50%);border:none;pointer-events:none;}
 .banner-div h2 span.btn.status.green{background:var(--green);}
@@ -180,7 +180,7 @@ button.header-btn i{font-size:var(--size-7);}
 .profile-lists .list.data a figure img{width:100%;height:100%;}
 
 .modal-img::backdrop{background-color:rgba(62, 92, 118, .5);}
-.modal-img{position:absolute;inset:50% auto auto 50%;transform:translate(-50%, -50%);padding:40px 20px 20px;border-radius:10px;box-shadow:var(--shadow-4);}
+.modal-img{margin:auto auto;padding:40px 20px 20px;border-radius:10px;box-shadow:var(--shadow-4);}
 .modal-img button{transform:rotate(45deg);background:none;font-size:40px;position:absolute;inset:0 20px auto auto;}
 
 figcaption mark{cursor:pointer;background-color:var(--light-blue);color:#fff;padding-inline:7px;}
@@ -269,7 +269,7 @@ figcaption mark{cursor:pointer;background-color:var(--light-blue);color:#fff;pad
 .order-con{display:flex;justify-content:space-between;column-gap:20px;}
 .order-info{width:45%;}
 
-.receipt, .additional-info{width:100%;text-align:center;margin:0 0 20px;padding:40px 20px;background:none;border:1px solid #aaa;box-shadow:var(--shadow-4);}
+.receipt, .additional-info{width:100%;text-align:center;margin:0 0 20px;padding:30px;background:none;border:1px solid #aaa;box-shadow:var(--shadow-4);}
 .receipt figure{width:100px;height:100px;margin-inline:auto;margin-bottom:20px;}
 .receipt figure img{width:100%;}
 .receipt-details {border:1px solid #aaa;box-shadow:var(--shadow-4);padding:20px;width:300px;max-width:100%;border-radius:5px;margin-inline:auto;margin-block:20px;}
@@ -277,7 +277,9 @@ figcaption mark{cursor:pointer;background-color:var(--light-blue);color:#fff;pad
 .receipt-details p{font-size:13px;margin:0;line-height:18px;}
 
 .additional-info {text-align:left;position:relative;}
+.additional-info label {display:block;}
 .additional-info input {border:1px solid #aaa;box-shadow:var(--shadow-4);}
+.additional-info .hr {width:100%;margin-block:13px;}
 .additional-info a {position:absolute;top:25px;right:0;font-size:15px;padding:10px 20px;}
 
 .table ul{display:flex;justify-content:space-between;column-gap:2px;flex-wrap:nowrap;margin-bottom:10px;text-align:right;}
@@ -286,13 +288,13 @@ figcaption mark{cursor:pointer;background-color:var(--light-blue);color:#fff;pad
 .table .hr.full-width{width:100%;margin-bottom:20px;}
 
 .order_status{padding:var(--size-7) 0 0;width:55%;}
-.order_status div{min-height:50px;position:relative;padding:0 0 50px 50px;}
+.order_status div{min-height:50px;position:relative;padding:0 0 30px 50px;}
 .order_status div h3{margin:0;}
 .order_status div p{margin:0;font-size:15px;}
-.order_status div:before, .order_status div:after{content:"";width:21px;height:21px;background:#bbb;position:absolute;top:4px;left:0;border-radius:50%;}
+.order_status div:before, .order_status div:after{content:"";width:21px;height:21px;background:#bbb;position:absolute;top:4px;left:10px;border-radius:50%;}
 .order_status div.done:before{background:var(--green);z-index:1;}
 .order_status div.done:after{background:rgba(75,181,67,.8);}
-.order_status div:after{width:5px;height:100%;left:8px;border-radius:0;}
+.order_status div:after{width:5px;height:100%;left:18px;border-radius:0;}
 .order_status div:last-child:after{display:none;}
 .order_status div.done{color:#aaa;}
 

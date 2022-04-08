@@ -23,10 +23,10 @@
 				<div class="wrapper">
 					<div class="banner-div">
 						<h2>Services</h2>
-						<form action="" class="search-form">
+						<!-- <form action="" class="search-form">
 							<input type="text" placeholder="search here..">
 							<button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
-						</form>
+						</form> -->
 						
 						<!-- TABS -->
 						<?php

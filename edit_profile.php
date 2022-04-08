@@ -33,7 +33,7 @@
 				<div class="wrapper">
 					<div class="banner-div">
 						<h2><a href="profile.php">Profile</a> <span>> Edit Profile</span></h2>
-						<form class="profile column" method="post">
+						<form class="profile column" method="post" enctype="multipart/form-data">
 							<?php
 							## FOR ADMIN
 							if(user_type() == "admin"){
@@ -55,14 +55,24 @@
 							else {
 							## FOR NON-ADMIN
 								if(user_type() == "provider"){
-									$value = (empty($user['provider_company'])) ? 'required':'readonly';
+									$name = (empty($user['provider_company'])) ? 'required':'readonly';
 									## TYPE [notify, success, error]
-									messaging("error", "Note: You can only edit company name once.");
+									messaging("error", "Note: You can only edit company name once and company logo is not required.");
+
+									if(empty($user['provider_logo'])){
+										echo "
+										<div>
+											<label>Company logo</label>
+											<input class='' type='file' name='file_logo' required>
+										</div>
+										";
+									}
 
 									echo "
+									
 									<div>
 										<label>Company name</label>
-										<input class='".$value."' type='text' name='txtcn' value='".$user['provider_company']."' ".$value.">
+										<input class='".$name."' type='text' name='txtcn' value='".$user['provider_company']."' ".$name.">
 									</div>
 									";
 								}
