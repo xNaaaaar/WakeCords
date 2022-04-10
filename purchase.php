@@ -5,6 +5,12 @@
 
 	if(isset($_GET['deleted']))
 		echo "<script>alert('Successfully deleted purchase!')</script>";
+
+	if(isset($_GET['requests']))
+		echo "<script>alert('Request payout sent! Please wait admin to process your request.')</script>";
+
+	if(isset($_GET['uploaded']))
+		echo "<script>alert('Successfully uploaded proof of payment!')</script>";
 		
 ?>
 
@@ -39,7 +45,7 @@
 							}
 							## IF COUNT TO PAY IS MORE THAN ONE 
 							if($count_to_pay > 1)
-								echo "<a class='btn btn-link-absolute' href='payment.php'>Pay all at once</a>";	
+								echo "<a class='btn btn-link-absolute' href='payment.php' onclick='return confirm(\"Are you sure you want to pay all purchases at once?\")'>Pay all at once</a>";	
 						}
 						?>
 						

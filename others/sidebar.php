@@ -60,7 +60,7 @@
     if(user_type() == 'admin'){
       $link = "<a class='sidebar-link ";
       $link .= ($this_page == 'transact')?'active':'';
-      $link .= "' href='admin_transact.php' title='Transactions'>";
+      $link .= "' href='purchase.php' title='Transactions'>";
     }
     else if(user_type() == 'provider') {
       $link = "<a class='sidebar-link ";

@@ -123,6 +123,17 @@
 						array_push($data_list, $txtfn, $txtmi, $txtln, $emea, $passpw);
 
 						create($table, $attr_list, qmark_generator(count($attr_list)), $data_list);
+
+						## GET THE PROVIDER ID
+						$userid = read("admin", ["admin_email"], [$emea]);
+
+						## CHECK EXISTING EMAIL
+						if(count($userid)>0){
+							$userid = $userid[0];
+							$ratePathImages = 'images/admins/payout/';
+							## CREATE A FOLDER FOR UPLOADING DEATH CERT
+							if(!file_exists($ratePathImages)) mkdir($ratePathImages,0777,true);
+						}
 						break;
 				}
 
@@ -152,6 +163,15 @@
 	function delete($table, $attr, $data){
 		## DELETE FROM {table} WHERE {attr} = {data}
 		return DB::query("DELETE FROM ".$table." WHERE ".$attr."=?", array($data), "DELETE");
+	}
+	## DISPLAY STARS
+	function display_stars($stars){
+		$text = "";
+		while($stars > 0){
+			$text .= "<i class='fa-solid fa-star stars'></i>";
+			$stars--;
+		}
+		return $text;
 	}
 	## SUBSCRIBED PROVIDER
 	function is_subscribed(){
@@ -449,7 +469,7 @@
 				foreach($services as $results){
 					echo "
 					<div class='card-0 no-padding'>
-						<a href='funeral_tradition_this.php?service_id=".$results['service_id']."'>
+						<a href='funeral_tradition_this.php?service_id=".$results['service_id']."&id={$results['provider_id']}'>
 							<img src='images/providers/".$results['service_type']."/".$results['provider_id']."/".$results['service_img']."'>
 							<h3>".$results['funeral_name']."
 								<span>
@@ -532,23 +552,84 @@
 						<p>".limit_text($service_['service_desc'], 10)."</p>
 					</div>
 					<div>
-						<span>".$results['purchase_status']."</span>
+						<span>
+						".$results['purchase_status']."
+				"; 
+				##
+				$payout = read("payout", ["purchase_id"], [$results['purchase_id']]);
+
+				if(count($payout) == 1){
+					$payout = $payout[0];
+
+					if($payout['payout_image'] == NULL) {
+						if(isset($_SESSION['provider'])){
+							echo ", pending payout requests";
+						}
+					}
+					else {
+						if(isset($_SESSION['admin'])){
+							echo ", uploaded proof";
+						}
+					}	
+				}
+
+				echo "
+						</span>
 					</div>
 					<div>
 				";
 
 				## STATUS IS PAID
-				if($results['purchase_status'] == "paid")
+				if($results['purchase_status'] == "paid" || $results['purchase_status'] == "done" || $results['purchase_status'] == "rated")
 					echo "<a href='status.php?purchaseid=".$results['purchase_id']."' class='status'>view</a>";
 
-				if(isset($_SESSION['seeker'])){
-					
-					## STATUS IS TO PAY
-					if($results['purchase_status'] == "to pay"){
-						echo "<a href='payment.php?purchaseid=".$results['purchase_id']."' class='status'>pay</a>";
+				## STATUS IS TO PAY
+				if($results['purchase_status'] == "to pay"){
+					## FOR SEEKER
+					if(isset($_SESSION['seeker'])){
+						echo "<a href='payment.php?purchaseid=".$results['purchase_id']."' class='status' onclick='return confirm(\"Are you sure you want to pay this purchase?\");'>pay</a>";
 						echo "<a href='deleting.php?table=purchase&attr=purchase_id&data=".$results['purchase_id']."&url=purchase' class='status' onclick='return confirm(\"Are you sure you want to delete this purchase?\");'>delete</a>";
-					}		
-				}				
+					}
+				}
+
+				## STATUS IS DONE OR RATED
+				if($results['purchase_status'] == "done" || $results['purchase_status'] == "rated"){
+					## FOR SEEKER
+					if(isset($_SESSION['seeker']) && $results['purchase_status'] == "done"){
+						echo "<a href='funeral_tradition_this.php?service_id={$results['service_id']}&id={$service_['provider_id']}&p_id={$results['purchase_id']}&rate#ratings' class='status' onclick='return confirm(\"Are you sure you want to rate this purchase?\")'>rate now</a>";
+					}
+
+					if(isset($_SESSION['seeker']) && $results['purchase_status'] == "rated"){
+						echo "<a href='funeral_tradition_this.php?service_id={$results['service_id']}&id={$service_['provider_id']}#ratings' class='status'>view rate</a>";
+					}
+
+					## FOR PROVIDER
+					if(isset($_SESSION['provider'])){
+						$payout = read("payout", ["purchase_id"], [$results['purchase_id']]);
+
+						if(count($payout) == 0){
+							echo "<a href='payout.php?id={$results['purchase_id']}' class='status' onclick='return confirm(\"Are you sure you want to request payout for this purchase?\")'>payout</a>";
+						}
+						else if(count($payout) == 1) {
+							$payout = $payout[0];
+							echo "<a href='/Capstone/WakeCords/images/admins/payout/{$payout['payout_image']}' download='payment_proof_{$results['purchase_id']}' class='status'>download proof</a>";
+						}
+							
+					}
+
+					## FOR ADMIN
+					if(isset($_SESSION['admin'])){
+						$payout = read("payout", ["purchase_id"], [$results['purchase_id']]);
+
+						if(count($payout) == 1){
+							$payout = $payout[0];
+
+							if($payout['payout_image'] == NULL){
+								echo "<a href='payout.php?id={$results['purchase_id']}' class='status' onclick='return confirm(\"Are you sure you want to upload proof of payment for this payout?\")'>upload proof</a>";
+							}
+						}	
+					}
+				}
 
 				echo "
 					</div>
@@ -571,6 +652,30 @@
 		}
 
 		return $arr;
+	}
+	## RATE A PURCHASE DONE
+	function rate(){
+		$star = $_POST['star'];
+		$txtrev = trim($_POST['txtrev']);
+		$date = date("Y-m-d");
+
+		## CREATE A FEEDBACK
+		$table = "feedback";
+		$attr_list = ["seeker_id", "service_id", "feedback_star", "feedback_comments", "feedback_date"];
+		$data_list = [$_SESSION['seeker'], $_GET['service_id'], $star, $txtrev, $date];
+
+		create($table, $attr_list, qmark_generator(count($attr_list)), $data_list);
+	
+		## UPDATE PURCHASE STATUS
+		$table1 = "purchase";
+		$attr_list1 = ["purchase_status"];
+		$data_list1 = ["rated", $_GET['p_id']];
+		$condition = "purchase_id";
+
+		update($table1, $attr_list1, $data_list1, $condition);
+
+		header("Location: funeral_tradition_this.php?service_id={$_GET['service_id']}&id={$_GET['id']}&rated");
+		exit;
 	}
 	## READ FUNCTION
 	function read($table, $attr=[], $data=[]){
@@ -595,6 +700,55 @@
 			return true;
 		}
 		return false;	
+	}
+	## REQUEST PAYOUT
+	function request($type){
+		switch($type){
+			case "payout":
+				$cbomethod = $_POST['cbomethod'];
+				$txtacc = trim($_POST['txtacc']);
+
+				if(!is_numeric($txtacc)){
+					echo "<script>alert('Invalid account number!')</script>";
+				}
+				else {
+					##
+					$table = "payout";
+					$attr_list = ["purchase_id", "payout_method", "payout_account"];
+					$data_list = [$_GET['id'], $cbomethod, $txtacc];
+					##
+					create($table, $attr_list, qmark_generator(count($attr_list)), $data_list);
+					## SEND EMAIL
+					## REDIRECTING
+					header("Location: purchase.php?requests");
+					exit;
+				}
+			break;
+
+			case "upload":
+				$imageName = upload_image("file_img", "images/admins/payout/");
+				## ERROR TRAPPINGS
+				if($imageName === 1){
+					echo "<script>alert('An error occurred in uploading your image!')</script>";
+				}
+				else if($imageName === 2){
+					echo "<script>alert('File type is not allowed!')</script>";
+				}
+				else {
+					##
+					$table = "payout";
+					$attr_list = ["payout_image"];
+					$data_list = [$imageName, $_GET['id']];
+					$condition = "purchase_id";
+					##
+					update($table, $attr_list, $data_list, $condition);
+					## SEND EMAIL
+					## REDIRECTING
+					header("Location: purchase.php?uploaded");
+					exit;
+				}
+			break;
+		}
 	}
 	## ADDING NEW SERVICE
 	function service_adding(){
@@ -706,10 +860,10 @@
 
 					if(count($services) > 0){
 						foreach($services as $results){
-							## VIEW ONLY FOR ADMIN
-							if(user_type() == "admin"){
-								echo "
-								<div class='card-0 no-padding'>
+							## FOR USERS
+							echo "
+							<div class='card-0 no-padding'>
+								<a href='funeral_tradition_this.php?service_id=".$results['service_id']."&id={$results['provider_id']}'>
 									<img src='images/providers/".$results['service_type']."/".$results['provider_id']."/".$results['service_img']."'>
 									<h3>".$results['funeral_name']."
 										<span>
@@ -723,32 +877,9 @@
 										".limit_text($results['service_desc'], 10)."
 									</p>
 									<div class='card-price'>₱ ".number_format($results['service_cost'], 2, '.', ',')."</div>
-								</div>
-								";
-							}
-							## FOR SEEKERS
-							else {
-								echo "
-								<div class='card-0 no-padding'>
-									<a href='funeral_tradition_this.php?service_id=".$results['service_id']."'>
-										<img src='images/providers/".$results['service_type']."/".$results['provider_id']."/".$results['service_img']."'>
-										<h3>".$results['funeral_name']."
-											<span>
-												<i class='fa-solid fa-star'></i>
-												<i class='fa-solid fa-star'></i>
-												<i class='fa-solid fa-star'></i>
-												<i class='fa-solid fa-star'></i>
-											</span>
-										</h3>
-										<p>
-											".limit_text($results['service_desc'], 10)."
-										</p>
-										<div class='card-price'>₱ ".number_format($results['service_cost'], 2, '.', ',')."</div>
-									</a>
-								</div>
-								";
-							}
-							
+								</a>
+							</div>
+							";
 						}
 					}
 					else messaging("error", "No funeral services posted!");
@@ -840,6 +971,7 @@
 		## UPDATE organizer SET orga_company=?, orga_fname=?, orga_lname=?, orga_mi=?, orga_address=?, orga_phone=?, orga_email=? WHERE orga_id=?"
 		DB::query("UPDATE ".$table." SET ".join("=?, ", $attr_list)."=? WHERE ".$condition."=?", $data_list, "UPDATE");
 	}
+	## UPDATE FUNERAL ADDITIONAL DETAILS
 	function update_details($type){
 		$txtname = trim(ucwords($_POST['txtname']));
 		$txtbdt = $_POST['txtbdt'];

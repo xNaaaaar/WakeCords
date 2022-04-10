@@ -26,11 +26,18 @@
 			<section class="banner-con">
 				<div class="wrapper">
 					<div class="banner-div">
-						<h2><a href="purchase.php">Purchase</a> <span>> Status</span></h2>
 						<?php
+						##
+						if(isset($_SESSION['seeker'])){
+							echo "<h2><a href='purchase.php'>Purchase</a> <span>> Status</span></h2>";
+						}
+						else {
+							echo "<h2><a href='purchase.php'>Transactions</a> <span>> Status</span></h2>";
+						}
 						## UPDATE PROGRESS STATUS FOR PROVIDER
-						if(isset($_SESSION['provider']) && !progress_limits($_GET['purchaseid']))
+						if(isset($_SESSION['provider']) && !progress_limits($_GET['purchaseid'])) {
 							echo "<a class='btn btn-link-absolute' href='updating.php?id=".$_GET['purchaseid']."&purchase' onclick='return confirm(\"Are you sure you want to update purchase progress?\");'>Update Progress</a>";
+						}
 						?>
 						
 						
@@ -96,8 +103,6 @@
 									<p>Thank you for purchasing!</p>
 									<h3>Purchase Receipt</h3>
 
-									
-
 									<div class="receipt-details">
 										<?php
 										echo "
@@ -144,8 +149,16 @@
 								</div>
 							</div>
 							<div class='order_status'>
-							
 								<?php 
+								$payout = read("payout", ["purchase_id"], [$_GET['purchaseid']]);
+
+								if(count($payout)>0 && !isset($_SESSION['seeker'])){
+									$payout = $payout[0];
+
+									echo "
+									<p>Download proof of payment by clicking <a href='images/admins/payout/{$payout['payout_image']}' download='payment_proof_{$payout['purchase_id']}' class='status'>here</a>.</p>
+									";
+								}
 								## FUNERAL SERVICES
 								if($purchase['service_type'] == 'funeral'){ ?>
 
