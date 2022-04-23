@@ -48,6 +48,13 @@
 								echo "<a class='btn btn-link-absolute' href='payment.php' onclick='return confirm(\"Are you sure you want to pay all purchases at once?\")'>Pay all at once</a>";	
 						}
 						?>
+
+						<!-- TABS -->
+						<?php
+						$current_tab = "transact";
+						$this_tab = "purchase";
+						include("others/tabs.php");
+						?>
 						
 						<div class="banner-ratings purchases-lists">
 							<div class="list">

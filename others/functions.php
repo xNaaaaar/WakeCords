@@ -459,63 +459,86 @@
 	## PROVIDER'S SERVICES
 	function provider_services($type=''){
 		$provider = provider();
-		$services = DB::query("SELECT * FROM services s JOIN funeral f ON s.service_id=f.service_id WHERE provider_id=? AND funeral_type=?", array($provider['provider_id'], $type), "READ");
+		
+		## DIFFER IN PROVIDER TYPE
+		switch($provider['provider_type']){
+			## FOR FUNERAL SERVICES
+			case "funeral":
+				$services = DB::query("SELECT * FROM services s JOIN funeral f ON s.service_id=f.service_id WHERE provider_id=? AND funeral_type=?", array($provider['provider_id'], $type), "READ");
+			break;
+			## FOR CHURCH SERVICES
+			case "church":
+				$services = DB::query("SELECT * FROM services s JOIN funeral f ON s.service_id=f.service_id WHERE provider_id=? AND funeral_type=?", array($provider['provider_id'], $type), "READ");
+			break;
+			## FOR HEADSTONE SERVICES
+			case "headstone":
+				$services = DB::query("SELECT * FROM services s JOIN headstone f ON s.service_id=f.service_id WHERE provider_id=?", array($provider['provider_id']), "READ");
+			break;
+		}
+		
 		## DIFFER IN PROVIDER TYPE
 		switch($provider['provider_type']){
 			## FOR FUNERAL
 			case "funeral":
-			##
-			if(count($services) > 0){
-				foreach($services as $results){
-					echo "
-					<div class='card-0 no-padding'>
-						<a href='funeral_tradition_this.php?service_id=".$results['service_id']."&id={$results['provider_id']}'>
-							<img src='images/providers/".$results['service_type']."/".$results['provider_id']."/".$results['service_img']."'>
-							<h3>".$results['funeral_name']."
-								<span>
-									<i class='fa-solid fa-star'></i>
-									<i class='fa-solid fa-star'></i>
-									<i class='fa-solid fa-star'></i>
-									<i class='fa-solid fa-star'></i>
-								</span>
-							</h3>
-							<p>
-								".limit_text($results['service_desc'], 10)."
-							</p>
-							<div class='card-price'>₱ ".number_format($results['service_cost'], 2, '.', ',')."</div>
-						</a>
-						<div class='buttons'>	
-					"; 
-
-					if(!service_is_booked($results['service_id'])){
+				##
+				if(count($services) > 0){
+					foreach($services as $results){
 						echo "
-						<a href='services_add.php?id=".$results['service_id']."&book=false&edit' class=''><i class='fa-solid fa-pen-to-square'></i></a>
-						<a href='deleting.php?table=funeral&attr=service_id&data=".$results['service_id']."&url=services' onclick='return confirm(\"Are you sure you want to delete this coffin?\");'><i class='fa-solid fa-trash-can'></i></a>";
-					}
-					else {
-						echo "<a href='services_add.php?id=".$results['service_id']."&edit' class=''><i class='fa-solid fa-pen-to-square'></i></a>";
-					}
+						<div class='card-0 no-padding'>
+							<a href='funeral_tradition_this.php?service_id=".$results['service_id']."&id={$results['provider_id']}'>
+								<img src='images/providers/".$results['service_type']."/".$results['provider_id']."/".$results['service_img']."'>
+								<h3>".$results['funeral_name']."
+									<span>
+										<i class='fa-solid fa-star'></i>
+										<i class='fa-solid fa-star'></i>
+										<i class='fa-solid fa-star'></i>
+										<i class='fa-solid fa-star'></i>
+									</span>
+								</h3>
+								<p>
+									".limit_text($results['service_desc'], 10)."
+								</p>
+								<div class='card-price'>₱ ".number_format($results['service_cost'], 2, '.', ',')."</div>
+							</a>
+							<div class='buttons'>	
+						"; 
 
-					echo "
+						if(!service_is_booked($results['service_id'])){
+							echo "
+							<a href='services_add.php?id=".$results['service_id']."&book=false&edit' class=''><i class='fa-solid fa-pen-to-square'></i></a>
+							<a href='deleting.php?table=funeral&attr=service_id&data=".$results['service_id']."&url=services' onclick='return confirm(\"Are you sure you want to delete this coffin?\");'><i class='fa-solid fa-trash-can'></i></a>";
+						}
+						else {
+							echo "<a href='services_add.php?id=".$results['service_id']."&edit' class=''><i class='fa-solid fa-pen-to-square'></i></a>";
+						}
+
+						echo "
+							</div>
 						</div>
-					</div>
-					";
+						";
+					}
 				}
-			}
-			else messaging("error", "No posted services yet!");
+				else messaging("error", "No posted services yet!");
 			break;
-
+			## FOR CHURCH
 			case "church":
-			##
-			if(count($services) > 0){
+				##
+				if(count($services) > 0){
 
-			}
-			else messaging("error", "No posted services yet!");
+				}
+				else messaging("error", "No posted services yet!");
+			break;
+			## FOR HEADSTONE
+			case "headstone":
+				##
+				if(count($services) > 0){
+					foreach($services as $results){
+
+					}
+				}
+				else messaging("error", "No posted services yet!");
 			break;
 		}
-		
-		## IF FUNERAL, EITHER TRADITIONAL or CREMATION
-
 	}
 	## PROVIDER'S TYPE
 	function provider($id=0){
@@ -530,8 +553,10 @@
 	function purchase_list(){
 		if(isset($_SESSION['seeker']))
 			$list = read("purchase", ["seeker_id"], [$_SESSION['seeker']]);
-		else
-			$list = read('purchase');
+		else if(isset($_SESSION['provider'])){
+			$list = DB::query("SELECT * FROM purchase a JOIN services b ON a.service_id = b.service_id WHERE provider_id = ?", array($_SESSION['provider']), "READ");
+		}
+		else $list = read('purchase');
 		
 		if(count($list)>0){
 			foreach($list as $results){
@@ -677,6 +702,38 @@
 		header("Location: funeral_tradition_this.php?service_id={$_GET['service_id']}&id={$_GET['id']}&rated");
 		exit;
 	}
+	## RATINGS TO A CERTAIN PURCHASE / WITH PROVIDER
+	function ratings($id, $service = true){
+		## 
+		$avg_stars = 0;
+		
+		if($service)
+			$feedback = read("feedback", ["service_id"], [$id]);
+		else {
+			$feedback = DB::query("SELECT * FROM feedback a JOIN services b ON a.service_id = b.service_id WHERE provider_id = ?", array($id), "READ");
+		}
+
+		##
+		if(count($feedback) > 0){
+			foreach($feedback as $result){
+				$avg_stars += $result['feedback_star'];
+			}
+			$avg_stars /= count($feedback);
+		}
+		else return $avg_stars;
+
+		return number_format((float)$avg_stars,1,".","");
+	}
+	## COUNT THE RATINGS OF EACH PURCHASE
+	function ratings_count($id, $service = true){
+		if($service)
+			$feedback = read("feedback", ["service_id"], [$id]);
+		else {
+			$feedback = DB::query("SELECT * FROM feedback a JOIN services b ON a.service_id = b.service_id WHERE provider_id = ?", array($id), "READ");
+		}
+
+		return (count($feedback) > 1) ? count($feedback)." reviews" : count($feedback)." review";
+	}
 	## READ FUNCTION
 	function read($table, $attr=[], $data=[]){
 		## SELECT * FROM joiner WHERE joiner_email=?
@@ -785,6 +842,10 @@
 					## 
 					echo "<script>alert('Successfully added new service!')</script>";
 				break;
+
+				case "church":
+
+				break;
 			}
 		}
 	}
@@ -837,11 +898,9 @@
 								<img src='images/providers/".$result['provider_type']."/".$result['provider_id']."/".$result['provider_logo']."'>
 								<h3>".$result['provider_company']."
 									<span>
-										(5 reviews)
+										".ratings($result['provider_id'], false)."
 										<i class='fa-solid fa-star'></i>
-										<i class='fa-solid fa-star'></i>
-										<i class='fa-solid fa-star'></i>
-										<i class='fa-solid fa-star'></i>
+										(".ratings_count($result['provider_id'], false).")
 									</span>
 								</h3>
 								<p>
@@ -867,10 +926,9 @@
 									<img src='images/providers/".$results['service_type']."/".$results['provider_id']."/".$results['service_img']."'>
 									<h3>".$results['funeral_name']."
 										<span>
+											".ratings($results['service_id'], true)."
 											<i class='fa-solid fa-star'></i>
-											<i class='fa-solid fa-star'></i>
-											<i class='fa-solid fa-star'></i>
-											<i class='fa-solid fa-star'></i>
+											(".ratings_count($results['service_id'], true).")
 										</span>
 									</h3>
 									<p>
@@ -1036,11 +1094,18 @@
 		else {
 			if(user_type() == "provider"){
 				$txtcn = trim(ucwords($_POST['txtcn']));
+				$image = $_FILES['file_logo'];
 
-				if(empty($provider['provider_logo']))
+				if($image['size'] != 0){
+					if(!empty($provider['provider_logo'])){
+						## DELETE THE IMAGE FILE
+						$path = "images/providers/".$provider['provider_type']."/".$provider['provider_id']."/{$provider['provider_logo']}";
+						if(!unlink($path)) echo "<script>alert('An error occurred in deleting image!')</script>";
+					}
+					##
 					$imageName = upload_image("file_logo", "images/providers/".$provider['provider_type']."/".$_SESSION['provider']."/");
-			}
-				
+				}	
+			}	
 
 			$txtaddress = trim(ucwords($_POST['txtaddress']));
 			$txtphone = trim($_POST['txtphone']);
@@ -1244,7 +1309,7 @@
 							<div>".$results['provider_phone']."</div>
 							<div>".$results['provider_email']."</div>";
 					
-					if(!empty($reqs)){
+					if(count($reqs) > 0){
 						$count++;
 						$reqs = $reqs[0];
 						echo "

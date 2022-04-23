@@ -135,6 +135,7 @@
 								</form>
 							</dialog>
 
+							<div class="ratings-con">
 							<?php
 							$ratings = read("feedback", ["service_id"], [$_GET['service_id']]);
 							
@@ -177,6 +178,7 @@
 							else messaging("notify", "No reviews yet!");
 							?>
 
+							</div>
 							
 						</div>
 					</div>

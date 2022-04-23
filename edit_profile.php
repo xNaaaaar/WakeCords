@@ -6,6 +6,7 @@
 	$user = current_user();
 
 	if(isset($_POST['btnsave'])){
+		
 		if(user_type() == "seeker")
 			update_profile("seeker", $user["seeker_email"]);
 		else if(user_type() == "provider")
@@ -59,17 +60,11 @@
 									## TYPE [notify, success, error]
 									messaging("error", "Note: You can only edit company name once and company logo is not required.");
 
-									if(empty($user['provider_logo'])){
-										echo "
-										<div>
-											<label>Company logo</label>
-											<input class='' type='file' name='file_logo' required>
-										</div>
-										";
-									}
-
 									echo "
-									
+									<div>
+										<label>Company logo</label>
+										<input class='' type='file' name='file_logo'>
+									</div>
 									<div>
 										<label>Company name</label>
 										<input class='".$name."' type='text' name='txtcn' value='".$user['provider_company']."' ".$name.">

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 08, 2022 at 11:40 AM
+-- Generation Time: Apr 23, 2022 at 03:15 AM
 -- Server version: 10.4.18-MariaDB
 -- PHP Version: 7.3.28
 
@@ -110,7 +110,8 @@ CREATE TABLE `details` (
 --
 
 INSERT INTO `details` (`purchase_id`, `deceased_name`, `burial_datetime`, `burial_add`, `delivery_add`, `delivery_date`, `msg_ribbon`, `msg_headstone`, `birth_date`, `death_date`, `delivery_datetime`, `num_pax`, `cemetery_add`) VALUES
-(10, 'Jan-Jan Dowll', '2022-04-12 13:00:00', 'This Is My New Updated Address', 'This Is My New Updated Address', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+(10, 'Jan-Jan Dowll', '2022-04-12 13:00:00', 'This Is My New Updated Address', 'This Is My New Updated Address', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(19, 'Asdys Sdfwe', '2022-04-23 18:46:00', 'Address 2', 'My Address', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -123,8 +124,18 @@ CREATE TABLE `feedback` (
   `seeker_id` int(8) NOT NULL,
   `service_id` int(8) NOT NULL,
   `feedback_star` int(8) NOT NULL,
-  `feedback_comments` varchar(250) NOT NULL
+  `feedback_comments` varchar(250) DEFAULT NULL,
+  `feedback_date` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `feedback`
+--
+
+INSERT INTO `feedback` (`feedback_id`, `seeker_id`, `service_id`, `feedback_star`, `feedback_comments`, `feedback_date`) VALUES
+(1, 10, 1, 4, '', '2022-04-10'),
+(2, 10, 1, 3, NULL, '2022-04-12'),
+(3, 10, 9, 5, 'Very good!', '2022-04-12');
 
 -- --------------------------------------------------------
 
@@ -197,6 +208,26 @@ CREATE TABLE `payment` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `payout`
+--
+
+CREATE TABLE `payout` (
+  `purchase_id` int(8) NOT NULL,
+  `payout_method` varchar(25) NOT NULL,
+  `payout_account` varchar(25) NOT NULL,
+  `payout_image` varchar(100) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `payout`
+--
+
+INSERT INTO `payout` (`purchase_id`, `payout_method`, `payout_account`, `payout_image`) VALUES
+(10, 'card', '2312323', '6251afbe887f97.73718527.png');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `provider`
 --
 
@@ -220,9 +251,12 @@ CREATE TABLE `provider` (
 --
 
 INSERT INTO `provider` (`provider_id`, `provider_logo`, `provider_company`, `provider_desc`, `provider_fname`, `provider_mi`, `provider_lname`, `provider_type`, `provider_phone`, `provider_address`, `provider_email`, `provider_pass`) VALUES
-(1, '624ef83a912521.12037345.jpg', 'Cosmopolitan', '', 'Nicyl', 'D', 'Lapas', 'funeral', '09090909090', 'Mabolo', 'nicyl@gmail.com', 'd7e73fb6980b78278c69b4e9f024f16a'),
+(1, '625573639b7841.77026679.png', 'Cosmopolitan', '', 'Nicyl', 'D', 'Lapas', 'funeral', '09090909090', 'Mabolo', 'nicyl@gmail.com', 'd7e73fb6980b78278c69b4e9f024f16a'),
 (2, '', '', '', 'Flower', '', 'Provider', 'flower', '', '', 'flower@provider.com', 'd7e73fb6980b78278c69b4e9f024f16a'),
-(3, '', 'Cosmopolitan', '', 'Melnar', 'B', 'Ancit', 'church', '09560376576', 'Sitio Granada Quiot Pardo, Cebu City Philippines', 'narancit@gmail.com', 'd7e73fb6980b78278c69b4e9f024f16a');
+(3, '62556ec5694796.07430911.png', 'Sent Church', '', 'Melnaaar', 'B', 'Ancit', 'church', '09560376576', 'Sitio Granada Quiot Pardo, Cebu City Philippines', 'narancit@gmail.com', 'd7e73fb6980b78278c69b4e9f024f16a'),
+(4, '62569c4e6bd8d9.82250856.jpg', 'Marbles', '', 'Head', 'T', 'Stone', 'headstone', '09457239646', 'This Is My Address', 'headstone@wakecords.com', 'd7e73fb6980b78278c69b4e9f024f16a'),
+(5, '', '', '', 'Candol', '', 'Meker', 'candle', '', '', 'candle@wakecords.com', 'd7e73fb6980b78278c69b4e9f024f16a'),
+(6, '', '', '', 'Kather', '', 'Reng', 'catering', '', '', 'catering@wakecords.com', 'd7e73fb6980b78278c69b4e9f024f16a');
 
 -- --------------------------------------------------------
 
@@ -246,8 +280,9 @@ CREATE TABLE `purchase` (
 --
 
 INSERT INTO `purchase` (`purchase_id`, `seeker_id`, `service_id`, `purchase_total`, `purchase_qty`, `purchase_date`, `purchase_status`, `purchase_progress`) VALUES
-(10, 10, 1, '220000.00', 2, '2022-03-21', 'paid', 0),
-(17, 10, 1, '110000.00', 1, '2022-04-07', 'to pay', 0);
+(10, 10, 1, '220000.00', 2, '2022-03-21', 'rated', 5),
+(17, 10, 1, '110000.00', 1, '2022-04-07', 'to pay', 0),
+(19, 16, 9, '100000.00', 1, '2022-04-13', 'paid', 0);
 
 -- --------------------------------------------------------
 
@@ -285,7 +320,8 @@ INSERT INTO `requirement` (`req_id`, `provider_id`, `seeker_id`, `req_type`, `re
 (2, NULL, 13, 'death certificate', '6247da321a0a64.72029108.jpg', 'verified'),
 (3, NULL, 14, 'death certificate', '6240038f3f6390.99031927.png', 'not verified'),
 (4, 1, NULL, 'business permit', '6248240f08d326.27804580.jpg', 'verified'),
-(5, 3, NULL, 'business permit', '62497c52bc1541.38904101.jpg', 'verified');
+(5, 3, NULL, 'business permit', '62497c52bc1541.38904101.jpg', 'verified'),
+(6, 4, NULL, 'business permit', '62569d068ca7e9.87658203.png', 'verified');
 
 -- --------------------------------------------------------
 
@@ -327,7 +363,8 @@ INSERT INTO `seeker` (`seeker_id`, `seeker_fname`, `seeker_mi`, `seeker_lname`, 
 (11, 'Lindor', NULL, 'Siton', NULL, NULL, 'inactive', 'lindor@gmail.com', 'd250786e8127c338aa76955b8c1faab2'),
 (12, 'John', NULL, 'Doe', NULL, NULL, 'inactive', 'johndoe@gmail.com', 'd250786e8127c338aa76955b8c1faab2'),
 (13, 'Jane', NULL, 'Doe', NULL, NULL, 'inactive', 'janedoe@gmail.com', 'd250786e8127c338aa76955b8c1faab2'),
-(14, 'Bernadette', 'G', 'Lapas', 'Mabolo', '09090909090', 'inactive', 'Blapas@gmail.com', '711037ae9ed6036d7de8e252dddd57b8');
+(14, 'Bernadette', 'G', 'Lapas', 'Mabolo', '09090909090', 'inactive', 'Blapas@gmail.com', '711037ae9ed6036d7de8e252dddd57b8'),
+(16, 'JJ', NULL, 'GG', NULL, NULL, 'inactive', 'jpulllefoiapnhcpak@kvhrr.com', '60719b813c16a8bd57388c1cdb047c22');
 
 -- --------------------------------------------------------
 
@@ -339,7 +376,6 @@ CREATE TABLE `services` (
   `service_id` int(8) NOT NULL,
   `provider_id` int(8) NOT NULL,
   `service_type` varchar(20) NOT NULL,
-  `service_name` varchar(50) NOT NULL,
   `service_desc` varchar(500) NOT NULL,
   `service_cost` decimal(9,2) NOT NULL,
   `service_qty` int(2) NOT NULL,
@@ -351,10 +387,10 @@ CREATE TABLE `services` (
 -- Dumping data for table `services`
 --
 
-INSERT INTO `services` (`service_id`, `provider_id`, `service_type`, `service_name`, `service_desc`, `service_cost`, `service_qty`, `service_img`, `service_status`) VALUES
-(1, 1, 'funeral', 'St. Peter', 'The final part of the funeral liturgy occurs at the cemetery.  ', '110000.00', 3, 'coffin.png', 'active'),
-(2, 1, 'funeral', 'St. Peter', 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ad corrupti beatae magni rerum doloribus, vitae inventore. Tempore quod fugit commodi!', '80000.00', 1, 'coffin.png', 'active'),
-(9, 1, 'funeral', 'St. Peter', 'An important part of grieving and of honouring the life of a person is the releasing of their remains to the earth.  A committal is the gathering of a small community, often just close family & friends, and the presider, at the graveside or mausoleum.', '100000.00', 5, '6249572712ddd5.72232742.png', 'active');
+INSERT INTO `services` (`service_id`, `provider_id`, `service_type`, `service_desc`, `service_cost`, `service_qty`, `service_img`, `service_status`) VALUES
+(1, 1, 'funeral', 'The final part of the funeral liturgy occurs at the cemetery.  ', '110000.00', 2, 'coffin.png', 'active'),
+(2, 1, 'funeral', 'Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ad corrupti beatae magni rerum doloribus, vitae inventore. Tempore quod fugit commodi!', '80000.00', 1, 'coffin.png', 'active'),
+(9, 1, 'funeral', 'An important part of grieving and of honouring the life of a person is the releasing of their remains to the earth.  A committal is the gathering of a small community, often just close family & friends, and the presider, at the graveside or mausoleum.', '100000.00', 4, '6249572712ddd5.72232742.png', 'active');
 
 -- --------------------------------------------------------
 
@@ -377,7 +413,8 @@ CREATE TABLE `subscription` (
 INSERT INTO `subscription` (`provider_id`, `subs_startdate`, `subs_duedate`, `subs_description`, `subs_cost`) VALUES
 (1, '2022-03-03', '2022-04-03', 'Provider can post and boost their service in an affordable amount.', '200.00'),
 (3, '2022-04-03', '2023-04-03', 'Provider can post and boost their service in an affordable amount.', '2000.00'),
-(1, '2022-04-06', '2022-05-06', 'Provider can post and boost their service in an affordable amount.', '200.00');
+(1, '2022-04-06', '2022-05-06', 'Provider can post and boost their service in an affordable amount.', '200.00'),
+(4, '2022-04-13', '2022-05-13', 'Provider can post and boost their service in an affordable amount.', '200.00');
 
 --
 -- Indexes for dumped tables
@@ -454,6 +491,12 @@ ALTER TABLE `payment`
   ADD KEY `purchase_id` (`purchase_id`);
 
 --
+-- Indexes for table `payout`
+--
+ALTER TABLE `payout`
+  ADD KEY `purchase_id` (`purchase_id`);
+
+--
 -- Indexes for table `provider`
 --
 ALTER TABLE `provider`
@@ -523,25 +566,25 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `cart_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+  MODIFY `cart_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
 
 --
 -- AUTO_INCREMENT for table `feedback`
 --
 ALTER TABLE `feedback`
-  MODIFY `feedback_id` int(8) NOT NULL AUTO_INCREMENT;
+  MODIFY `feedback_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `provider`
 --
 ALTER TABLE `provider`
-  MODIFY `provider_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `provider_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `purchase`
 --
 ALTER TABLE `purchase`
-  MODIFY `purchase_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `purchase_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `request`
@@ -553,13 +596,13 @@ ALTER TABLE `request`
 -- AUTO_INCREMENT for table `requirement`
 --
 ALTER TABLE `requirement`
-  MODIFY `req_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `req_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `seeker`
 --
 ALTER TABLE `seeker`
-  MODIFY `seeker_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `seeker_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `services`
@@ -583,6 +626,13 @@ ALTER TABLE `cart`
 --
 ALTER TABLE `details`
   ADD CONSTRAINT `details_ibfk_1` FOREIGN KEY (`purchase_id`) REFERENCES `purchase` (`purchase_id`);
+
+--
+-- Constraints for table `feedback`
+--
+ALTER TABLE `feedback`
+  ADD CONSTRAINT `feedback_ibfk_1` FOREIGN KEY (`seeker_id`) REFERENCES `seeker` (`seeker_id`),
+  ADD CONSTRAINT `feedback_ibfk_2` FOREIGN KEY (`service_id`) REFERENCES `services` (`service_id`);
 
 --
 -- Constraints for table `funeral`

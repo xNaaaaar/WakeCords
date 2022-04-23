@@ -53,24 +53,24 @@
 									}
 							?>
 							<div>
-								<label for="label-name">First name</label>
-								<input type="text" name="" id="label-name" placeholder="<?php echo (user_type() == 'seeker')?$user['seeker_fname']:$user['provider_fname']; ?>" disabled>
+								<label>First name</label>
+								<input type="text" placeholder="<?php echo (user_type() == 'seeker')?$user['seeker_fname']:$user['provider_fname']; ?>" disabled>
 							</div>
 							<div>
-								<label for="label-name">Middle initial</label>
-								<input type="text" name="" id="label-name" placeholder="<?php echo (user_type() == 'seeker')?$user['seeker_mi']:$user['provider_mi']; ?>" disabled>
+								<label>Middle initial</label>
+								<input type="text" placeholder="<?php echo (user_type() == 'seeker')?$user['seeker_mi']:$user['provider_mi']; ?>" disabled>
 							</div>
 							<div>
-								<label for="label-name">Last name</label>
-								<input type="text" name="" id="label-name" placeholder="<?php echo (user_type() == 'seeker')?$user['seeker_lname']:$user['provider_lname']; ?>" disabled>
+								<label>Last name</label>
+								<input type="text" placeholder="<?php echo (user_type() == 'seeker')?$user['seeker_lname']:$user['provider_lname']; ?>" disabled>
 							</div>
 							<div>
-								<label for="label-name">Address</label>
-								<input type="text" name="" id="label-name" placeholder="<?php echo (user_type() == 'seeker')?$user['seeker_address']:$user['provider_address']; ?>" disabled>
+								<label>Address</label>
+								<input type="text" placeholder="<?php echo (user_type() == 'seeker')?$user['seeker_address']:$user['provider_address']; ?>" disabled>
 							</div>
 							<div>
-								<label for="label-name">Phone</label>
-								<input type="text" name="" id="label-name" placeholder="<?php echo (user_type() == 'seeker')?$user['seeker_phone']:$user['provider_phone']; ?>" disabled>
+								<label>Phone</label>
+								<input type="text" placeholder="<?php echo (user_type() == 'seeker')?$user['seeker_phone']:$user['provider_phone']; ?>" disabled>
 							</div>
 
 							<?php
@@ -79,16 +79,16 @@
 							?>
 							
 							<div>
-								<label for="label-name">First name</label>
-								<input type="text" name="" id="label-name" placeholder="<?php echo $user['admin_fname']; ?>" disabled>
+								<label>First name</label>
+								<input type="text" placeholder="<?php echo $user['admin_fname']; ?>" disabled>
 							</div>
 							<div>
-								<label for="label-name">Middle initial</label>
-								<input type="text" name="" id="label-name" placeholder="<?php echo $user['admin_mi']; ?>" disabled>
+								<label>Middle initial</label>
+								<input type="text" placeholder="<?php echo $user['admin_mi']; ?>" disabled>
 							</div>
 							<div>
-								<label for="label-name">Last name</label>
-								<input type="text" name="" id="label-name" placeholder="<?php echo $user['admin_lname']; ?>" disabled>
+								<label>Last name</label>
+								<input type="text" placeholder="<?php echo $user['admin_lname']; ?>" disabled>
 							</div>
 
 							<?php
@@ -113,23 +113,23 @@
 							## FOR USER
 							?>
 							<div>
-								<label for="label-name">Email</label>
-								<input type="text" name="" id="label-name" placeholder="<?php echo (user_type() == 'seeker')?$user['seeker_email']:$user['provider_email']; ?>" disabled>
+								<label>Email</label>
+								<input type="text" placeholder="<?php echo (user_type() == 'seeker')?$user['seeker_email']:$user['provider_email']; ?>" disabled>
 							</div>
 							<?php
 							} else {
 							## FOR ADMIN
 							?>
 							<div>
-								<label for="label-name">Email</label>
-								<input type="text" name="" id="label-name" placeholder="<?php echo $user['admin_email']; ?>" disabled>
+								<label>Email</label>
+								<input type="text" placeholder="<?php echo $user['admin_email']; ?>" disabled>
 							</div>
 							<?php
 							}
 							?>
 							<div>
-								<label for="label-name">Password</label>
-								<input type="text" name="" id="label-name" placeholder="********" disabled>
+								<label>Password</label>
+								<input type="text" placeholder="********" disabled>
 							</div>
 						</form>
 					</div>

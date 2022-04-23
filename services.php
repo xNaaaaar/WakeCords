@@ -31,8 +31,7 @@
 					<div class="banner-div">
 						<?php
 						if(isset($_SESSION['provider'])){
-							$user = read("provider", ["provider_id"], [$_SESSION['provider']]);
-							$user = $user[0];
+							$user = provider();
 						}
 						?>
 						<h2>Services <mark class="btn status type"><?php echo $user['provider_type']; ?></mark></h2>
@@ -44,12 +43,14 @@
 						
 						<!-- TABS -->
 						<?php
-						echo "
-						<ul>
-							<li><a class='active' href='services.php' >Traditional</a></li>
-							<li><a class='' href='services_cremation.php'>Cremation</a></li>
-						</ul>
-						";
+						if($user['provider_type'] == "funeral"){
+							echo "
+							<ul>
+								<li><a class='active' href='services.php' >Traditional</a></li>
+								<li><a class='' href='services_cremation.php'>Cremation</a></li>
+							</ul>
+							";
+						}
 						?>
 
 						<div class="banner-cards">

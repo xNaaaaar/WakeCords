@@ -30,7 +30,7 @@
 					<div class="banner-div">
 						<h2><a href="profile.php">Profile</a> <span>> Requirements</span></h2>
 						<form enctype="multipart/form-data" class="profile column" method="post">
-							<button class="btn-new" type="submit" name="btnupdate">Upload</button>
+							<button class="btn btn-link-absolute higher-top" type="submit" name="btnupdate">Upload</button>
 							<div>
 								<label for="label-name">Upload An Image</label>
 								<input type="file" name="file_req" id="label-name" required>

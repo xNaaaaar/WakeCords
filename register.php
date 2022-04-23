@@ -24,12 +24,12 @@
 				<input type="text" name="txtfn" placeholder="First Name" required>
 				<input type="text" name="txtln" placeholder="Last Name" required>
 				<select name="cbouser" onchange="is_orga(this);" required>
-					<option value="">Select Option</option>
+					<option value="">BROWSE USER OPTION</option>
 					<option value="seek">Seeker</option>
 					<option value="orga">Provider</option>
 				</select>
 				<select name="cboorga" id="for_orga">
-					<option value="">Select Provider Option</option>
+					<option value="">BROWSE PROVIDER OPTION</option>
 					<option value="funeral">Funeral Homes</option>
 					<option value="church">Church</option>
 					<option value="candle">Candle Maker</option>
