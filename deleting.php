@@ -3,7 +3,7 @@
 
 	## DELETE IN DATABASE
 	if(isset($_GET['table']) && isset($_GET['attr']) && isset($_GET['data'])) {
-		if($_GET['table'] == "funeral"){
+		if($_GET['table'] == "funeral" || $_GET['table'] == "headstone"){
 			## DELETE IN FUNERAL TABLE
 			delete($_GET['table'], $_GET['attr'], $_GET['data']);
 			## 

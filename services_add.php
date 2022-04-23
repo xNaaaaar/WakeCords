@@ -6,23 +6,16 @@
 	$user = provider();
 
 	echo "";
-	
-	if(isset($_POST['btnadd'])){
-		# service_adding();
-		$cbsize = $_POST['cbsize'];
-
-		print_r($cbsize);
-		echo $cbsize[0];
-		echo count($cbsize);
+	## 
+	if(isset($_POST['btnadd'])) {
+		service_adding();
 	}
-
 	## UPDATE FOR NO BOOKING
 	if(isset($_POST['btn_upd0'])){
 		service_adding();
-		header("Location: deleting.php?table=funeral&attr=service_id&data=".$_GET['id']."&url=services&update");
+		header("Location: deleting.php?table={$user['provider_type']}&attr=service_id&data=".$_GET['id']."&url=services&update");
 		exit;
 	}
-
 	## UPDATE WITH BOOKING
 	if(isset($_POST['btn_upd1'])){
 		service_editing($_GET['id']);
@@ -51,47 +44,45 @@
 						<em style='color:#ccc;'> Service: <?php echo ucwords($user['provider_type']); ?> </em>
 						
 						<?php
-						if(isset($_GET['edit'])){
-							## FOR EDITING SERVICES
-							$service = read("services", ["service_id"], [$_GET['id']]);
-							$service = $service[0];
+						// if(isset($_GET['edit'])){
+						// 	## FOR EDITING SERVICES
+						// 	$service = read("services", ["service_id"], [$_GET['id']]);
+						// 	$service = $service[0];
 
-							$type = read($service['service_type'], ["service_id"], [$_GET['id']]);
-							$type = $type[0];
+						// 	$type = read($service['service_type'], ["service_id"], [$_GET['id']]);
+						// 	$type = $type[0];
 						?>
 
-						<form class="profile column" method="post" enctype="multipart/form-data">
+						<!-- <form class="profile column" method="post" enctype="multipart/form-data">
 							<?php
 							if(isset($_GET['book'])){
 								## NO ONE BOOKED BUTTON
 							?>
-							<button class="btn btn-link-absolute higher-top" type="submit" name="btn_upd0">Update Service</button>
-							<div>
-								<label >Image</label>
-								<input type="file" name="file_img" required>
-							</div>	
-							<div>
-								<label >Service name</label>
-								<input type="text" name="txtfn" value="<?php echo $type['funeral_name']; ?>" required>
-							</div>
-							<div>
-								<label >Type</label>
-								<select name="cbotype" style="border:1px solid #000;" required>
-									<option value="traditional" <?php echo ($type['funeral_type'] == "traditional") ? "selected":""; ?>>Traditional</option>
-									<option value="cremation" <?php echo ($type['funeral_type'] == "cremation") ? "selected":""; ?>>Cremation</option>
-								</select>
-							</div>
-							<div>
-								<label >Price</label>
-								<input type="number" name="numprice" placeholder="Ex. 80000" value="<?php echo $service['service_cost']; ?>" required>
-							</div>
+								<button class="btn btn-link-absolute higher-top" type="submit" name="btn_upd0">Update Service</button>
+								<div>
+									<label >Image</label>
+									<input type="file" name="file_img" required>
+								</div>	
+								<div>
+									<label >Service name</label>
+									<input type="text" name="txtfn" value="<?php echo $type['funeral_name']; ?>" required>
+								</div>
+								<div>
+									<label >Type</label>
+									<select name="cbotype" style="border:1px solid #000;" required>
+										<option value="traditional" <?php echo ($type['funeral_type'] == "traditional") ? "selected":""; ?>>Traditional</option>
+										<option value="cremation" <?php echo ($type['funeral_type'] == "cremation") ? "selected":""; ?>>Cremation</option>
+									</select>
+								</div>
+								<div>
+									<label >Price</label>
+									<input type="number" name="numprice" placeholder="Ex. 80000" value="<?php echo $service['service_cost']; ?>" required>
+								</div>
 
 							<?php
 							} else {
 								## WITH BOOK BUTTON
-							?>
-							<button class="btn btn-link-absolute higher-top" type="submit" name="btn_upd1">Update Service</button>
-							<?php
+								echo "<button class='btn btn-link-absolute higher-top' type='submit' name='btn_upd1'>Update Service</button>";
 							}
 							?>
 							<div>
@@ -102,12 +93,13 @@
 								<label >Description (please specify casket size and if for adult/child)</label>
 								<textarea name="txtdesc" placeholder='Please specify casket size and if for adult/child..'><?php echo $service['service_desc']; ?></textarea>
 							</div>
-						</form>
+						</form> -->
 
 						<?php
-						} else {
+						// } else {
 							## FOR ADDING SERVICES
 							## DECLARING VARIABLES
+							$edit = false;
 							$desc = "";
 							$width = "";
 							$others = "
@@ -119,17 +111,39 @@
 						?>
 						
 						<form class="profile" method="post" enctype="multipart/form-data">
+							<?php 
+							## FOR EDITING SERVICES
+							if(isset($_GET['edit'])){
+								$service = read("services", ["service_id"], [$_GET['id']]);
+								$service = $service[0];
+								$edit = true;
+	
+								$type = read($service['service_type'], ["service_id"], [$_GET['id']]);
+								$type = $type[0];
+								## NO ONE BOOKED
+								if(isset($_GET['book'])){
+									echo "<button class='btn btn-link-absolute higher-top' type='submit' name='btn_upd0'>Update Service</button>";
+								## WITH BOOKING
+								} else {
+									echo "<button class='btn btn-link-absolute higher-top' type='submit' name='btn_upd1'>Update Service</button>";
+								}
+							## FOR ADDING SERVICES
+							} else {
+								echo "<button class='btn btn-link-absolute higher-top' type='submit' name='btnadd'>Add Service</button>";
+							}
+
+							echo "
 							<div>
 								<label>Image</label>
-								<input type="file" name="file_img" required>
+								<input type='file' name='file_img' required>
 							</div>
+							";
 
-							<?php 
 							if($user['provider_type'] != "headstone"){
 								echo "
 								<div>
-									<label >Service Name</label>
-									<input type='text' name='txtfn' required>
+									<label>Service Name</label>
+									<input type='text' name='txtsname' required>
 								</div>
 								";
 							}
@@ -145,27 +159,27 @@
 										<label class='label-span'>Size Available <span>(check all that applies)</span></label>
 										<div class='checkbox'>
 											<div>
-												<input type='checkbox' name='cbfont[]' value='font #1'>
+												<input type='checkbox' name='cbsize[]' value='size #1' checked>
 												<label>Size #1</label>
 											</div>
 											<div>
-												<input type='checkbox' name='cbfont[]' value='font #2'>
+												<input type='checkbox' name='cbsize[]' value='size #2'>
 												<label>Size #2</label>
 											</div>
 											<div>
-												<input type='checkbox' name='cbfont[]' value='font #3'>
+												<input type='checkbox' name='cbsize[]' value='size #3'>
 												<label>Size #3</label>
 											</div>
 											<div>
-												<input type='checkbox' name='cbfont[]' value='font #4'>
+												<input type='checkbox' name='cbsize[]' value='size #4'>
 												<label>Size #4</label>
 											</div>
 											<div>
-												<input type='checkbox' name='cbfont[]' value='font #5'>
+												<input type='checkbox' name='cbsize[]' value='size #5'>
 												<label>Size #5</label>
 											</div>
 											<div>
-												<input type='checkbox' name='cbfont[]' value='font #1'>
+												<input type='checkbox' name='cbsize[]' value='size #1'>
 												<label>Size #6</label>
 											</div>
 										</div>
@@ -197,7 +211,7 @@
 									</div>
 									<div>
 										<label>Headstone Kind</label>
-										<select name='cbotype' required>
+										<select name='cbokind' required>
 											<option value=''>BROWSE OPTIONS </option>
 											<option value='flat'>Flat</option>
 										</select>
@@ -206,15 +220,15 @@
 										<label>Color</label>
 										<div class='checkbox'>
 											<div>
-												<input type='radio' name='cbfont' value='font #1'>
+												<input type='radio' name='cbcolor' value='black' required>
 												<label>Black</label>
 											</div>
 											<div>
-												<input type='radio' name='cbfont' value='font #2'>
+												<input type='radio' name='cbcolor' value='gray' required>
 												<label>Gray</label>
 											</div>
 											<div>
-												<input type='radio' name='cbfont' value='font #3'>
+												<input type='radio' name='cbcolor' value='white' required>
 												<label>White</label>
 											</div>
 										</div>
@@ -253,27 +267,27 @@
 										<label class='label-span'>Size Available <span>(check all that applies)</span></label>
 										<div class='checkbox'>
 											<div>
-												<input type='checkbox' name='cbfont[]' value='font #1'>
+												<input type='checkbox' name='cbsize[]' value='size #1'>
 												<label>Size #1</label>
 											</div>
 											<div>
-												<input type='checkbox' name='cbfont[]' value='font #2'>
+												<input type='checkbox' name='cbsize[]' value='size #2'>
 												<label>Size #2</label>
 											</div>
 											<div>
-												<input type='checkbox' name='cbfont[]' value='font #3'>
+												<input type='checkbox' name='cbsize[]' value='size #3'>
 												<label>Size #3</label>
 											</div>
 											<div>
-												<input type='checkbox' name='cbfont[]' value='font #4'>
+												<input type='checkbox' name='cbsize[]' value='size #4'>
 												<label>Size #4</label>
 											</div>
 											<div>
-												<input type='checkbox' name='cbfont[]' value='font #5'>
+												<input type='checkbox' name='cbsize[]' value='size #5'>
 												<label>Size #5</label>
 											</div>
 											<div>
-												<input type='checkbox' name='cbfont[]' value='font #1'>
+												<input type='checkbox' name='cbsize[]' value='size #1'>
 												<label>Size #6</label>
 											</div>
 										</div>
@@ -519,10 +533,9 @@
 								<label class='label-span'>Description <span><?php echo (!empty($desc)) ? "({$desc})":""; ?></span></label>
 								<textarea name="txtdesc" placeholder='Write here...' required></textarea>
 							</div>
-							<button class="btn btn-link-absolute higher-top" type="submit" name="btnadd">Add Service</button>
 						</form>
 						<?php
-						}
+						// }
 						?>
 					</div>
 				</div>

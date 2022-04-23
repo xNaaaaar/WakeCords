@@ -55,7 +55,14 @@
 
 						<div class="banner-cards">
 							<?php
-							provider_services("traditional");
+							switch($user['provider_type']){
+								case "funeral":
+									provider_services("traditional");
+								break;
+								default:
+									provider_services();
+								break;
+							}
 							?>
 						</div>
 					</div>

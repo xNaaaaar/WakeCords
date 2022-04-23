@@ -37,7 +37,7 @@
 						<?php
 						$current_tab = "transact";
 						$this_tab = "cart";
-						include("others/tabs.php");
+						include("others/tabs.php"); 
 						
 						my_cart();
 						?>

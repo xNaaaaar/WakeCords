@@ -28,7 +28,10 @@
 				<div class="wrapper">
 					<div class="banner-div">
 						<?php
-							$service = DB::query("SELECT * FROM services s JOIN funeral f ON s.service_id = f.service_id WHERE s.service_id=?", array($_GET['service_id']), "READ");
+							$service_type = read("services", ["service_id"], [$_GET['service_id']]);
+							$service_type = $service_type[0];
+							##
+							$service = DB::query("SELECT * FROM services s JOIN {$service_type['service_type']} f ON s.service_id = f.service_id WHERE s.service_id=?", array($_GET['service_id']), "READ");
 							$service = $service[0];
 
 							if(isset($_SESSION['provider'])){
@@ -42,9 +45,25 @@
 								
 
 							## NAME BASED ON SERVICE PROVIDER
-							echo "
-							<h2><a href='{$service_link}'>Services</a> <span>> <a href='{$a_link}?id={$provider['provider_id']}'>{$provider['provider_company']}</a> > {$service['funeral_name']}</span></h2>
-							";
+							switch($service_type['service_type']){
+								case "funeral":
+									$size_array = explode(",",$service['funeral_size']);
+									echo "
+									<h2><a href='{$service_link}'>Services</a> <span>> <a href='{$a_link}?id={$provider['provider_id']}'>{$provider['provider_company']}</a> > {$service['funeral_name']}</span></h2>
+									";
+									## SERVICE NAME
+									$service_name = $service['funeral_name'];
+								break;
+
+								case "headstone":
+									echo "
+									<h2><a href='{$service_link}'>Services</a> <span>> <a href='{$a_link}?id={$provider['provider_id']}'>{$provider['provider_company']}</a> > {$_SESSION['headstone_name']}</span></h2>
+									";
+									## SERVICE NAME
+									$service_name = $_SESSION['headstone_name'];
+								break;
+							}
+							
 						?>
 						 
 						<div class="banner-cards trad">
@@ -53,12 +72,11 @@
 								<img class='card-img' src='images/providers/".$service['service_type']."/".$service['provider_id']."/".$service['service_img']."'>
 								<div class='card-div'>
 									<div>
-										<h3>".$service['funeral_name']."
+										<h3>".$service_name."
 											<span>
-												<i class='fa-solid fa-star stars-big'></i>
-												<i class='fa-solid fa-star stars-big'></i>
-												<i class='fa-solid fa-star stars-big'></i>
-												<i class='fa-solid fa-star stars-big'></i>
+												".ratings($service['service_id'], true)."
+												<i class='fa-solid fa-star'></i>
+												(".ratings_count($service['service_id'], true).")
 											</span>
 										</h3>
 										<p>
@@ -70,8 +88,17 @@
 								echo "
 										<form method='post'>
 											<div>
+												<label for='cbosize'>Sizes: </label>
+												<select name='cbosize' required>
+													<option value=''>BROWSE OPTIONS</option>
+								";
+													for($i=0;$i<count($size_array);$i++) 
+														echo "<option value='".$size_array[$i]."'>".$size_array[$i]."</option>";
+								echo "
+												</select>
 												<label for='cbomaxqty'>Quantity: </label>
 												<select name='cbomaxqty' required>
+													<option value=''>BROWSE OPTIONS</option>
 								";
 													for($i=1;$i<=$service['service_qty'];$i++) 
 														echo "<option value='".$i."'>".$i."</option>";
@@ -91,11 +118,20 @@
 									</div>
 								</div>
 								";
-
+								##
 								if(isset($_POST['btnadd'])){
-									$cbomaxqty = $_POST['cbomaxqty'];
-									$attr_list = ["service_id", "seeker_id", "cart_qty"];
-									$data_list = [$service['service_id'], $_SESSION['seeker'], $cbomaxqty];
+									switch($service_type['service_type']){
+										case "funeral":
+											$cbomaxqty = $_POST['cbomaxqty'];
+											$cbosize = $_POST['cbosize'];
+											$attr_list = ["service_id", "seeker_id", "cart_qty", "cart_size"];
+											$data_list = [$service['service_id'], $_SESSION['seeker'], $cbomaxqty, $cbosize];
+										break;
+		
+										case "headstone":
+										break;
+									}
+									
 									##
 									create("cart", $attr_list, qmark_generator(count($attr_list)), $data_list);
 

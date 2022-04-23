@@ -59,8 +59,8 @@ select option:first-child, .label-span span{color:var(--gray);}
 .card-0.each_rate:hover{background:none;}
 .card-0 .btn{height:40px !important;width:110px;margin:0;font:600 16px/40px Poppins,sans-serif;border-radius:5px;padding:0;color:#fff;}
 .card-0 .buttons{position:absolute;inset:10px 10px auto auto;}
-.card-0 .buttons a{display:inline-block;margin-inline:3px;width:fit-content;color:#748cab}
-.card-0 .buttons a:hover{color:#0d1321;}
+.card-0 .buttons a{display:inline-block;margin-inline:3px;width:fit-content;color:var(--green);}
+.card-0 .buttons a:hover{color:var(--red);}
 .card-0 .buttons a i{font-size:20px;}
 
 .note{padding:5px 23px 5px 12px;color:#fff;position:relative;overflow:hidden;width:fit-content;margin-bottom:var(--size-2);font-size:15px;}
@@ -133,8 +133,9 @@ button.header-btn i{font-size:var(--size-7);}
 .banner-cards .card-img{width:48%;}
 .banner-cards .card-div{width:48%;display:flex;align-items:center;}
 
+.card-div > div{width:100%;}
 .card-div form div{display:flex;align-items:center;column-gap:10px;margin-bottom:var(--size-5);}
-.card-div form div select{width:70px;height:40px;margin:0;}
+.card-div form div select{width:30%;height:40px;margin:0;}
 
 /* FUNERAL_PROVIDER_TRAD.PHP */
 .search-form{position:absolute;top:var(--size-11);right:0;height:45px;}
@@ -226,9 +227,10 @@ figcaption mark, .mark-style{cursor:pointer;background-color:var(--light-blue);c
 .my-cart-details{display:flex;align-items:center;justify-content:space-between;column-gap:var(--size-5);}
 .my-cart-details > h3{width:150px;text-align:right;}
 .my-cart-details h3, .my-cart-details p{margin:0;}
-.my-cart-details .qty{color:#aaa;text-align:right;width:25px;}
+.my-cart-details .qty{color:#aaa;text-align:right;width:25px;font-weight:bold;}
 
 .my-cart-title{width:60%;}
+.my-cart-title h3 span{font-size:15px;color:#aaa;}
 
 .my-cart-qty{display:flex;justify-content:center;align-items:center;width:5%;margin-left:auto;}
 .my-cart-qty a{display:block;color:#aaa;}

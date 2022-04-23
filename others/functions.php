@@ -261,7 +261,9 @@
 					</figure>
 					<div class='my-cart-details'>
 						<div class='my-cart-title'>
-							<h3>".$results['funeral_name']."</h3>
+							<h3>".$results['funeral_name']."
+								<span>".$results['cart_size']."</span>
+							</h3>
 							<p>".limit_text($results['service_desc'], 10)."</p>
 						</div>
 						<span class='qty'>x".$results['cart_qty']."</span>
@@ -289,7 +291,7 @@
 			";
 
 			if(isset($_POST['btncheckout'])){
-				$attr_list = ["seeker_id", "service_id", "purchase_total", "purchase_qty", "purchase_date", "purchase_status"];
+				$attr_list = ["seeker_id", "service_id", "purchase_total", "purchase_qty", "purchase_size", "purchase_date", "purchase_status"];
 				$cart_table = read("cart", ["seeker_id"], [$_SESSION['seeker']]);
 				
 				foreach($cart_table as $results){
@@ -297,7 +299,7 @@
 					$service_ = $service_[0];
 					$per_cost = $service_["service_cost"] * $results['cart_qty'];
 
-					$data_list = [$results['seeker_id'], $results['service_id'], $per_cost, $results['cart_qty'], date('Y-m-d'), "to pay"];
+					$data_list = [$results['seeker_id'], $results['service_id'], $per_cost, $results['cart_qty'], $results['cart_size'], date('Y-m-d'), "to pay"];
 					## CREATE PURCHASE
 					create("purchase", $attr_list, qmark_generator(count($attr_list)), $data_list);
 				}
@@ -489,10 +491,9 @@
 								<img src='images/providers/".$results['service_type']."/".$results['provider_id']."/".$results['service_img']."'>
 								<h3>".$results['funeral_name']."
 									<span>
+										".ratings($results['service_id'], true)."
 										<i class='fa-solid fa-star'></i>
-										<i class='fa-solid fa-star'></i>
-										<i class='fa-solid fa-star'></i>
-										<i class='fa-solid fa-star'></i>
+										(".ratings_count($results['service_id'], true).")
 									</span>
 								</h3>
 								<p>
@@ -506,7 +507,7 @@
 						if(!service_is_booked($results['service_id'])){
 							echo "
 							<a href='services_add.php?id=".$results['service_id']."&book=false&edit' class=''><i class='fa-solid fa-pen-to-square'></i></a>
-							<a href='deleting.php?table=funeral&attr=service_id&data=".$results['service_id']."&url=services' onclick='return confirm(\"Are you sure you want to delete this coffin?\");'><i class='fa-solid fa-trash-can'></i></a>";
+							<a href='deleting.php?table={$results['service_type']}&attr=service_id&data=".$results['service_id']."&url=services' onclick='return confirm(\"Are you sure you want to delete this service?\");'><i class='fa-solid fa-trash-can'></i></a>";
 						}
 						else {
 							echo "<a href='services_add.php?id=".$results['service_id']."&edit' class=''><i class='fa-solid fa-pen-to-square'></i></a>";
@@ -533,7 +534,39 @@
 				##
 				if(count($services) > 0){
 					foreach($services as $results){
+						$_SESSION['headstone_name'] = ucwords($results['stone_color'])." ".ucwords($results['stone_kind'])." ".ucwords($results['stone_type'])." Headstone";
+						echo "
+						<div class='card-0 no-padding'>
+							<a href='funeral_tradition_this.php?service_id=".$results['service_id']."&id={$results['provider_id']}'>
+								<img src='images/providers/".$results['service_type']."/".$results['provider_id']."/".$results['service_img']."'>
+								<h3>".$_SESSION['headstone_name']."
+									<span>
+										".ratings($results['service_id'], true)."
+										<i class='fa-solid fa-star'></i>
+										(".ratings_count($results['service_id'], true).")
+									</span>
+								</h3>
+								<p>
+									".limit_text($results['service_desc'], 10)."
+								</p>
+								<div class='card-price'>₱ ".number_format($results['service_cost'], 2, '.', ',')."</div>
+							</a>
+							<div class='buttons'>	
+						"; 
 
+						if(!service_is_booked($results['service_id'])){
+							echo "
+							<a href='services_add.php?id=".$results['service_id']."&book=false&edit' class=''><i class='fa-solid fa-pen-to-square'></i></a>
+							<a href='deleting.php?table={$results['service_type']}&attr=service_id&data=".$results['service_id']."&url=services' onclick='return confirm(\"Are you sure you want to delete this service?\");'><i class='fa-solid fa-trash-can'></i></a>";
+						}
+						else {
+							echo "<a href='services_add.php?id=".$results['service_id']."&edit' class=''><i class='fa-solid fa-pen-to-square'></i></a>";
+						}
+
+						echo "
+							</div>
+						</div>
+						";
 					}
 				}
 				else messaging("error", "No posted services yet!");
@@ -807,78 +840,6 @@
 			break;
 		}
 	}
-	## ADDING NEW SERVICE
-	function service_adding(){
-		## DECLARE VARIABLES
-		$txtfn = trim(ucwords($_POST['txtfn']));
-		$cbotype = $_POST['cbotype'];
-		$numprice = $_POST['numprice'];
-		$numqty = $_POST['numqty'];
-		$txtdesc = trim($_POST['txtdesc']);
-
-		$provider = provider();
-		$imageName = upload_image("file_img", "images/providers/".$provider['provider_type']."/".$_SESSION['provider']."/");
-		## ERROR TRAPPINGS
-		if($imageName === 1){
-			echo "<script>alert('An error occurred in uploading your image!')</script>";
-		}
-		else if($imageName === 2){
-			echo "<script>alert('File type is not allowed!')</script>";
-		}
-		else {
-			$data_list = [];
-			$table = "services";
-
-			switch ($provider['provider_type']){
-				case "funeral":
-					$attr_list = ["provider_id", "service_type", "service_name", "service_desc", "service_cost", "service_qty", "service_img", "service_status"];
-					array_push($data_list, $provider['provider_id'], $provider['provider_type'], $provider['provider_company'], $txtdesc, $numprice, $numqty, $imageName, "active");
-					## ADDED TO SERVICES
-					create($table, $attr_list, qmark_generator(count($attr_list)), $data_list);
-					$service = read("services", ["service_img"], [$imageName]);
-					$service = $service[0];
-					## ADD TO SPECIFIC TYPE
-					create("funeral", ["service_id", "funeral_name", "funeral_type"], qmark_generator(3), [$service['service_id'], $txtfn, $cbotype]);
-					## 
-					echo "<script>alert('Successfully added new service!')</script>";
-				break;
-
-				case "church":
-
-				break;
-			}
-		}
-	}
-	## EDITING SERVICE
-	function service_editing($id){
-		$numqty = $_POST['numqty'];
-		$txtdesc = $_POST['txtdesc'];
-
-		update("services", ["service_qty", "service_desc"], [$numqty, $txtdesc, $id], "service_id");
-		header("Location: services.php?updated");
-		exit;
-	}
-	## SERVICE TYPE
-	function service_type($type, $service_id){
-		switch($type){
-			case "funeral":
-				$result = read($type, ["service_id"], [$service_id]);
-				break;
-			case "flower":
-				break;
-		}
-
-		return $result[0];
-	}
-	## SERVICE TYPE EXISTS IN ARRAY BOOLEAN
-	function service_type_exist_bool($type, $type_list){
-		for($i=0;$i<count($type_list);$i++){
-			if($type == $type_list[$i]) {
-				return true;
-			}
-		}
-		return false;
-	}
 	## DISPLAY FUNERAL SERVICES
 	function services($type, $defer=NULL){
 		// $services = read("services", ["service_type"], ["funeral"]);
@@ -965,12 +926,119 @@
 			break;
 		}	
 	}
+	## ADDING NEW SERVICE
+	function service_adding(){
+		## DECLARE VARIABLES
+		$provider = provider();
+		## 
+		if($provider['provider_type'] != "headstone")
+			$txtsname = trim(ucwords($_POST['txtsname']));
+		##
+		if($provider['provider_type'] != "church"){
+			$txtothers = trim($_POST['txtothers']);
+			$numprice = $_POST['numprice'];
+		}	
+		##
+		if($provider['provider_type'] != "catering" && $provider['provider_type'] != "church")
+			$numqty = $_POST['numqty'];
+		##
+		$txtdesc = trim($_POST['txtdesc']);
+		$imageName = upload_image("file_img", "images/providers/".$provider['provider_type']."/".$_SESSION['provider']."/");
+		## ERROR TRAPPINGS
+		if($imageName === 1){
+			echo "<script>alert('An error occurred in uploading your image!')</script>";
+		}
+		else if($imageName === 2){
+			echo "<script>alert('File type is not allowed!')</script>";
+		}
+		else {
+			$data_list = [];
+			$table = "services";
+
+			switch ($provider['provider_type']){
+				case "funeral":
+					$cbotype = $_POST['cbotype'];
+					$cbsize = implode(",", $_POST['cbsize']);
+					$cbsize .= ",".$txtothers;
+					##
+					$attr_list = ["provider_id", "service_type", "service_desc", "service_cost", "service_qty", "service_img", "service_status"];
+					array_push($data_list, $provider['provider_id'], $provider['provider_type'], $txtdesc, $numprice, $numqty, $imageName, "active");
+					## ADDED TO SERVICES
+					create($table, $attr_list, qmark_generator(count($attr_list)), $data_list);
+					$service = read("services", ["service_img"], [$imageName]);
+					$service = $service[0];	
+					## ADD TO SPECIFIC TYPE
+					$attr_list = ["service_id", "funeral_name", "funeral_type", "funeral_size"];
+					$data_list = [$service['service_id'], $txtsname, $cbotype, $cbsize];
+					create("funeral", $attr_list, qmark_generator(count($attr_list)), $data_list);
+				break;
+
+				case "headstone":
+					$cbotype = $_POST['cbotype'];
+					$cbokind = $_POST['cbokind'];
+					$cbcolor = $_POST['cbcolor'];
+					$txtothers1 = trim($_POST['txtothers1']);
+					$cbfont = implode(",", $_POST['cbfont']);
+					$cbfont .= ",".$txtothers;
+					$cbsize = implode(",", $_POST['cbsize']);
+					$cbsize .= ",".$txtothers1;
+					##
+					$attr_list = ["provider_id", "service_type", "service_desc", "service_cost", "service_qty", "service_img", "service_status"];
+					array_push($data_list, $provider['provider_id'], $provider['provider_type'], $txtdesc, $numprice, $numqty, $imageName, "active");
+					## ADDED TO SERVICES
+					create($table, $attr_list, qmark_generator(count($attr_list)), $data_list);
+					$service = read("services", ["service_img"], [$imageName]);
+					$service = $service[0];	
+					## ADD TO SPECIFIC TYPE
+					$attr_list = ["service_id", "stone_kind", "stone_type", "stone_color", "stone_size", "stone_font"];
+					$data_list = [$service['service_id'], $cbokind, $cbotype, $cbcolor, $cbsize, $cbfont];
+					create("headstone", $attr_list, qmark_generator(count($attr_list)), $data_list);
+				break;
+
+				case "headstone":
+
+				break;
+			}
+			## 
+			echo "<script>alert('Successfully added new service!')</script>";
+		}
+	}
+	## EDITING SERVICE
+	function service_editing($id){
+		$numqty = $_POST['numqty'];
+		$txtdesc = $_POST['txtdesc'];
+
+		update("services", ["service_qty", "service_desc"], [$numqty, $txtdesc, $id], "service_id");
+		header("Location: services.php?updated");
+		exit;
+	}
 	## CHECK IF SPECIFIC SERVICE IS BOOKED
 	function service_is_booked($service_id){
 		$service = DB::query("SELECT * FROM services s JOIN purchase p ON s.service_id = p.service_id WHERE s.service_id=?", array($service_id), "READ");
 
 		if(count($service) > 0)
 			return true;
+		return false;
+	}
+	## SERVICE TYPE
+	function service_type($type, $service_id){
+		switch($type){
+			case "funeral":
+				$result = read($type, ["service_id"], [$service_id]);
+				break;
+			case "flower":
+				break;
+		}
+
+		return $result[0];
+	}
+	## SERVICE TYPE EXISTS IN ARRAY BOOLEAN
+	function service_type_exist_bool($type, $type_list){
+		for($i=0;$i<count($type_list);$i++){
+			if($type == $type_list[$i]) {
+				return true;
+			}
+		}
 		return false;
 	}
 	## STATUS COLOR
