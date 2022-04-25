@@ -55,11 +55,6 @@
 						?>
 						
 						<div class="banner-ratings purchases-lists">
-							<div class="list">
-								<div></div>
-								<div>Status</div>
-								<div>Requests</div>
-							</div>
 							<?php purchase_list(); ?>
 						</div>
 					</div>

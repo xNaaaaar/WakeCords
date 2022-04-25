@@ -62,6 +62,14 @@
 									## SERVICE NAME
 									$service_name = $_SESSION['headstone_name'];
 								break;
+
+								case "church":
+									echo "
+									<h2><a href='{$service_link}'>Services</a> <span>> <a href='{$a_link}?id={$provider['provider_id']}'>{$provider['provider_company']}</a> > {$service['church_church']}</span></h2>
+									";
+									## SERVICE NAME
+									$service_name = $service['church_church'];
+								break;
 							}
 							
 						?>
@@ -81,9 +89,11 @@
 										</h3>
 										<p>
 											".$service['service_desc']."
-										</p>
-										<div class='card-price trad'>₱ ".number_format($service['service_cost'], 2, '.', ',')."</div>
+										</p>	
 								";
+								if($service_type['service_type'] != "church")
+									echo "<div class='card-price trad'>₱ ".number_format($service['service_cost'], 2, '.', ',')."</div>";
+								##
 								if(isset($_SESSION['seeker'])){
 								echo "
 										<form method='post'>
@@ -110,9 +120,8 @@
 								";
 								}
 								else {
-									echo "
-									<h4 style='color:gray'>QUANTITY: x{$service['service_qty']}</h4>
-									";
+									if($service_type['service_type'] != "church")
+										echo "<h4 style='color:gray'>QUANTITY: x{$service['service_qty']}</h4>";
 								}
 								echo "
 									</div>

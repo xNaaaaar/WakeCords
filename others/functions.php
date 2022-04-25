@@ -470,7 +470,7 @@
 			break;
 			## FOR CHURCH SERVICES
 			case "church":
-				$services = DB::query("SELECT * FROM services s JOIN funeral f ON s.service_id=f.service_id WHERE provider_id=? AND funeral_type=?", array($provider['provider_id'], $type), "READ");
+				$services = DB::query("SELECT * FROM services s JOIN church f ON s.service_id=f.service_id WHERE provider_id=?", array($provider['provider_id']), "READ");
 			break;
 			## FOR HEADSTONE SERVICES
 			case "headstone":
@@ -506,7 +506,7 @@
 
 						if(!service_is_booked($results['service_id'])){
 							echo "
-							<a href='services_add.php?id=".$results['service_id']."&book=false&edit' class=''><i class='fa-solid fa-pen-to-square'></i></a>
+							<a href='services_add.php?id=".$results['service_id']."&book&edit' class=''><i class='fa-solid fa-pen-to-square'></i></a>
 							<a href='deleting.php?table={$results['service_type']}&attr=service_id&data=".$results['service_id']."&url=services' onclick='return confirm(\"Are you sure you want to delete this service?\");'><i class='fa-solid fa-trash-can'></i></a>";
 						}
 						else {
@@ -525,7 +525,42 @@
 			case "church":
 				##
 				if(count($services) > 0){
+					foreach($services as $results){
+						echo "
+						<div class='card-0 no-padding'>
+							<a href='funeral_tradition_this.php?service_id=".$results['service_id']."&id={$results['provider_id']}'>
+								<img src='images/providers/".$results['service_type']."/".$results['provider_id']."/".$results['service_img']."'>
+								<h3>".$results['church_church']."
+									<span class='gray-italic inline'>({$results['church_cemetery']})</span>
+									<span>
+										".ratings($results['service_id'], true)."
+										<i class='fa-solid fa-star'></i>
+										(".ratings_count($results['service_id'], true).")
+									</span>
+								</h3>
+								<p>
+									".limit_text($results['service_desc'], 10)."
+								</p>
+								<p>Priest: <b>{$results['church_priest']}</b></p>
+							</a>
+							<div class='buttons'>	
+						"; 
+						// <div class='card-price'>₱ ".number_format($results['service_cost'], 2, '.', ',')."</div>
 
+						if(!service_is_booked($results['service_id'])){
+							echo "
+							<a href='services_add.php?id=".$results['service_id']."&book=false&edit' class=''><i class='fa-solid fa-pen-to-square'></i></a>
+							<a href='deleting.php?table={$results['service_type']}&attr=service_id&data=".$results['service_id']."&url=services' onclick='return confirm(\"Are you sure you want to delete this service?\");'><i class='fa-solid fa-trash-can'></i></a>";
+						}
+						else {
+							echo "<a href='services_add.php?id=".$results['service_id']."&edit' class=''><i class='fa-solid fa-pen-to-square'></i></a>";
+						}
+
+						echo "
+							</div>
+						</div>
+						";
+					}
 				}
 				else messaging("error", "No posted services yet!");
 			break;
@@ -592,6 +627,13 @@
 		else $list = read('purchase');
 		
 		if(count($list)>0){
+			echo "
+			<div class='list'>
+				<div></div>
+				<div>Status</div>
+				<div>Requests</div>
+			</div>
+			";
 			foreach($list as $results){
 				$service_ = read("services", ["service_id"], [$results['service_id']]);
 				$service_ = $service_[0];
@@ -840,6 +882,101 @@
 			break;
 		}
 	}
+	## RETURN SPECIFIC VALUE
+	function return_value($table, $id, $attr, $value=""){
+		## CHECK WHAT TABLE IN DATABASE
+		switch($table){
+			case "services":
+				$service = read($table, ["service_id"], [$id]);
+				$service = $service[0];
+
+				$type = read($service['service_type'], ["service_id"], [$id]);
+				$type = $type[0];
+			break;
+		}
+		$naming = "";
+		$list = [];
+		##
+		if($service['service_type'] == "funeral") {
+			$naming = "funeral_size";
+			$list = ["size #1", "size #2", "size #3", "size #4", "size #5", "size #6"];
+		}
+		else if($service['service_type'] == "headstone") {
+			if($attr == "font" || $attr == "others") {
+				$naming = "stone_font";
+				$list = ["font #1", "font #2", "font #3", "font #4", "font #5", "font #6"];
+			}
+			else if($attr == "size" || $attr == "others1") {
+				$naming = "stone_size";
+				$list = ["size #1", "size #2", "size #3", "size #4", "size #5", "size #6"];
+			}
+		}
+		##
+		switch($attr){
+			## FOR SERVICE NAME
+			case "name":
+				if($service['service_type'] == "funeral") return $type["funeral_name"];
+			break;
+			## FOR SOME TYPE
+			case "type":
+				if($service['service_type'] == "funeral") {
+					if($type['funeral_type'] == $value) return "selected";
+				}
+				else if($service['service_type'] == "headstone") {
+					if($type['stone_type'] == $value) return "selected";
+				}
+			break;
+			## FOR SOME KIND
+			case "kind":
+				if($service['service_type'] == "headstone") {
+					if($type['stone_kind'] == $value) return "selected";
+				}
+			break;
+			## FOR SOME COLOR
+			case "color":
+				if($service['service_type'] == "headstone") {
+					if($type['stone_color'] == $value) return "checked";
+				}
+			break;
+			## FOR SOME SIZE
+			case "size":
+			case "font":
+				if($naming != "" && $type[$naming] != NULL){
+					$var = explode(",",$type[$naming]);
+					##
+					if(in_array($value, $var)) return "checked";
+				}
+			break; 
+			## FOR SOME OTHERS
+			case "others":
+			case "others1":
+				if($naming != "" && $type[$naming] != NULL){
+					$array = explode(",",$type[$naming]);
+					#
+					for($i=0; $i<=count($array); $i++) {
+						if(in_array($array[$i], $list))
+							unset($array[$i]);
+					}
+
+					return implode(",",$array);
+				}
+			break;
+			## FOR PRICE / COST
+			case "price":
+				return number_format($service["service_cost"],0,"","");
+			break; 
+			## FOR QUANTITY
+			case "qty":
+				return $service["service_qty"];
+			break;
+			## FOR DESCRIPTION
+			case "desc":
+				return $service["service_desc"];
+			break;
+		}
+		
+		return "";
+	}
 	## DISPLAY FUNERAL SERVICES
 	function services($type, $defer=NULL){
 		// $services = read("services", ["service_type"], ["funeral"]);
@@ -970,7 +1107,7 @@
 					## ADD TO SPECIFIC TYPE
 					$attr_list = ["service_id", "funeral_name", "funeral_type", "funeral_size"];
 					$data_list = [$service['service_id'], $txtsname, $cbotype, $cbsize];
-					create("funeral", $attr_list, qmark_generator(count($attr_list)), $data_list);
+					
 				break;
 
 				case "headstone":
@@ -992,13 +1129,42 @@
 					## ADD TO SPECIFIC TYPE
 					$attr_list = ["service_id", "stone_kind", "stone_type", "stone_color", "stone_size", "stone_font"];
 					$data_list = [$service['service_id'], $cbokind, $cbotype, $cbcolor, $cbsize, $cbfont];
-					create("headstone", $attr_list, qmark_generator(count($attr_list)), $data_list);
+					
 				break;
 
-				case "headstone":
+				case "church":
+					$txtpriest = trim(ucwords($_POST['txtpriest']));
+					$date = $_POST['date'];
+					$txtcemetery = trim(ucwords($_POST['txtcemetery']));
+					$cbtime = "10:00 am - 11:00 am, 11:00 am - 12:00 nn, 12:00 nn - 01:00 pm, 01:00 pm - 02:00 pm, 02:00 pm - 03:00 pm";
+					$checked = false;
+					##
+					if(!isset($_POST['cbaddress'])) {
+						$txtaddress = trim(ucwords($_POST['txtaddress']));
+					}
+					else $checked = true;
+					##
+					$attr_list = ["provider_id", "service_type", "service_desc", "service_img", "service_status"];
+					array_push($data_list, $provider['provider_id'], $provider['provider_type'], $txtdesc, $imageName, "active");
+					## ADDED TO SERVICES
+					create($table, $attr_list, qmark_generator(count($attr_list)), $data_list);
+					$service = read("services", ["service_img"], [$imageName]);
+					$service = $service[0];	
+					## ADD TO SPECIFIC TYPE
+					$attr_list = ["service_id", "church_church", "church_cemetery", "church_priest", "church_mass_date", "church_mass_time", "church_address"];
+					$data_list = [$service['service_id'], $txtsname, $txtcemetery, $txtpriest, $date, $cbtime];
+					##
+					if($checked) array_push($data_list, $provider['provider_address']);
+					else array_push($data_list, $txtaddress);
+					
+				break;
+
+				case "church":
 
 				break;
 			}
+			##
+			create($provider['provider_type'], $attr_list, qmark_generator(count($attr_list)), $data_list);
 			## 
 			echo "<script>alert('Successfully added new service!')</script>";
 		}

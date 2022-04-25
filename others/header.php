@@ -20,8 +20,9 @@
 			}
 
 			if(isset($_SESSION['provider'])){
-				$provider = read("provider", ["provider_id"], [$_SESSION['provider']]);
-				$provider = $provider[0];
+				// $provider = read("provider", ["provider_id"], [$_SESSION['provider']]);
+				// $provider = $provider[0];
+				$provider = provider();
 
 				if(empty($provider['provider_logo'])){
 				## PROVIDER DEFAULT LOGO
