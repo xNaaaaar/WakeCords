@@ -591,11 +591,11 @@
 
 						if(!service_is_booked($results['service_id'])){
 							echo "
-							<a href='services_add.php?id=".$results['service_id']."&book=false&edit' class=''><i class='fa-solid fa-pen-to-square'></i></a>
+							<a href='services_add.php?id=".$results['service_id']."&book=false&edit'><i class='fa-solid fa-pen-to-square'></i></a>
 							<a href='deleting.php?table={$results['service_type']}&attr=service_id&data=".$results['service_id']."&url=services' onclick='return confirm(\"Are you sure you want to delete this service?\");'><i class='fa-solid fa-trash-can'></i></a>";
 						}
 						else {
-							echo "<a href='services_add.php?id=".$results['service_id']."&edit' class=''><i class='fa-solid fa-pen-to-square'></i></a>";
+							echo "<a href='services_add.php?id=".$results['service_id']."&edit'><i class='fa-solid fa-pen-to-square'></i></a>";
 						}
 
 						echo "
@@ -667,7 +667,7 @@
 						}
 					}
 					else {
-						if(isset($_SESSION['admin'])){
+						if(!isset($_SESSION['seeker'])){
 							echo ", uploaded proof";
 						}
 					}	
@@ -700,7 +700,7 @@
 					}
 
 					if(isset($_SESSION['seeker']) && $results['purchase_status'] == "rated"){
-						echo "<a href='funeral_tradition_this.php?service_id={$results['service_id']}&id={$service_['provider_id']}#ratings' class='status'>view rate</a>";
+						echo "<a href='funeral_tradition_this.php?service_id={$results['service_id']}&id={$service_['provider_id']}&rated#ratings' class='status'>view rate</a>";
 					}
 
 					## FOR PROVIDER
@@ -712,9 +712,10 @@
 						}
 						else if(count($payout) == 1) {
 							$payout = $payout[0];
-							echo "<a href='/Capstone/WakeCords/images/admins/payout/{$payout['payout_image']}' download='payment_proof_{$results['purchase_id']}' class='status'>download proof</a>";
+							if($payout['payout_image'] != NULL) {
+								echo "<a href='images/admins/payout/{$payout['payout_image']}' download='payment_proof_{$results['purchase_id']}' class='status'>download proof</a>";
+							}
 						}
-							
 					}
 
 					## FOR ADMIN
@@ -725,7 +726,7 @@
 							$payout = $payout[0];
 
 							if($payout['payout_image'] == NULL){
-								echo "<a href='payout.php?id={$results['purchase_id']}' class='status' onclick='return confirm(\"Are you sure you want to upload proof of payment for this payout?\")'>upload proof</a>";
+								echo "<a href='payout.php?id={$results['purchase_id']}' class='status'>upload proof</a>";
 							}
 						}	
 					}
@@ -916,6 +917,23 @@
 			## FOR SERVICE NAME
 			case "name":
 				if($service['service_type'] == "funeral") return $type["funeral_name"];
+				if($service['service_type'] == "church") return $type["church_church"];
+			break;
+			## FOR PRIEST NAME
+			case "priest":
+				if($service['service_type'] == "church") return $type["church_priest"];
+			break;
+			## FOR CEMETERY
+			case "cemetery":
+				if($service['service_type'] == "church") return $type["church_cemetery"];
+			break;
+			## FOR DATE
+			case "date":
+				if($service['service_type'] == "church") return $type["church_mass_date"];
+			break;
+			## FOR ADDRESS
+			case "address":
+				if($service['service_type'] == "church") return $type["church_address"];
 			break;
 			## FOR SOME TYPE
 			case "type":
@@ -992,7 +1010,7 @@
 					if(count($provider) > 0){
 						foreach($provider as $result){
 							echo "
-							<div class='card-0'>
+							<div class='card-0 no-padding'>
 								<img src='images/providers/".$result['provider_type']."/".$result['provider_id']."/".$result['provider_logo']."'>
 								<h3>".$result['provider_company']."
 									<span>
@@ -1004,7 +1022,9 @@
 								<p>
 									".limit_text($result['provider_desc'], 10)."
 								</p>
-								<a class='btn' href='funeral_tradition.php?id=".$result['provider_id']."'>View</a>
+								<div class='buttons'>
+									<a href='funeral_tradition.php?id=".$result['provider_id']."' title='View'><i class='fa-solid fa-eye'></i></a>
+								</div>
 							</div>
 							";
 						}
@@ -1020,20 +1040,21 @@
 							## FOR USERS
 							echo "
 							<div class='card-0 no-padding'>
-								<a href='funeral_tradition_this.php?service_id=".$results['service_id']."&id={$results['provider_id']}'>
-									<img src='images/providers/".$results['service_type']."/".$results['provider_id']."/".$results['service_img']."'>
-									<h3>".$results['funeral_name']."
-										<span>
-											".ratings($results['service_id'], true)."
-											<i class='fa-solid fa-star'></i>
-											(".ratings_count($results['service_id'], true).")
-										</span>
-									</h3>
-									<p>
-										".limit_text($results['service_desc'], 10)."
-									</p>
-									<div class='card-price'>₱ ".number_format($results['service_cost'], 2, '.', ',')."</div>
-								</a>
+								<img src='images/providers/".$results['service_type']."/".$results['provider_id']."/".$results['service_img']."'>
+								<h3>".$results['funeral_name']."
+									<span>
+										".ratings($results['service_id'], true)."
+										<i class='fa-solid fa-star'></i>
+										(".ratings_count($results['service_id'], true).")
+									</span>
+								</h3>
+								<p>
+									".limit_text($results['service_desc'], 10)."
+								</p>
+								<div class='card-price'>₱ ".number_format($results['service_cost'], 2, '.', ',')."</div>
+								<div class='buttons'>
+									<a title='View' href='funeral_tradition_this.php?service_id=".$results['service_id']."&id={$results['provider_id']}'><i class='fa-solid fa-eye'></i></a>
+								</div>
 							</div>
 							";
 						}
@@ -1042,12 +1063,41 @@
 				}
 			break;
 
-			## CANDLE SERVICES
-			case "candle":
-			break;
-
 			## CHURCH SERVICES
 			case "church":
+				$services = DB::query("SELECT * FROM services s JOIN church f ON s.service_id=f.service_id", array(), "READ");
+
+				if(count($services) > 0){
+					foreach($services as $results){
+						echo "
+						<div class='card-0 no-padding'>
+							
+							<img src='images/providers/".$results['service_type']."/".$results['provider_id']."/".$results['service_img']."'>
+							<h3>".$results['church_church']."
+								<span class='gray-italic inline'>({$results['church_cemetery']})</span>
+								<span>
+									".ratings($results['service_id'], true)."
+									<i class='fa-solid fa-star'></i>
+									(".ratings_count($results['service_id'], true).")
+								</span>
+							</h3>
+							<p>
+								".limit_text($results['service_desc'], 10)."
+							</p>
+							<p>Priest: <b>{$results['church_priest']}</b></p>
+							<div class='buttons'>
+								<a title='View' href='funeral_tradition_this.php?service_id=".$results['service_id']."&id={$results['provider_id']}'><i class='fa-solid fa-eye'></i></a>
+								<a title='Donate' href='#'><i class='fa-solid fa-heart'></i></a>
+							</div>
+						</div>
+						";
+					}
+				}
+				else messaging("error", "No church services posted!");
+			break;
+
+			## HEADSTONE SERVICES
+			case "headstone":
 			break;
 
 			## FLOWER SERVICES
@@ -1058,8 +1108,8 @@
 			case "food_cater":
 			break;
 
-			## HEADSTONE SERVICES
-			case "headstone":
+			## CANDLE SERVICES
+			case "candle":
 			break;
 		}	
 	}

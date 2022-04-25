@@ -33,10 +33,28 @@
 							##
 							$service = DB::query("SELECT * FROM services s JOIN {$service_type['service_type']} f ON s.service_id = f.service_id WHERE s.service_id=?", array($_GET['service_id']), "READ");
 							$service = $service[0];
-
+							http://localhost/WakeCords/church.php
 							if(isset($_SESSION['provider'])){
 								$service_link = "services.php";
 								$a_link = "services.php";
+							}
+							else if(isset($_SESSION['seeker'])){
+								## FOR FUNERAL
+								if($service_type['service_type'] == "funeral") {
+									$service_link = "funeral.php";
+									$a_link = "funeral_tradition.php";
+								}
+								## FOR CHURCH
+								else if($service_type['service_type'] == "church") {
+									$service_link = "church.php";
+									$a_link = "church.php";
+								}
+								## FOR HEADSTONE
+								else if($service_type['service_type'] == "headstone") {
+									$service_link = "headstone.php";
+									$a_link = "headstone.php";
+								}
+								
 							}
 							else {
 								$service_link = "funeral.php";
@@ -94,29 +112,39 @@
 								if($service_type['service_type'] != "church")
 									echo "<div class='card-price trad'>₱ ".number_format($service['service_cost'], 2, '.', ',')."</div>";
 								##
-								if(isset($_SESSION['seeker'])){
+								if(isset($_SESSION['seeker']) && !isset($_GET['rate']) && !isset($_GET['rated'])){
 								echo "
-										<form method='post'>
-											<div>
-												<label for='cbosize'>Sizes: </label>
-												<select name='cbosize' required>
-													<option value=''>BROWSE OPTIONS</option>
+									<form method='post'>
+									"; 
+									if($service_type['service_type'] != "church") {
+								echo "
+										<div>"; 
+										if(count($size_array) > 0 && $size_array[0] != NULL) {
+										echo "
+											<label for='cbosize'>Sizes: </label>
+											<select name='cbosize' required>
+												<option value=''>BROWSE OPTIONS</option>
 								";
-													for($i=0;$i<count($size_array);$i++) 
-														echo "<option value='".$size_array[$i]."'>".$size_array[$i]."</option>";
+												for($i=0;$i<count($size_array);$i++) 
+													echo "<option value='".$size_array[$i]."'>".$size_array[$i]."</option>";
 								echo "
-												</select>
-												<label for='cbomaxqty'>Quantity: </label>
-												<select name='cbomaxqty' required>
-													<option value=''>BROWSE OPTIONS</option>
+											</select>";
+									 	} 
+								echo "
+											<label for='cbomaxqty'>Quantity: </label>
+											<select name='cbomaxqty' required>
+												<option value=''>BROWSE OPTIONS</option>
 								";
-													for($i=1;$i<=$service['service_qty'];$i++) 
-														echo "<option value='".$i."'>".$i."</option>";
+												for($i=1;$i<=$service['service_qty'];$i++) 
+													echo "<option value='".$i."'>".$i."</option>";
 								echo "
-												</select>
-											</div>
-											<button type='submit' name='btnadd' class='btn trad' onclick=\"return confirm('Are you sure you want to add this to cart?');\">Book</button>
-										</form>
+											</select>
+										</div>
+								"; 
+									}
+								echo "
+										<button type='submit' name='btnadd' class='btn trad' onclick=\"return confirm('Are you sure you want to add this to cart?');\">Book</button>
+									</form>
 								";
 								}
 								else {
@@ -236,6 +264,10 @@
 		let review = document.querySelector('#modal-subs');
 		let open_review = document.querySelector('#open-subs');
 		let close_review = document.querySelector('#close-subs');
+
+		<?php
+		if(isset($_GET['rate'])) echo "review.showModal();";
+		?>
 
 		open_review.addEventListener('click', () => {
 			review.showModal();

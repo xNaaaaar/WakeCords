@@ -154,10 +154,11 @@
 
 								if(count($payout)>0 && !isset($_SESSION['seeker'])){
 									$payout = $payout[0];
-
-									echo "
+									if($payout['payout_image'] != NULL) {
+										echo "
 									<p>Download proof of payment by clicking <a href='images/admins/payout/{$payout['payout_image']}' download='payment_proof_{$payout['purchase_id']}' class='status'>here</a>.</p>
 									";
+									}
 								}
 								## FUNERAL SERVICES
 								if($purchase['service_type'] == 'funeral'){ ?>

@@ -31,20 +31,9 @@
 						include("others/tabs.php");?>
 
 						<div class="banner-cards">
-							<div class="card-0">		
-								<img class="no-padding" src="images/sto-rosario.jpg" alt="">
-								<h3>Santo Rosario
-									<span>on March 15, 2023 @02:30pm</span>
-								</h3>
-								<p>
-									<?php
-										$text = "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ad corrupti beatae magni rerum doloribus, vitae inventore. Tempore quod fugit commodi!";
-										echo limit_text($text, 10);
-									?>
-								</p>
-								<p><b>Carreta Cemetery</b></p>
-								<a class="btn" href="">View</a>
-							</div>
+							<?php
+								services("church");
+							?>
 						</div>
 					</div>
 				</div>

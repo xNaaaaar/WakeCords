@@ -326,25 +326,35 @@
 									echo "
 									<div>
 										<label>Priest</label>
-										<input type='text' name='txtpriest' required>
+										<input type='text' name='txtpriest' value='"; 
+										echo ($edit) ? return_value("services", $_GET['id'], "priest"):"";
+										echo "' required>
 									</div>
 									<div>
 										<label>Church</label>
-										<input type='text' name='txtsname' value='' required>
+										<input type='text' name='txtsname' value='"; 
+										echo ($edit) ? return_value("services", $_GET['id'], "name"):"";
+										echo "' required>
 									</div>
 									<div>
 										<label>Cemetery</label>
-										<input type='text' name='txtcemetery' required>
+										<input type='text' name='txtcemetery' value='"; 
+										echo ($edit) ? return_value("services", $_GET['id'], "cemetery"):"";
+										echo "' required>
 									</div>
 									<div>
 										<label>Date</label>
-										<input type='date' name='date' required>
+										<input type='date' name='date' value='"; 
+										echo ($edit) ? return_value("services", $_GET['id'], "date"):"";
+										echo "' required>
 									</div>
 									<div>
 										<label>Address</label>
-										<input id='address' class='' type='text' name='txtaddress' required>
+										<input id='address' class='' type='text' name='txtaddress' value='"; 
+										echo ($edit) ? return_value("services", $_GET['id'], "address"):"";
+										echo "' required>
 										<div class='checkbox'>
-											<div>
+											<div class='full'>
 												<input id='profile-address' type='checkbox' name='cbaddress'>
 												<label class='label-span'><span>Check to use address in Profile.</span></label>
 											</div>

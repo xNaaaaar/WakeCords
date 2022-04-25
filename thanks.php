@@ -35,14 +35,19 @@
 								</ol>
 								";
 								## SEND EMAIL
-								$read = read("seeker", ["seeker_id"], [$_SESSION['seeker']]);
-								$read = $read[0];
+								try {
+									$read = read("seeker", ["seeker_id"], [$_SESSION['seeker']]);
+									$read = $read[0];
 
-								$subject = "Purchase Receipt";
-								$txt = "Hi {$read['seeker_fname']} {$read['seeker_lname']},\nThank you for your purchase! Here's your receipt: ";
-								$txt .= "\n\n\nBest regards,\nTeam Wakecords";
-								
-								mail($read['seeker_email'], $subject, $txt);
+									$subject = "Purchase Receipt";
+									$txt = "Hi {$read['seeker_fname']} {$read['seeker_lname']},\nThank you for your purchase! Here's your receipt: ";
+									$txt .= "\n\n\nBest regards,\nTeam Wakecords";
+									
+									// mail($read['seeker_email'], $subject, $txt);
+								}
+								catch (Exception $e) {
+									echo "Error sending email! Error found: ".$e->getMessage();
+								}
 							}
 							else if(user_type() == "provider"){
 								echo "

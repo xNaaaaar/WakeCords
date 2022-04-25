@@ -38,6 +38,7 @@
 							<div>
 								<label>Payment Method</label>
 								<select name="cbomethod" required>
+									<option value="">BROWSE OPTIONS</option>
 									<option value="card">Card</option>
 									<option value="gcash">Gcash</option>
 								</select>
@@ -46,7 +47,7 @@
 								<label>Account No.</label>
 								<input type="text" name="txtacc" required>
 							</div>
-							<button class="btn btn-link-absolute higher-top" type="submit" name="btnsend">Send Requests</button>
+							<button class="btn btn-link-absolute higher-top" type="submit" name="btnsend" onclick='return confirm("Are you sure the account number is correct? Press OK to send requests.");'>Send Requests</button>
 						</form>
 
 						<?php
@@ -56,11 +57,25 @@
 						?>
 						<h2><a href="purchase.php">Transactions</a> <span>> Upload Proof</span></h2>
 						<form class="profile column" method="post" enctype="multipart/form-data">
+							<div class="banner-section card">
+								<?php
+								$payout = DB::query("SELECT * FROM payout a JOIN purchase b ON a.purchase_id = b.purchase_id JOIN services c ON b.service_id = c.service_id JOIN provider d ON c.provider_id = d.provider_id WHERE a.purchase_id = ?", array($_GET['id']), "READ");
+								$payout = $payout[0];
+								echo "
+								<h3>Provider's {$payout["payout_method"]} details: </h3>
+								<label>Account Name: </label>
+								<input class='readonly' type='text' value='{$payout["provider_fname"]} {$payout["provider_lname"]}' readonly>
+								<label>Account Number: </label>
+								<input class='readonly' type='text' value='{$payout["payout_account"]}' readonly>
+								";
+								
+								?>
+							</div>
 							<div>
 								<label>Proof of Payment</label>
 								<input type="file" name="file_img" required>
 							</div>
-							<button class="btn btn-link-absolute higher-top" type="submit" name="btnsend">Upload</button>
+							<button class="btn btn-link-absolute higher-top" type="submit" name="btnsend" onclick='return confirm("Are you sure you uploaded the correct proof of payment for this payout? Press OK to proceed.");'>Upload</button>
 						</form>
 
 						<?php

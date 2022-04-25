@@ -23,7 +23,7 @@
 				<div class="wrapper">
 					<div class="banner-div intro">
 						<div class="">
-							<h2>Let's get started..</h2>
+							<h2>About Us</h2>
 							<?php
 							## TYPE [notify, success, error]
 							messaging("notify", "Note: Please upload a death certificate and wait to be verified! Click <a href='profile.php'>here</a> to upload!");

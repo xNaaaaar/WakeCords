@@ -4,8 +4,8 @@
   <ul>
     <li><a class="<?php echo ($this_tab == 'funeral')?'active':''; ?>" href="funeral.php">Funeral Homes</a></li>
     <li><a class="<?php echo ($this_tab == 'church')?'active':''; ?>" href="church.php">Church</a></li>
-    <li><a class="<?php echo ($this_tab == 'candle')?'active':''; ?>" href="candle.php">Candle Maker</a></li>
     <li><a class="<?php echo ($this_tab == 'headstone')?'active':''; ?>" href="headstone.php">Headstone Maker</a></li>
+    <li><a class="<?php echo ($this_tab == 'candle')?'active':''; ?>" href="candle.php">Candle Maker</a></li>
     <li><a class="<?php echo ($this_tab == 'flower')?'active':''; ?>" href="flower.php">Flower Shop</a></li>
     <li><a class="<?php echo ($this_tab == 'food')?'active':''; ?>" href="food.php">Food Catering</a></li>
   </ul>
