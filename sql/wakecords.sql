@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 01, 2022 at 05:55 AM
+-- Generation Time: May 01, 2022 at 01:10 PM
 -- Server version: 10.4.19-MariaDB
 -- PHP Version: 7.3.28
 
@@ -66,7 +66,8 @@ CREATE TABLE `cart` (
   `service_id` int(8) NOT NULL,
   `seeker_id` int(8) NOT NULL,
   `cart_qty` int(2) DEFAULT NULL,
-  `cart_size` varchar(15) DEFAULT NULL,
+  `cart_size` varchar(25) DEFAULT NULL,
+  `cart_font` varchar(25) DEFAULT NULL,
   `cart_sched_time` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -219,8 +220,7 @@ CREATE TABLE `headstone` (
 
 INSERT INTO `headstone` (`service_id`, `stone_kind`, `stone_type`, `stone_color`, `stone_size`, `stone_font`) VALUES
 (19, 'flat', 'bronze', 'black', 'size #2,size #4,', 'font #2,font #5,'),
-(31, 'flat', 'bronze', 'black', 'size #1,size #4,size #5,sample#5, sample#1', 'font #1,font #4,sample#1'),
-(32, 'flat', 'granite', 'white', 'size #3,size #6,sample3, sample6', 'font #3,font #6,sample#1');
+(31, 'flat', 'bronze', 'black', 'size #1,size #4,size #5,sample#5, sample#1', 'font #1,font #4,sample#1');
 
 -- --------------------------------------------------------
 
@@ -285,7 +285,7 @@ CREATE TABLE `provider` (
 INSERT INTO `provider` (`provider_id`, `provider_logo`, `provider_company`, `provider_desc`, `provider_fname`, `provider_mi`, `provider_lname`, `provider_type`, `provider_phone`, `provider_address`, `provider_email`, `provider_pass`) VALUES
 (1, '625573639b7841.77026679.png', 'Cosmopolitan', '', 'Nicyl', 'D', 'Lapas', 'funeral', '09090909090', 'Mabolo', 'nicyl@gmail.com', 'd7e73fb6980b78278c69b4e9f024f16a'),
 (2, '', '', '', 'Flower', '', 'Provider', 'flower', '', '', 'flower@provider.com', 'd7e73fb6980b78278c69b4e9f024f16a'),
-(3, '62556ec5694796.07430911.png', 'Sent Church', '', 'Melnaaar', 'B', 'Ancit', 'church', '09560376576', 'Sitio Granada Quiot Pardo, Cebu City Philippines', 'narancit@gmail.com', '4f3e8798a48f0390713d0e28a2ddb7b0'),
+(3, '62556ec5694796.07430911.png', 'Sent Church', '', 'Melnaaar', 'B', 'Ancit', 'church', '09560376576', 'Sitio Granada Quiot Pardo, Cebu City Philippines', 'narancit@gmail.com', '0695e848b3a096493325763af9a56b47'),
 (4, '62569c4e6bd8d9.82250856.jpg', 'Marbles', '', 'Head', 'T', 'Stone', 'headstone', '09457239646', 'This Is My Address', 'headstone@wakecords.com', 'd7e73fb6980b78278c69b4e9f024f16a'),
 (5, '', '', '', 'Candol', '', 'Meker', 'candle', '', '', 'candle@wakecords.com', 'd7e73fb6980b78278c69b4e9f024f16a'),
 (6, '', '', '', 'Kather', '', 'Reng', 'catering', '', '', 'catering@wakecords.com', 'd7e73fb6980b78278c69b4e9f024f16a');
@@ -302,7 +302,8 @@ CREATE TABLE `purchase` (
   `service_id` int(8) NOT NULL,
   `purchase_total` decimal(9,2) DEFAULT NULL,
   `purchase_qty` int(2) DEFAULT NULL,
-  `purchase_size` varchar(15) DEFAULT NULL,
+  `purchase_size` varchar(25) DEFAULT NULL,
+  `purchase_font` varchar(25) DEFAULT NULL,
   `purchase_date` date NOT NULL,
   `purchase_sched_time` varchar(50) DEFAULT NULL,
   `purchase_status` varchar(15) NOT NULL,
@@ -313,15 +314,16 @@ CREATE TABLE `purchase` (
 -- Dumping data for table `purchase`
 --
 
-INSERT INTO `purchase` (`purchase_id`, `seeker_id`, `service_id`, `purchase_total`, `purchase_qty`, `purchase_size`, `purchase_date`, `purchase_sched_time`, `purchase_status`, `purchase_progress`) VALUES
-(10, 10, 1, '220000.00', 2, NULL, '2022-03-21', NULL, 'rated', 5),
-(19, 16, 9, '100000.00', 1, NULL, '2022-04-13', NULL, 'paid', 0),
-(21, 10, 29, '20000.00', 1, 'sample1', '2022-04-25', NULL, 'rated', 5),
-(22, 10, 1, '110000.00', 1, '', '2022-04-25', NULL, 'done', 5),
-(39, 10, 29, '20000.00', 1, 'size #2', '2022-04-30', NULL, 'paid', 0),
-(40, 10, 29, '20000.00', 1, 'sample1', '2022-04-30', NULL, 'to pay', 0),
-(41, 10, 39, NULL, NULL, NULL, '2022-04-30', ' 11:00am - 12:00nn', 'scheduled', 0),
-(43, 10, 29, '20000.00', 1, 'sample1', '2022-04-30', NULL, 'to pay', 0);
+INSERT INTO `purchase` (`purchase_id`, `seeker_id`, `service_id`, `purchase_total`, `purchase_qty`, `purchase_size`, `purchase_font`, `purchase_date`, `purchase_sched_time`, `purchase_status`, `purchase_progress`) VALUES
+(10, 10, 1, '220000.00', 2, NULL, NULL, '2022-03-21', NULL, 'rated', 5),
+(19, 16, 9, '100000.00', 1, NULL, NULL, '2022-04-13', NULL, 'paid', 0),
+(21, 10, 29, '20000.00', 1, 'sample1', NULL, '2022-04-25', NULL, 'rated', 5),
+(22, 10, 1, '110000.00', 1, '', NULL, '2022-04-25', NULL, 'done', 5),
+(39, 10, 29, '20000.00', 1, 'size #2', NULL, '2022-04-30', NULL, 'paid', 0),
+(40, 10, 29, '20000.00', 1, 'sample1', NULL, '2022-04-30', NULL, 'to pay', 0),
+(41, 10, 39, NULL, NULL, NULL, NULL, '2022-04-30', ' 11:00am - 12:00nn', 'scheduled', 0),
+(43, 10, 29, '20000.00', 1, 'sample1', NULL, '2022-04-30', NULL, 'to pay', 0),
+(44, 10, 19, '66666.00', 1, 'size #2', 'font #5', '2022-05-01', NULL, 'to pay', 0);
 
 -- --------------------------------------------------------
 
@@ -357,7 +359,7 @@ CREATE TABLE `requirement` (
 INSERT INTO `requirement` (`req_id`, `provider_id`, `seeker_id`, `req_type`, `req_img`, `req_status`) VALUES
 (1, NULL, 10, 'death certificate', '6220cb08d606a4.91479037.jpg', 'verified'),
 (2, NULL, 13, 'death certificate', '6247da321a0a64.72029108.jpg', 'verified'),
-(3, NULL, 14, 'death certificate', '6240038f3f6390.99031927.png', 'not verified'),
+(3, NULL, 14, 'death certificate', '626e68aaabc2a3.72908438.png', 'verified'),
 (4, 1, NULL, 'business permit', '6248240f08d326.27804580.jpg', 'verified'),
 (5, 3, NULL, 'business permit', '62497c52bc1541.38904101.jpg', 'verified'),
 (6, 4, NULL, 'business permit', '62569d068ca7e9.87658203.png', 'verified'),
@@ -403,7 +405,7 @@ INSERT INTO `seeker` (`seeker_id`, `seeker_fname`, `seeker_mi`, `seeker_lname`, 
 (11, 'Lindor', NULL, 'Siton', NULL, NULL, 'inactive', 'lindor@gmail.com', 'd250786e8127c338aa76955b8c1faab2'),
 (12, 'John', NULL, 'Doe', NULL, NULL, 'inactive', 'johndoe@gmail.com', 'd250786e8127c338aa76955b8c1faab2'),
 (13, 'Jane', NULL, 'Doe', NULL, NULL, 'inactive', 'janedoe@gmail.com', 'd250786e8127c338aa76955b8c1faab2'),
-(14, 'Bernadette', 'G', 'Lapas', 'Mabolo', '09090909090', 'inactive', 'Blapas@gmail.com', '711037ae9ed6036d7de8e252dddd57b8'),
+(14, 'Bernadette', 'G', 'Lapas', 'Mabolo', '09090909090', 'inactive', 'Blapas@gmail.com', 'd250786e8127c338aa76955b8c1faab2'),
 (16, 'JJ', NULL, 'GG', NULL, NULL, 'inactive', 'jpulllefoiapnhcpak@kvhrr.com', '60719b813c16a8bd57388c1cdb047c22');
 
 -- --------------------------------------------------------
@@ -435,7 +437,6 @@ INSERT INTO `services` (`service_id`, `provider_id`, `service_type`, `service_de
 (26, 1, 'funeral', 'This is my new funeral description for adult.', '55556.00', 12, '62652a865a28b5.76843127.png', 'active'),
 (29, 1, 'funeral', 'This is my new description for child.', '20000.00', 3, '62653bac37a939.71344588.png', 'active'),
 (31, 4, 'headstone', 'This is my another updated sample of headstone\'s description.', '55555.00', 15, '62660842a0d699.20167841.jpg', 'active'),
-(32, 4, 'headstone', 'This is my new headstone service.', '123123.00', 12, '626608f8902278.65745779.jpg', 'active'),
 (39, 3, 'church', 'This is my description.', NULL, NULL, '6269386e8c5ca7.16700970.jpg', 'active'),
 (40, 3, 'church', 'This is my church long description.', NULL, NULL, '626938af53b472.57701294.jpg', 'active');
 
@@ -614,7 +615,7 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `cart_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
+  MODIFY `cart_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=68;
 
 --
 -- AUTO_INCREMENT for table `feedback`
@@ -632,7 +633,7 @@ ALTER TABLE `provider`
 -- AUTO_INCREMENT for table `purchase`
 --
 ALTER TABLE `purchase`
-  MODIFY `purchase_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
+  MODIFY `purchase_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
 
 --
 -- AUTO_INCREMENT for table `request`
