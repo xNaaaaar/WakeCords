@@ -28,8 +28,12 @@
 						$details = DB::query("SELECT * FROM details WHERE purchase_id=?", array($_GET['purchaseid']), "READ");
 						$details = $details[0];
 
+						$services = DB::query("SELECT * FROM purchase a JOIN services b ON a.service_id = b.service_id WHERE purchase_id=?", array($_GET['purchaseid']), "READ");
+						$services = $services[0];
+
 						echo "
 						<form class='profile column' method='post'>
+							<button class='btn btn-link-absolute higher-top' type='submit' name='btnupdate'>Update</button>
 							<div>
 								<label>Deceased name</label>
 								<input type='text' name='txtname' value='".$details['deceased_name']."'>
@@ -42,19 +46,28 @@
 								<label>Burial address</label>
 								<input type='text' name='txtbadd' value='".$details['burial_add']."'>
 							</div>
-							<div>
-								<label>Delivery address</label>
-								<input type='text' name='txtdadd' value='".$details['delivery_add']."'>
-							</div>
-							<button class='btn btn-link-absolute higher-top' type='submit' name='btnupdate'>Update</button>
-						</form>
 						";
 
-						if(isset($_POST['btnupdate'])){
-							$service_type = DB::query("SELECT * FROM purchase a JOIN services b ON a.service_id = b.service_id WHERE purchase_id=?", array($_GET['purchaseid']), "READ");
-							$service_type = $service_type[0];
+						switch($services['service_type']){
+							## FOR FUNERAL SERVICES
+							case "funeral":
+								echo "
+								<div>
+									<label>Delivery address</label>
+									<input type='text' name='txtdadd' value='".$details['delivery_add']."'>
+								</div>
+								";
+							break;
+							## FOR CHURCH SERVICES
+							case "church":
+							break;
+						}
 
-							update_details($service_type['service_type']);
+						echo "
+						</form>";
+
+						if(isset($_POST['btnupdate'])){
+							update_details($services['service_type']);
 						}
 						?>
 					</div>

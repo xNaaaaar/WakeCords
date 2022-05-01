@@ -11,7 +11,7 @@
 					<i class="fa-solid fa-cart-shopping"></i>
 					<?php
 						echo "
-						<span>".count(read('cart', ['seeker_id'], [$_SESSION['seeker']]))."</span>
+						<span class='bounce'>".count(read('cart', ['seeker_id'], [$_SESSION['seeker']]))."</span>
 						";
 					?>
 				</a>

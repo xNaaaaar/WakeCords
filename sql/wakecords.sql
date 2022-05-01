@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 25, 2022 at 01:08 PM
+-- Generation Time: May 01, 2022 at 05:55 AM
 -- Server version: 10.4.19-MariaDB
 -- PHP Version: 7.3.28
 
@@ -65,8 +65,9 @@ CREATE TABLE `cart` (
   `cart_id` int(8) NOT NULL,
   `service_id` int(8) NOT NULL,
   `seeker_id` int(8) NOT NULL,
-  `cart_qty` int(2) NOT NULL,
-  `cart_size` varchar(15) DEFAULT NULL
+  `cart_qty` int(2) DEFAULT NULL,
+  `cart_size` varchar(15) DEFAULT NULL,
+  `cart_sched_time` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -92,7 +93,7 @@ CREATE TABLE `church` (
   `church_priest` varchar(25) NOT NULL,
   `church_address` varchar(100) NOT NULL,
   `church_mass_date` date NOT NULL,
-  `church_mass_time` varchar(100) NOT NULL
+  `church_mass_time` varchar(200) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
@@ -100,8 +101,8 @@ CREATE TABLE `church` (
 --
 
 INSERT INTO `church` (`service_id`, `church_church`, `church_cemetery`, `church_priest`, `church_address`, `church_mass_date`, `church_mass_time`) VALUES
-(34, 'Sto. Rosario', 'Carreta', 'Benedict Servi', 'Sitio Granada Quiot Pardo, Cebu City Philippines', '2022-04-26', '10:00 am - 11:00 am, 11:00 am - 12:00 nn, 12:00 nn - 01:00 pm, 01:00 pm - 02:00 pm, 02:00 pm - 03:00'),
-(37, 'San Roque 2', 'Pardoow', 'George Waise', 'Quiot Pardo, Cebu City Philippines', '2022-05-01', '10:00 am - 11:00 am, 11:00 am - 12:00 nn, 12:00 nn - 01:00 pm, 01:00 pm - 02:00 pm, 02:00 pm - 03:00');
+(39, 'Church Sample 1', 'Cemetery Sample 1', 'Benedict Servi', 'Quiot Pardo, Cebu City Philippines', '2022-05-07', '10:00am - 11:00am, 11:00am - 12:00nn, 12:00nn - 01:00pm, 01:00pm - 02:00pm, 02:00pm - 03:00pm'),
+(40, 'Sto. Rosario', 'Caretta', 'George Wais', 'Sitio Granada Quiot Pardo, Cebu City Philippines', '2022-05-05', '10:00am - 11:00am, 11:00am - 12:00nn, 12:00nn - 01:00pm, 01:00pm - 02:00pm, 02:00pm - 03:00pm');
 
 -- --------------------------------------------------------
 
@@ -133,7 +134,9 @@ INSERT INTO `details` (`purchase_id`, `deceased_name`, `burial_datetime`, `buria
 (10, 'Jan-Jan Dowll', '2022-04-12 13:00:00', 'This Is My New Updated Address', 'This Is My New Updated Address', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (19, 'Asdys Sdfwe', '2022-04-23 18:46:00', 'Address 2', 'My Address', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (21, 'Asdys Sdfwe', '2022-04-30 21:12:00', 'Sample Burial Address', 'My Address', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(22, 'Asdys Sdfwe', '2022-04-28 19:23:00', 'Sample Burial Address', 'My Address', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+(22, 'Asdssys Sdfweee', '2022-04-28 19:23:00', 'Sample1 Burial Address', 'My Address1', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(39, 'Asdys Sdfwe', '2022-04-30 17:35:00', 'Sample Burial Address', 'My Address', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(41, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -282,7 +285,7 @@ CREATE TABLE `provider` (
 INSERT INTO `provider` (`provider_id`, `provider_logo`, `provider_company`, `provider_desc`, `provider_fname`, `provider_mi`, `provider_lname`, `provider_type`, `provider_phone`, `provider_address`, `provider_email`, `provider_pass`) VALUES
 (1, '625573639b7841.77026679.png', 'Cosmopolitan', '', 'Nicyl', 'D', 'Lapas', 'funeral', '09090909090', 'Mabolo', 'nicyl@gmail.com', 'd7e73fb6980b78278c69b4e9f024f16a'),
 (2, '', '', '', 'Flower', '', 'Provider', 'flower', '', '', 'flower@provider.com', 'd7e73fb6980b78278c69b4e9f024f16a'),
-(3, '62556ec5694796.07430911.png', 'Sent Church', '', 'Melnaaar', 'B', 'Ancit', 'church', '09560376576', 'Sitio Granada Quiot Pardo, Cebu City Philippines', 'narancit@gmail.com', 'd7e73fb6980b78278c69b4e9f024f16a'),
+(3, '62556ec5694796.07430911.png', 'Sent Church', '', 'Melnaaar', 'B', 'Ancit', 'church', '09560376576', 'Sitio Granada Quiot Pardo, Cebu City Philippines', 'narancit@gmail.com', '4f3e8798a48f0390713d0e28a2ddb7b0'),
 (4, '62569c4e6bd8d9.82250856.jpg', 'Marbles', '', 'Head', 'T', 'Stone', 'headstone', '09457239646', 'This Is My Address', 'headstone@wakecords.com', 'd7e73fb6980b78278c69b4e9f024f16a'),
 (5, '', '', '', 'Candol', '', 'Meker', 'candle', '', '', 'candle@wakecords.com', 'd7e73fb6980b78278c69b4e9f024f16a'),
 (6, '', '', '', 'Kather', '', 'Reng', 'catering', '', '', 'catering@wakecords.com', 'd7e73fb6980b78278c69b4e9f024f16a');
@@ -297,10 +300,11 @@ CREATE TABLE `purchase` (
   `purchase_id` int(8) NOT NULL,
   `seeker_id` int(8) NOT NULL,
   `service_id` int(8) NOT NULL,
-  `purchase_total` decimal(9,2) NOT NULL,
-  `purchase_qty` int(2) NOT NULL,
+  `purchase_total` decimal(9,2) DEFAULT NULL,
+  `purchase_qty` int(2) DEFAULT NULL,
   `purchase_size` varchar(15) DEFAULT NULL,
   `purchase_date` date NOT NULL,
+  `purchase_sched_time` varchar(50) DEFAULT NULL,
   `purchase_status` varchar(15) NOT NULL,
   `purchase_progress` int(2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -309,11 +313,15 @@ CREATE TABLE `purchase` (
 -- Dumping data for table `purchase`
 --
 
-INSERT INTO `purchase` (`purchase_id`, `seeker_id`, `service_id`, `purchase_total`, `purchase_qty`, `purchase_size`, `purchase_date`, `purchase_status`, `purchase_progress`) VALUES
-(10, 10, 1, '220000.00', 2, NULL, '2022-03-21', 'rated', 5),
-(19, 16, 9, '100000.00', 1, NULL, '2022-04-13', 'paid', 0),
-(21, 10, 29, '20000.00', 1, 'sample1', '2022-04-25', 'rated', 5),
-(22, 10, 1, '110000.00', 1, '', '2022-04-25', 'done', 5);
+INSERT INTO `purchase` (`purchase_id`, `seeker_id`, `service_id`, `purchase_total`, `purchase_qty`, `purchase_size`, `purchase_date`, `purchase_sched_time`, `purchase_status`, `purchase_progress`) VALUES
+(10, 10, 1, '220000.00', 2, NULL, '2022-03-21', NULL, 'rated', 5),
+(19, 16, 9, '100000.00', 1, NULL, '2022-04-13', NULL, 'paid', 0),
+(21, 10, 29, '20000.00', 1, 'sample1', '2022-04-25', NULL, 'rated', 5),
+(22, 10, 1, '110000.00', 1, '', '2022-04-25', NULL, 'done', 5),
+(39, 10, 29, '20000.00', 1, 'size #2', '2022-04-30', NULL, 'paid', 0),
+(40, 10, 29, '20000.00', 1, 'sample1', '2022-04-30', NULL, 'to pay', 0),
+(41, 10, 39, NULL, NULL, NULL, '2022-04-30', ' 11:00am - 12:00nn', 'scheduled', 0),
+(43, 10, 29, '20000.00', 1, 'sample1', '2022-04-30', NULL, 'to pay', 0);
 
 -- --------------------------------------------------------
 
@@ -425,11 +433,11 @@ INSERT INTO `services` (`service_id`, `provider_id`, `service_type`, `service_de
 (9, 1, 'funeral', 'An important part of grieving and of honouring the life of a person is the releasing of their remains to the earth.  A committal is the gathering of a small community, often just close family & friends, and the presider, at the graveside or mausoleum.', '100000.00', 4, '6249572712ddd5.72232742.png', 'active'),
 (19, 4, 'headstone', 'This is my sample description of headstone service.', '66666.00', 6, '62641fcd338220.97815685.jpg', 'active'),
 (26, 1, 'funeral', 'This is my new funeral description for adult.', '55556.00', 12, '62652a865a28b5.76843127.png', 'active'),
-(29, 1, 'funeral', 'This is my new description for child.', '20000.00', 4, '62653bac37a939.71344588.png', 'active'),
+(29, 1, 'funeral', 'This is my new description for child.', '20000.00', 3, '62653bac37a939.71344588.png', 'active'),
 (31, 4, 'headstone', 'This is my another updated sample of headstone\'s description.', '55555.00', 15, '62660842a0d699.20167841.jpg', 'active'),
 (32, 4, 'headstone', 'This is my new headstone service.', '123123.00', 12, '626608f8902278.65745779.jpg', 'active'),
-(34, 3, 'church', 'This is my sample description of this specific Church service.', NULL, NULL, '6266305610a584.54404705.jpg', 'active'),
-(37, 3, 'church', 'This is my updated description.', NULL, NULL, '626646477ece95.78724691.jpg', 'active');
+(39, 3, 'church', 'This is my description.', NULL, NULL, '6269386e8c5ca7.16700970.jpg', 'active'),
+(40, 3, 'church', 'This is my church long description.', NULL, NULL, '626938af53b472.57701294.jpg', 'active');
 
 -- --------------------------------------------------------
 
@@ -606,7 +614,7 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `cart_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
+  MODIFY `cart_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
 
 --
 -- AUTO_INCREMENT for table `feedback`
@@ -624,7 +632,7 @@ ALTER TABLE `provider`
 -- AUTO_INCREMENT for table `purchase`
 --
 ALTER TABLE `purchase`
-  MODIFY `purchase_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `purchase_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
 -- AUTO_INCREMENT for table `request`
@@ -648,7 +656,7 @@ ALTER TABLE `seeker`
 -- AUTO_INCREMENT for table `services`
 --
 ALTER TABLE `services`
-  MODIFY `service_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=38;
+  MODIFY `service_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
 
 --
 -- Constraints for dumped tables

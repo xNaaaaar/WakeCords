@@ -33,7 +33,7 @@
 							##
 							$service = DB::query("SELECT * FROM services s JOIN {$service_type['service_type']} f ON s.service_id = f.service_id WHERE s.service_id=?", array($_GET['service_id']), "READ");
 							$service = $service[0];
-							http://localhost/WakeCords/church.php
+							
 							if(isset($_SESSION['provider'])){
 								$service_link = "services.php";
 								$a_link = "services.php";
@@ -75,7 +75,7 @@
 
 								case "headstone":
 									echo "
-									<h2><a href='{$service_link}'>Services</a> <span>> <a href='{$a_link}?id={$provider['provider_id']}'>{$provider['provider_company']}</a> > {$_SESSION['headstone_name']}</span></h2>
+									<h2><a href='{$service_link}'>Services</a> <span>> <a href='{$a_link}'>{$provider['provider_company']}</a> > {$_SESSION['headstone_name']}</span></h2>
 									";
 									## SERVICE NAME
 									$service_name = $_SESSION['headstone_name'];
@@ -83,7 +83,7 @@
 
 								case "church":
 									echo "
-									<h2><a href='{$service_link}'>Services</a> <span>> <a href='{$a_link}?id={$provider['provider_id']}'>{$provider['provider_company']}</a> > {$service['church_church']}</span></h2>
+									<h2><a href='{$service_link}'>Services</a> <span>> <a href='{$a_link}'>{$provider['provider_company']}</a> > {$service['church_church']}</span></h2>
 									";
 									## SERVICE NAME
 									$service_name = $service['church_church'];
@@ -114,8 +114,7 @@
 								##
 								if(isset($_SESSION['seeker']) && !isset($_GET['rate']) && !isset($_GET['rated'])){
 								echo "
-									<form method='post'>
-									"; 
+									<form method='post'>"; 
 									if($service_type['service_type'] != "church") {
 								echo "
 										<div>"; 
@@ -123,29 +122,32 @@
 										echo "
 											<label for='cbosize'>Sizes: </label>
 											<select name='cbosize' required>
-												<option value=''>BROWSE OPTIONS</option>
-								";
+												<option value=''>BROWSE OPTIONS</option>";
 												for($i=0;$i<count($size_array);$i++) 
 													echo "<option value='".$size_array[$i]."'>".$size_array[$i]."</option>";
-								echo "
-											</select>";
+								echo "		</select>";
 									 	} 
 								echo "
 											<label for='cbomaxqty'>Quantity: </label>
 											<select name='cbomaxqty' required>
-												<option value=''>BROWSE OPTIONS</option>
-								";
+												<option value=''>BROWSE OPTIONS</option>";
 												for($i=1;$i<=$service['service_qty'];$i++) 
 													echo "<option value='".$i."'>".$i."</option>";
-								echo "
-											</select>
-										</div>
-								"; 
+								echo "		</select>
+										</div>"; 
+									## FOR CHURCH
+									} else {
+
+								echo "	<div>
+											<label>Time: </label>
+											<select name='cbotime' required>
+												<option value=''>BROWSE OPTIONS</option>"; 
+												echo time_available($service['church_mass_time'], $_GET['service_id']);
+								echo "		</select>
+										</div>";
 									}
-								echo "
-										<button type='submit' name='btnadd' class='btn trad' onclick=\"return confirm('Are you sure you want to add this to cart?');\">Book</button>
-									</form>
-								";
+								echo "	<button type='submit' name='btnadd' class='btn trad' onclick=\"return confirm('Confirm booking?');\">Book</button>
+									</form>";
 								}
 								else {
 									if($service_type['service_type'] != "church")
@@ -153,26 +155,31 @@
 								}
 								echo "
 									</div>
-								</div>
-								";
+								</div>";
 								##
 								if(isset($_POST['btnadd'])){
 									switch($service_type['service_type']){
+										## FOR FUNERAL
 										case "funeral":
 											$cbomaxqty = $_POST['cbomaxqty'];
 											$cbosize = $_POST['cbosize'];
 											$attr_list = ["service_id", "seeker_id", "cart_qty", "cart_size"];
 											$data_list = [$service['service_id'], $_SESSION['seeker'], $cbomaxqty, $cbosize];
 										break;
-		
-										case "headstone":
+										## FOR CHURCH
+										case "church":
+											$cbotime = $_POST['cbotime'];
+											// $txtdeceased = $_POST['txtdeceased'];
+											$attr_list = ["service_id", "seeker_id", "cart_sched_time"];
+											$data_list = [$service['service_id'], $_SESSION['seeker'], $cbotime];
 										break;
 									}
 									
 									##
 									create("cart", $attr_list, qmark_generator(count($attr_list)), $data_list);
 
-									echo "<script>alert('Successfully added to cart!')</script>";
+									header("Location: cart.php?cart_success");
+									exit;
 								}
 							?>
 							
@@ -260,14 +267,13 @@
 		</div>
 	</div>
 	<script>
+	<?php if(isset($_GET['rate'])) { ?>
 		// FOR REVIEW MODAL
 		let review = document.querySelector('#modal-subs');
 		let open_review = document.querySelector('#open-subs');
 		let close_review = document.querySelector('#close-subs');
 
-		<?php
-		if(isset($_GET['rate'])) echo "review.showModal();";
-		?>
+		review.showModal();
 
 		open_review.addEventListener('click', () => {
 			review.showModal();
@@ -276,6 +282,7 @@
 		close_review.addEventListener('click', () => {
 			review.close();
 		})
+	<?php } ?>
 	</script>
 <!-- FOOTER JS -->
 <?php include("others/footer-js.php"); ?>

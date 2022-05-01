@@ -6,12 +6,22 @@
 	if(isset($_GET['deleted']))
 		echo "<script>alert('Successfully deleted purchase!')</script>";
 
+	if(isset($_GET['canceled']))
+		echo "<script>alert('Successfully canceled purchase!')</script>";
+
 	if(isset($_GET['requests']))
 		echo "<script>alert('Request payout sent! Please wait admin to process your request.')</script>";
 
 	if(isset($_GET['uploaded']))
 		echo "<script>alert('Successfully uploaded proof of payment!')</script>";
-		
+
+	if(isset($_POST['btnresched'])) {
+		$numid = $_POST['numid'];
+		$cbotime = $_POST['cbotime'];
+		##
+		update("purchase", ["purchase_sched_time", "purchase_progress"], [$cbotime, 1, $numid], "purchase_id");
+		echo "<script>alert('Rescheduled successfully!')</script>";
+	}	
 ?>
 
 <body>
@@ -62,5 +72,19 @@
 			</section>
 		</div>
 	</div>
+	<script>
+		// FOR RESCHED MODAL
+		function open_modal($id){
+			let resched = document.querySelector('#modal-resched'+$id);
+			//let open_resched = document.querySelector('#open-resched');
+			let close_resched = document.querySelector('#close-resched'+$id);
+
+			resched.showModal();
+
+			close_resched.addEventListener('click', () => {
+				resched.close();
+			})
+		}
+	</script>
 </body>
 </html>

@@ -32,6 +32,7 @@
 						<form method="post">
 							<!-- PURCHASE DETAILS -->
 							<div class="banner-section card">
+								<h3>Payment Details <span><a class="status" href="purchase.php">pay later</a></span></h3>
 								<ul>
 									<li><h3>Purchases</h3></li>
 									<li><h3>Qty</h3></li>

@@ -5,6 +5,21 @@
 	require_once("others/db.php");
 	ob_start();
 	
+	## ARRAY ID OF QUERY
+	function id_array_of_query($table){
+		$ids_array = array();
+		$ids = read($table);
+		
+		switch($table) {
+			case "purchase":
+				foreach($ids as $id) {
+					array_push($ids_array, $id["purchase_id"]);
+				}
+			break;
+		}
+
+		return $ids_array;
+	}
 	## UPDATE PASSWORD
 	function change_password($user, $email, $password){
 		$pw_cpass = trim(md5($_POST['pw_cpass']));
@@ -184,6 +199,24 @@
 		}
 		return false;
 	}
+	## GET THE LAST ID INSERT IN SQL
+	function last_created_id($table, $ids_array){
+		$id = "";
+		$rows = read($table);
+
+		switch($table){
+			case "purchase":
+				foreach($rows as $row){
+					if(!in_array($row['purchase_id'], $ids_array)){
+						$id = $row['purchase_id'];
+						break;
+					}
+				}
+			break;
+		}
+
+		return $id;
+	}
 	## LIMIT DISPLAY TEXT
 	function limit_text($text, $limit) {
 		if (str_word_count($text, 0) > $limit) {
@@ -246,67 +279,135 @@
 	}
 	## DISPLAY CART
 	function my_cart(){
-		$cart = DB::query("SELECT * FROM services s JOIN cart c ON s.service_id=c.service_id JOIN seeker skr ON skr.seeker_id=c.seeker_id JOIN funeral f ON f.service_id=s.service_id WHERE c.seeker_id=?", array($_SESSION['seeker']), "READ");
-		
-		// read("cart", ["seeker_id"], [$_SESSION['seeker']]);
+		$all_cart = DB::query("SELECT * FROM cart a JOIN services b ON a.service_id = b.service_id WHERE seeker_id=?", array($_SESSION['seeker']), "READ");
 
-		if(count($cart) > 0){
+		if(count($all_cart) > 0){
 			$i = 0;
-			foreach($cart as $results){
-				$total_cost = $results['service_cost'] * $results['cart_qty'];
-				echo "
-				<div class='my-cart'>
-					<figure>
-						<img src='images/providers/".$results['service_type']."/".$results['provider_id']."/".$results['service_img']."' alt=''>
-					</figure>
-					<div class='my-cart-details'>
-						<div class='my-cart-title'>
-							<h3>".$results['funeral_name']."
-								<span>".$results['cart_size']."</span>
-							</h3>
-							<p>".limit_text($results['service_desc'], 10)."</p>
+			foreach($all_cart as $results){
+				$cart = DB::query("SELECT * FROM services s JOIN cart c ON s.service_id=c.service_id JOIN seeker skr ON skr.seeker_id=c.seeker_id JOIN {$results['service_type']} f ON f.service_id=s.service_id WHERE c.cart_id=?", array($results['cart_id']), "READ");
+				$cart = $cart[0];
+				##
+				switch($results['service_type']){
+					## FOR FUNERAL
+					case "funeral":
+						$total_cost = $cart['service_cost'] * $cart['cart_qty'];
+						echo "
+						<div class='my-cart'>
+							<figure>
+								<img src='images/providers/".$cart['service_type']."/".$cart['provider_id']."/".$cart['service_img']."' alt=''>
+							</figure>
+							<div class='my-cart-details'>
+								<div class='my-cart-title'>
+									<h3>".$cart['funeral_name']."
+										<span>".$cart['cart_size']."</span>
+									</h3>
+									<p>".limit_text($cart['service_desc'], 10)."</p>
+								</div>
+								<span class='qty'>x".$cart['cart_qty']."</span>
+								<h3>₱ ".number_format($total_cost,2,'.',',')."</h3>
+							</div>
+							<div class='my-cart-qty'><a href='deleting.php?table=cart&attr=cart_id&data=".$cart['cart_id']."' onclick=\"return confirm('Are you sure you want to delete this to cart?');\"><i class='fa-solid fa-trash-can'></i></a></div>
 						</div>
-						<span class='qty'>x".$results['cart_qty']."</span>
-						<h3>₱ ".number_format($total_cost,2,'.',',')."</h3>
-					</div>
-					<div class='my-cart-qty'><a href='deleting.php?table=cart&attr=cart_id&data=".$results['cart_id']."' onclick=\"return confirm('Are you sure you want to delete this to cart?');\"><i class='fa-solid fa-trash-can'></i></a></div>
-				</div>
-				";
-				$i++;
+						";
+						$i++;
+					break;
+					## FOR CHURCH
+					case "church":
+						echo "
+						<div class='my-cart'>
+							<figure>
+								<img src='images/providers/".$cart['service_type']."/".$cart['provider_id']."/".$cart['service_img']."' alt=''>
+							</figure>
+							<div class='my-cart-details'>
+								<div class='my-cart-title'>
+									<h3>".$cart['church_church']."</h3>
+									<p>".limit_text($cart['service_desc'], 10)."</p>
+								</div>
+								<div>
+									<p>Scheduled time:</p>
+									<p style='color:#aaa;'>{$cart['cart_sched_time']}</p>
+								</div>
+							</div>
+							<div class='my-cart-qty'><a href='deleting.php?table=cart&attr=cart_id&data=".$cart['cart_id']."' onclick=\"return confirm('Are you sure you want to delete this to cart?');\"><i class='fa-solid fa-trash-can'></i></a></div>
+						</div>
+						";
+						$i++;
+					break;
+					## FOR HEADSTONE
+					case "headstone":
+					break;
+					## FOR HEADSTONE
+					case "headstone":
+					break;
+					## FOR HEADSTONE
+					case "headstone":
+					break;
+					## FOR HEADSTONE
+					case "headstone":
+					break;
+
+				}
 			}
 
+			
+			
 			echo "
+			<a style='display:block;width:95%;text-align:right;margin-bottom:.5em;' href='funeral.php'>Browse More Services &#187; </a>
+			<div class='hr full-width'></div>
 			<form method='post'>
-				<div class='hr full-width'></div>
 				<div class='my-cart'>
 					<div class='my-cart-form'>
 						<div class='total-sub terms'>
 							<input class='radio-terms' type='checkbox' name='radio' required>
 							<p>By checking this you agree to our <a href=''>terms and conditions</a>.</p>
 						</div>
-						<button type='submit' name='btncheckout' class='btn'>Checkout</button>
+						<button type='submit' name='btncheckout' class='btn' onclick='return confirm(\"Confirm checkout?\");'>Checkout</button>
 					</div>
 				</div>
 			</form>
 			";
 
 			if(isset($_POST['btncheckout'])){
-				$attr_list = ["seeker_id", "service_id", "purchase_total", "purchase_qty", "purchase_size", "purchase_date", "purchase_status"];
+				$table = "purchase";
+				$attr_list = ["seeker_id", "service_id", "purchase_total", "purchase_qty", "purchase_size", "purchase_date", "purchase_sched_time", "purchase_status", "purchase_progress"];
 				$cart_table = read("cart", ["seeker_id"], [$_SESSION['seeker']]);
+				$checker = false;
 				
 				foreach($cart_table as $results){
 					$service_ = read("services", ["service_id"], [$results["service_id"]]);
 					$service_ = $service_[0];
-					$per_cost = $service_["service_cost"] * $results['cart_qty'];
 
-					$data_list = [$results['seeker_id'], $results['service_id'], $per_cost, $results['cart_qty'], $results['cart_size'], date('Y-m-d'), "to pay"];
+					switch($service_['service_type']){
+						##
+						case "funeral":
+							$per_cost = $service_["service_cost"] * $results['cart_qty'];
+
+							$data_list = [$results['seeker_id'], $results['service_id'], $per_cost, $results['cart_qty'], $results['cart_size'], date('Y-m-d'), NULL, "to pay", 0];
+						break;
+						##
+						case "church":
+							$checker = true;
+							$data_list = [$results['seeker_id'], $results['service_id'], NULL, NULL, NULL, date('Y-m-d'), $results['cart_sched_time'], "scheduled", 0];
+						break;
+					}
+					## GET ALL IDS BEFORE CREATING
+					$ids_array = id_array_of_query($table);
 					## CREATE PURCHASE
-					create("purchase", $attr_list, qmark_generator(count($attr_list)), $data_list);
+					create($table, $attr_list, qmark_generator(count($attr_list)), $data_list);
+
+					## ADD TO DETAILS FOR CHURCH
+					if($service_['service_type'] == "church") {
+						## GET THE LAST CREATED ID
+						$purchase_id = last_created_id($table, $ids_array);
+						##
+						$attr_list = ["purchase_id"];
+						create("details", $attr_list, qmark_generator(count($attr_list)), [$purchase_id]);
+					}
 				}
 				## DELETE ALL DATA IN CART
 				delete("cart", "seeker_id", $_SESSION['seeker']);
 
-				header("Location: payment.php");
+				($checker) ? header("Location: purchase.php") : header("Location: payment.php");
 				exit;
 			}
 		}
@@ -634,8 +735,27 @@
 				<div>Requests</div>
 			</div>
 			";
-			foreach($list as $results){
-				$service_ = read("services", ["service_id"], [$results['service_id']]);
+			## DECLARATION FOR PAGINATION
+			$result = 5;
+			$total_results = count($list);
+			$page_numbers = ceil($total_results / $result);
+
+			## PAGINATION CURRENT PAGES
+			if(!isset($_GET['page'])) $current_page = 1;
+			else $current_page = $_GET['page'];
+			##
+			for($i=1; $i<=$page_numbers; $i++){
+				if($current_page == $i){
+					## 5 * 2 = 10
+					$per_page = $result * $current_page;
+					## 10 - 5 = 5
+					$starting_point = $per_page - $result;
+					##
+					for($j=$starting_point; $j<$per_page; $j++){
+						if(!empty($list[$j])){
+
+				##
+				$service_ = read("services", ["service_id"], [$list[$j]['service_id']]);
 				$service_ = $service_[0];
 
 				$differ_ = service_type($service_['service_type'], $service_['service_id']);
@@ -646,17 +766,21 @@
 						<h3>".$differ_[1]." <mark class='btn status type'>".$service_['service_type']."</mark>
 							<span>
 								<!-- DATE -->
-								on: ".date("F j, Y", strtotime($results['purchase_date']))."
+								on: ".date("F j, Y", strtotime($list[$j]['purchase_date']))."
 							</span>
 						</h3>
 						<p>".limit_text($service_['service_desc'], 10)."</p>
 					</div>
 					<div>
-						<span>
-						".$results['purchase_status']."
+						<span style='display:flex;align-items:center;justify-content:center;gap:0 5px;'>"; 
+						if($service_['service_type'] == "funeral" && $list[$j]['purchase_status'] != "to pay") {
+							echo "<a style='color:var(--blue);font-size:18px;' href='' title='Covered by no cancellation policy.'><i class='fa-solid fa-circle-question'></i></a>";
+						}
+						echo "
+						".$list[$j]['purchase_status']."
 				"; 
 				##
-				$payout = read("payout", ["purchase_id"], [$results['purchase_id']]);
+				$payout = read("payout", ["purchase_id"], [$list[$j]['purchase_id']]);
 
 				if(count($payout) == 1){
 					$payout = $payout[0];
@@ -679,64 +803,135 @@
 					<div>
 				";
 
-				## STATUS IS PAID
-				if($results['purchase_status'] == "paid" || $results['purchase_status'] == "done" || $results['purchase_status'] == "rated")
-					echo "<a href='status.php?purchaseid=".$results['purchase_id']."' class='status'>view</a>";
+				## ALL STATUS
+				if($list[$j]['purchase_status'] == "paid" || $list[$j]['purchase_status'] == "done" || $list[$j]['purchase_status'] == "rated" || $list[$j]['purchase_status'] == "scheduled") {
+					echo "<a href='status.php?purchaseid=".$list[$j]['purchase_id']."' class='status'>view</a>";
+				}
+					
 
 				## STATUS IS TO PAY
-				if($results['purchase_status'] == "to pay"){
+				if($list[$j]['purchase_status'] == "to pay"){
 					## FOR SEEKER
 					if(isset($_SESSION['seeker'])){
-						echo "<a href='payment.php?purchaseid=".$results['purchase_id']."' class='status' onclick='return confirm(\"Are you sure you want to pay this purchase?\");'>pay</a>";
-						echo "<a href='deleting.php?table=purchase&attr=purchase_id&data=".$results['purchase_id']."&url=purchase' class='status' onclick='return confirm(\"Are you sure you want to delete this purchase?\");'>delete</a>";
+						echo "<a href='payment.php?purchaseid=".$list[$j]['purchase_id']."' class='status' onclick='return confirm(\"Are you sure you want to pay this purchase?\");'>pay</a>";
+						echo "<a href='deleting.php?table=purchase&attr=purchase_id&data=".$list[$j]['purchase_id']."&url=purchase' class='status' onclick='return confirm(\"Confirm deletion?\");'>delete</a>";
 					}
 				}
 
 				## STATUS IS DONE OR RATED
-				if($results['purchase_status'] == "done" || $results['purchase_status'] == "rated"){
+				if($list[$j]['purchase_status'] == "done" || $list[$j]['purchase_status'] == "rated"){
 					## FOR SEEKER
-					if(isset($_SESSION['seeker']) && $results['purchase_status'] == "done"){
-						echo "<a href='funeral_tradition_this.php?service_id={$results['service_id']}&id={$service_['provider_id']}&p_id={$results['purchase_id']}&rate#ratings' class='status' onclick='return confirm(\"Are you sure you want to rate this purchase?\")'>rate now</a>";
+					if(isset($_SESSION['seeker']) && $list[$j]['purchase_status'] == "done"){
+						echo "<a href='funeral_tradition_this.php?service_id={$list[$j]['service_id']}&id={$service_['provider_id']}&p_id={$list[$j]['purchase_id']}&rate#ratings' class='status' onclick='return confirm(\"Are you sure you want to rate this purchase?\")'>rate now</a>";
 					}
 
-					if(isset($_SESSION['seeker']) && $results['purchase_status'] == "rated"){
-						echo "<a href='funeral_tradition_this.php?service_id={$results['service_id']}&id={$service_['provider_id']}&rated#ratings' class='status'>view rate</a>";
+					if(isset($_SESSION['seeker']) && $list[$j]['purchase_status'] == "rated"){
+						echo "<a href='funeral_tradition_this.php?service_id={$list[$j]['service_id']}&id={$service_['provider_id']}&rated#ratings' class='status'>view rate</a>";
 					}
 
 					## FOR PROVIDER
 					if(isset($_SESSION['provider'])){
-						$payout = read("payout", ["purchase_id"], [$results['purchase_id']]);
+						$payout = read("payout", ["purchase_id"], [$list[$j]['purchase_id']]);
 
 						if(count($payout) == 0){
-							echo "<a href='payout.php?id={$results['purchase_id']}' class='status' onclick='return confirm(\"Are you sure you want to request payout for this purchase?\")'>payout</a>";
+							echo "<a href='payout.php?id={$list[$j]['purchase_id']}' class='status' onclick='return confirm(\"Are you sure you want to request payout for this purchase?\")'>payout</a>";
 						}
 						else if(count($payout) == 1) {
 							$payout = $payout[0];
 							if($payout['payout_image'] != NULL) {
-								echo "<a href='images/admins/payout/{$payout['payout_image']}' download='payment_proof_{$results['purchase_id']}' class='status'>download proof</a>";
+								echo "<a href='images/admins/payout/{$payout['payout_image']}' download='payment_proof_{$list[$j]['purchase_id']}' class='status'>download proof</a>";
 							}
 						}
 					}
 
 					## FOR ADMIN
 					if(isset($_SESSION['admin'])){
-						$payout = read("payout", ["purchase_id"], [$results['purchase_id']]);
+						$payout = read("payout", ["purchase_id"], [$list[$j]['purchase_id']]);
 
 						if(count($payout) == 1){
 							$payout = $payout[0];
 
 							if($payout['payout_image'] == NULL){
-								echo "<a href='payout.php?id={$results['purchase_id']}' class='status'>upload proof</a>";
+								echo "<a href='payout.php?id={$list[$j]['purchase_id']}' class='status'>upload proof</a>";
 							}
 						}	
 					}
+				}
+
+				## STATUS IS SCHEDULED
+				if($list[$j]['purchase_status'] == "scheduled" && $list[$j]['purchase_progress'] == 0){
+					## RESCHED BUTTON
+					echo "<mark class='status' id='open-resched' onclick='open_modal({$list[$j]['purchase_id']});'>resched</mark>";
+					
+					##
+					$days_remaining = (strtotime(date($differ_['church_mass_date'])) - strtotime(date("Y-m-d"))) /60/60/24;
+					## CAN CANCEL IF MORE THAN 3 DAYS REMAINING BEFORE SERVICE DATE
+					if($days_remaining > 3) {
+						echo "<a class='status' href='deleting.php?table=purchase&attr=purchase_id&data=".$list[$j]['purchase_id']."&url=purchase' onclick='return confirm(\"Confirm cancellation?\");'>cancel</a>";
+					}
+					##
+					$time_available = time_available($differ_['church_mass_time'], $list[$j]['service_id']);
+
+					echo "
+					<dialog class='modal-img' id='modal-resched{$list[$j]['purchase_id']}'>
+						<button id='close-resched{$list[$j]['purchase_id']}'>+</button>";
+						## 
+						if(empty($time_available)) {
+							echo "<div class='note red' style='width:fit-content;'><i class='fa-solid fa-circle-info'></i> Fully booked pamisa's schedules.</div>";
+						}
+						else {
+							echo "
+							<h2>Reschedule Church Pamisa</h2>
+							<div class='note blue'><i class='fa-solid fa-circle-info'></i> Note: You can only reschedule once.</div>
+							<form method='post' style='text-align:left;margin-block:1.5em;'>
+								<input type='hidden' name='numid' value='{$list[$j]['purchase_id']}'></input>
+								<label>Time Available on ".date("M j, Y", strtotime($differ_['church_mass_date']))."</label>
+								<select name='cbotime' required>
+									<option value=''>BROWSE OPTIONS</option>
+									{$time_available}
+								</select>
+								<button class='btn' type='submit' name='btnresched'>Reschedule</button>
+							</form>";
+						}
+					echo "	
+					</dialog>";
 				}
 
 				echo "
 					</div>
 				</div>
 				";
+						}
+						else break;
+					}
+				}
+				else continue;
 			}	
+			## PAGINATION
+			echo "
+			<div class='pagination'>
+				<ul>";
+					## FOR PREV PAGE
+					$prev_page = $current_page - 1;
+					if($prev_page >= 1) echo "<li><a href='?page={$prev_page}'><i class='fa-solid fa-angles-left'></i></a></li>";
+					else echo "<li><a style='pointer-events:none;color:gray;'><i class='fa-solid fa-angles-left'></i></a></li>";
+
+					## LOOP ALL PAGE NUMBERS
+					for($i=1; $i<=$page_numbers; $i++){
+						$is_active = "";
+			
+						if($i == $current_page) $is_active = "class='hovered'";
+						else $is_active = "";
+						##
+						echo "<li><a {$is_active} href='?page={$i}'>{$i}</a></li>";
+					}
+					## FOR NEXT PAGE
+					$next_page = $current_page + 1;
+					if($next_page <= $page_numbers) echo "<li><a href='?page={$next_page}'><i class='fa-solid fa-angles-right'></i></a></li>";
+					else echo "<li><a style='pointer-events:none;color:gray;'><i class='fa-solid fa-angles-right'></i></a></li>";
+			echo "
+				</ul>
+			</div>";
 		}
 		else messaging("error", "You have no transactions yet!");
 	}
@@ -1186,7 +1381,7 @@
 					$txtpriest = trim(ucwords($_POST['txtpriest']));
 					$date = $_POST['date'];
 					$txtcemetery = trim(ucwords($_POST['txtcemetery']));
-					$cbtime = "10:00 am - 11:00 am, 11:00 am - 12:00 nn, 12:00 nn - 01:00 pm, 01:00 pm - 02:00 pm, 02:00 pm - 03:00 pm";
+					$cbtime = "10:00am - 11:00am, 11:00am - 12:00nn, 12:00nn - 01:00pm, 01:00pm - 02:00pm, 02:00pm - 03:00pm";
 					$checked = false;
 					##
 					if(!isset($_POST['cbaddress'])) {
@@ -1238,14 +1433,7 @@
 	}
 	## SERVICE TYPE
 	function service_type($type, $service_id){
-		switch($type){
-			case "funeral":
-				$result = read($type, ["service_id"], [$service_id]);
-				break;
-			case "flower":
-				break;
-		}
-
+		$result = read($type, ["service_id"], [$service_id]);
 		return $result[0];
 	}
 	## SERVICE TYPE EXISTS IN ARRAY BOOLEAN
@@ -1308,6 +1496,34 @@
 		}
 		return $expired;
 	}
+	## AVAILABLE TIME FOR CHURCH
+	function time_available($time_string, $service_id){
+		##
+		$time = $time_available = "";
+		$results = [];
+		$time_booked = read("purchase", ["service_id"], [$service_id]);
+		##
+		if(count($time_booked) > 0) {
+			foreach($time_booked as $result) {
+				$time .= $result['purchase_sched_time'].",";
+			}
+		}
+		## CHECK CURRENT SCHEDULED TIME
+		$time_list = explode(",",$time_string);
+		$time = explode(",",$time);
+		## GET ALL AVAILABLE TIME
+		$results = array_diff($time_list, $time);
+		##
+		if(!empty($results)) {
+			foreach($results as $result) {
+				$time_available .= "<option value='{$result}'>{$result}</option>";
+			}
+		}
+		
+		return $time_available;
+		## IF RESULT IS EQUALS TO ""
+		## DISPLAY FULLY BOOKED
+	}
 	## UPDATE FUNCTION
 	function update($table, $attr_list, $data_list, $condition){
 		## UPDATE organizer SET orga_company=?, orga_fname=?, orga_lname=?, orga_mi=?, orga_address=?, orga_phone=?, orga_email=? WHERE orga_id=?"
@@ -1318,29 +1534,31 @@
 		$txtname = trim(ucwords($_POST['txtname']));
 		$txtbdt = $_POST['txtbdt'];
 		$txtbadd = trim(ucwords($_POST['txtbadd']));
-		$txtdadd = trim(ucwords($_POST['txtdadd']));
-
-		switch($type){
-			case "funeral":
-				## ERROR TRAPPING
-				if(preg_match('/\d/', $txtname)){
-					echo "<script>alert('Firstname cannot have a number!')</script>";
-				}
-				else {
-					$table = "details";
-					$attr_list = ["deceased_name","burial_datetime","burial_add","delivery_add"];
-					$data_list = [$txtname, date("Y-m-d H:i:s", strtotime($txtbdt)), $txtbadd, $txtdadd, $_GET['purchaseid']];
-
-					update($table, $attr_list, $data_list, "purchase_id");
-
-					header("Location: status.php?purchaseid=".$_GET['purchaseid']."&updated");
-					exit;
-				}
-			break;
-
-			case "church":
-			break;
+		## ERROR TRAPPING
+		if(preg_match('/\d/', $txtname)){
+			echo "<script>alert('Firstname cannot have a number!')</script>";
 		}
+		else {
+			$table = "details";
+			$attr_list = ["deceased_name","burial_datetime","burial_add"];
+			$data_list = [$txtname, date("Y-m-d H:i:s", strtotime($txtbdt)), $txtbadd];
+
+			switch($type){
+				case "funeral":
+					$txtdadd = trim(ucwords($_POST['txtdadd']));
+					array_push($attr_list, "delivery_add");
+					array_push($data_list, $txtdadd, $_GET['purchaseid']);
+				break;
+	
+				case "church":
+					array_push($data_list, $_GET['purchaseid']);
+				break;
+			}
+			## UPDATE DETAILS TABLE
+			update($table, $attr_list, $data_list, "purchase_id");
+			header("Location: status.php?purchaseid=".$_GET['purchaseid']."&updated");
+			exit;
+		}		
 	}
 	## UPLOAD SINGLE IMAGE
 	function upload_image($name, $target){

@@ -5,7 +5,7 @@
 	
 	## CART SUCCESSFULLY ADDED
 	if(isset($_GET['cart_success'])){
-		echo "<script>alert('Successfully added to cart! View cart now!')</script>";
+		echo "<script>alert('Successfully added to cart!')</script>";
 	}
 
 	## CART SUCCESSFULLY DELETE
