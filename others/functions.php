@@ -335,6 +335,26 @@
 					break;
 					## FOR HEADSTONE
 					case "headstone":
+						$total_cost = $cart['service_cost'] * $cart['cart_qty'];
+						echo "
+						<div class='my-cart'>
+							<figure>
+								<img src='images/providers/".$cart['service_type']."/".$cart['provider_id']."/".$cart['service_img']."' alt=''>
+							</figure>
+							<div class='my-cart-details'>
+								<div class='my-cart-title'>
+									<h3>".ucwords($cart['stone_color'])." ".ucwords($cart['stone_kind'])." ".ucwords($cart['stone_type'])."
+										<span>(".$cart['cart_font'].")</span> <span>".$cart['cart_size']."</span>
+									</h3>
+									<p>".limit_text($cart['service_desc'], 10)."</p>
+								</div>
+								<span class='qty'>x".$cart['cart_qty']."</span>
+								<h3>₱ ".number_format($total_cost,2,'.',',')."</h3>
+							</div>
+							<div class='my-cart-qty'><a href='deleting.php?table=cart&attr=cart_id&data=".$cart['cart_id']."' onclick=\"return confirm('Are you sure you want to delete this to cart?');\"><i class='fa-solid fa-trash-can'></i></a></div>
+						</div>
+						";
+						$i++;
 					break;
 					## FOR HEADSTONE
 					case "headstone":
@@ -349,8 +369,6 @@
 				}
 			}
 
-			
-			
 			echo "
 			<a style='display:block;width:95%;text-align:right;margin-bottom:.5em;' href='funeral.php'>Browse More Services &#187; </a>
 			<div class='hr full-width'></div>
@@ -388,6 +406,13 @@
 						case "church":
 							$checker = true;
 							$data_list = [$results['seeker_id'], $results['service_id'], NULL, NULL, NULL, date('Y-m-d'), $results['cart_sched_time'], "scheduled", 0];
+						break;
+						##
+						case "headstone":
+							$per_cost = $service_["service_cost"] * $results['cart_qty'];
+							array_push($attr_list, "purchase_font");
+
+							$data_list = [$results['seeker_id'], $results['service_id'], $per_cost, $results['cart_qty'], $results['cart_size'], date('Y-m-d'), NULL, "to pay", 0, $results['cart_font']];
 						break;
 					}
 					## GET ALL IDS BEFORE CREATING
@@ -454,16 +479,27 @@
 	## NECESSARY UPDATE AFTER PAYING
 	function pay_purchase($type_list, $purchase_list){
 		## DECLARE DATA
-		if(service_type_exist_bool("funeral", $type_list) || service_type_exist_bool("church", $type_list) || service_type_exist_bool("headstone", $type_list)){
+		$cbomethod = $_POST['cbomethod'];
+		##
+		if(service_type_exist_bool("funeral", $type_list) || service_type_exist_bool("headstone", $type_list)){
 			$txtdeceasedname = trim(ucwords($_POST['txtdeceasedname']));
 		}
+
 		if(!service_type_exist_bool("church", $type_list)){
 			$txtdeliveryadd = trim(ucwords($_POST['txtdeliveryadd']));
 		}
-		if(service_type_exist_bool("funeral", $type_list)){
-			$dtburial = $_POST['dtburial'];
-			$txtburialadd = trim(ucwords($_POST['txtburialadd']));
 
+		if(service_type_exist_bool("funeral", $type_list) || service_type_exist_bool("headstone", $type_list)){
+			if(service_type_exist_bool("funeral", $type_list)){
+				$dtburial = $_POST['dtburial'];
+				$txtburialadd = trim(ucwords($_POST['txtburialadd']));
+			}
+			if(service_type_exist_bool("headstone", $type_list)){
+				$datebirth = $_POST['datebirth'];
+				$datedeath = $_POST['datedeath'];
+				$datedeliveryheadstone = $_POST['datedeliveryheadstone'];
+				$txtmsg = trim(ucwords($_POST['txtmsg']));
+			}
 			## ERROR TRAP
 			if(preg_match('/\d/', $txtdeceasedname)){
 				echo "<script>alert('Deceased name cannot have a number!')</script>";
@@ -471,8 +507,18 @@
 			else {
 				## INSERT DATA INTO FUNERAL
 				foreach($purchase_list as $results){
-					$attr_list = ["purchase_id", "deceased_name", "delivery_add", "burial_datetime", "burial_add"];
-					$data_list = [$results['purchase_id'], $txtdeceasedname, $txtdeliveryadd, date("Y-m-d H:i:s", strtotime($dtburial)), $txtburialadd];
+					$attr_list = ["purchase_id", "deceased_name", "delivery_add"];
+					$data_list = [$results['purchase_id'], $txtdeceasedname, $txtdeliveryadd];
+					## FOR FUNERAL
+					if(service_type_exist_bool("funeral", $type_list)){
+						array_push($attr_list, "burial_datetime", "burial_add");
+						array_push($data_list, date("Y-m-d H:i:s", strtotime($dtburial)), $txtburialadd);
+					}
+					## FOR HEADSTONE
+					if(service_type_exist_bool("headstone", $type_list)){
+						array_push($attr_list, "birth_date", "death_date", "delivery_date", "message");
+						array_push($data_list, $datebirth, $datedeath, $datedeliveryheadstone, $txtmsg);
+					}
 					##
 					create("details", $attr_list, qmark_generator(count($attr_list)), $data_list);
 
@@ -493,12 +539,23 @@
 					if($service_['service_qty'] == 0){
 						update("services", ["service_status"], ["inactive", $results['service_id']], "service_id");
 					}
-				}		
-			}
 
-			
-			
-			
+					## CREATE PAYMENT TABLE
+					if($cbomethod == "gcash") {
+						$acc_name = trim(ucwords($_POST['gcash-name']));
+						$acc_num = $_POST['gcash-num'];
+					}
+					else if($cbomethod == "card") {
+						$acc_name = trim(ucwords($_POST['card-name']));
+						$acc_num = $_POST['card-num'];
+					}
+					
+					$attr_list = ["purchase_id", "payment_method", "account_name", "account_number", "payment_datetime"];
+					$data_list = [$results['purchase_id'], $cbomethod, $acc_name, $acc_num, date("Y-m-d H:i:s")];
+
+					create("payment", $attr_list, qmark_generator(count($attr_list)), $data_list);
+				}		
+			}			
 		}
 		if(service_type_exist_bool("candle", $type_list)){
 			$datedeliverycandle = $_POST['datedeliverycandle'];
@@ -507,19 +564,9 @@
 			$datedeliveryflower = $_POST['datedeliveryflower'];
 			$txtribbonmsg = trim(ucwords($_POST['txtribbonmsg']));
 		}
-		if(service_type_exist_bool("headstone", $type_list)){
-			$datebirth = $_POST['datebirth'];
-			$datedeath = $_POST['datedeath'];
-			$txtmsg = trim(ucwords($_POST['txtmsg']));
-			$datedeliveryheadstone = $_POST['datedeliveryheadstone'];
-		}
 		if(service_type_exist_bool("catering", $type_list)){
 			$dtdelivery = $_POST['dtdelivery'];
 			$numpax = $_POST['numpax'];
-		}
-		if(service_type_exist_bool("church", $type_list)){
-			$txtcemaddress = trim(ucwords($_POST['txtcemaddress']));
-			## CHECK IF txtcemaddress IS EMPTY
 		}
 	}
 	## CHECKS PURCHASE PROGRESS IF LIMIT
@@ -648,13 +695,13 @@
 						"; 
 						// <div class='card-price'>₱ ".number_format($results['service_cost'], 2, '.', ',')."</div>
 
-						if(!service_is_booked($results['service_id'])){
+						if(service_is_booked($results['service_id'])){
+							echo "<a href='services_add.php?id=".$results['service_id']."&edit' class=''><i class='fa-solid fa-pen-to-square'></i></a>";
+						}
+						else {
 							echo "
 							<a href='services_add.php?id=".$results['service_id']."&book=false&edit' class=''><i class='fa-solid fa-pen-to-square'></i></a>
 							<a href='deleting.php?table={$results['service_type']}&attr=service_id&data=".$results['service_id']."&url=services' onclick='return confirm(\"Are you sure you want to delete this service?\");'><i class='fa-solid fa-trash-can'></i></a>";
-						}
-						else {
-							echo "<a href='services_add.php?id=".$results['service_id']."&edit' class=''><i class='fa-solid fa-pen-to-square'></i></a>";
 						}
 
 						echo "
@@ -720,10 +767,14 @@
 	}
 	## LIST OF PURCHASE
 	function purchase_list(){
+		$is_church = false;
 		if(isset($_SESSION['seeker']))
 			$list = read("purchase", ["seeker_id"], [$_SESSION['seeker']]);
 		else if(isset($_SESSION['provider'])){
 			$list = DB::query("SELECT * FROM purchase a JOIN services b ON a.service_id = b.service_id WHERE provider_id = ?", array($_SESSION['provider']), "READ");
+			
+			$provider = provider();
+			if($provider['provider_type'] == "church") $is_church = true;
 		}
 		else $list = read('purchase');
 		
@@ -731,6 +782,9 @@
 			echo "
 			<div class='list'>
 				<div></div>
+				"; 
+				echo ($is_church) ? "<div>Time</div>":"";
+				echo "
 				<div>Status</div>
 				<div>Requests</div>
 			</div>
@@ -759,26 +813,44 @@
 				$service_ = $service_[0];
 
 				$differ_ = service_type($service_['service_type'], $service_['service_id']);
+				$name = $differ_[1];
+
+				if($service_['service_type'] == "headstone") {
+					$headstone = read("headstone", ["service_id"], [$list[$j]['service_id']]);
+					$headstone = $headstone[0];
+
+					$name = $headstone["stone_color"]." ".$headstone["stone_kind"]." ".$headstone["stone_type"];
+					$name = ucwords($name);
+				} 
 				
 				echo "
 				<div class='list'>
 					<div>
-						<h3>".$differ_[1]." <mark class='btn status type'>".$service_['service_type']."</mark>
+						<h3>{$name} <mark class='btn status type'>".$service_['service_type']."</mark>
 							<span>
 								<!-- DATE -->
 								on: ".date("F j, Y", strtotime($list[$j]['purchase_date']))."
 							</span>
 						</h3>
 						<p>".limit_text($service_['service_desc'], 10)."</p>
-					</div>
+					</div>";
+					##  
+					if($is_church) {
+						echo "<div><span style='display:flex;align-items:center;justify-content:center;gap:0 5px;'>{$list[$j]['purchase_sched_time']}</span></div>";
+					}
+				echo "
 					<div>
 						<span style='display:flex;align-items:center;justify-content:center;gap:0 5px;'>"; 
+						
 						if($service_['service_type'] == "funeral" && $list[$j]['purchase_status'] != "to pay") {
 							echo "<a style='color:var(--blue);font-size:18px;' href='' title='Covered by no cancellation policy.'><i class='fa-solid fa-circle-question'></i></a>";
 						}
-						echo "
-						".$list[$j]['purchase_status']."
-				"; 
+
+						if($service_['service_type'] == "church" && $list[$j]['purchase_status'] == "re-schedule") {
+							echo "<a style='color:var(--blue);font-size:18px;' href='' title='Church provider changed time availability.'><i class='fa-solid fa-circle-question'></i></a>";
+						}
+						
+				echo $list[$j]['purchase_status']; 
 				##
 				$payout = read("payout", ["purchase_id"], [$list[$j]['purchase_id']]);
 
@@ -797,8 +869,7 @@
 					}	
 				}
 
-				echo "
-						</span>
+				echo "	</span>
 					</div>
 					<div>
 				";
@@ -808,12 +879,11 @@
 					echo "<a href='status.php?purchaseid=".$list[$j]['purchase_id']."' class='status'>view</a>";
 				}
 					
-
 				## STATUS IS TO PAY
 				if($list[$j]['purchase_status'] == "to pay"){
 					## FOR SEEKER
 					if(isset($_SESSION['seeker'])){
-						echo "<a href='payment.php?purchaseid=".$list[$j]['purchase_id']."' class='status' onclick='return confirm(\"Are you sure you want to pay this purchase?\");'>pay</a>";
+						echo "<a href='payment.php?purchaseid=".$list[$j]['purchase_id']."' class='status' onclick='return confirm(\"Proceed to payment?\");'>pay</a>";
 						echo "<a href='deleting.php?table=purchase&attr=purchase_id&data=".$list[$j]['purchase_id']."&url=purchase' class='status' onclick='return confirm(\"Confirm deletion?\");'>delete</a>";
 					}
 				}
@@ -834,7 +904,7 @@
 						$payout = read("payout", ["purchase_id"], [$list[$j]['purchase_id']]);
 
 						if(count($payout) == 0){
-							echo "<a href='payout.php?id={$list[$j]['purchase_id']}' class='status' onclick='return confirm(\"Are you sure you want to request payout for this purchase?\")'>payout</a>";
+							echo "<a href='payout.php?id={$list[$j]['purchase_id']}' class='status' onclick='return confirm(\"Confirm request payout?\")'>payout</a>";
 						}
 						else if(count($payout) == 1) {
 							$payout = $payout[0];
@@ -858,11 +928,10 @@
 					}
 				}
 
-				## STATUS IS SCHEDULED
-				if($list[$j]['purchase_status'] == "scheduled" && $list[$j]['purchase_progress'] == 0){
+				## STATUS IS SCHEDULED / RE-SCHEDULE - WHEN CHURCH UPDATE MASS TIME WHERE SEEKER BOOKED
+				if(($list[$j]['purchase_status'] == "scheduled" || $list[$j]['purchase_status'] == "re-schedule") && $list[$j]['purchase_progress'] == 0 && isset($_SESSION['seeker'])){
 					## RESCHED BUTTON
 					echo "<mark class='status' id='open-resched' onclick='open_modal({$list[$j]['purchase_id']});'>resched</mark>";
-					
 					##
 					$days_remaining = (strtotime(date($differ_['church_mass_date'])) - strtotime(date("Y-m-d"))) /60/60/24;
 					## CAN CANCEL IF MORE THAN 3 DAYS REMAINING BEFORE SERVICE DATE
@@ -1034,19 +1103,33 @@
 		switch($type){
 			case "payout":
 				$cbomethod = $_POST['cbomethod'];
-				$txtacc = trim($_POST['txtacc']);
+				$acc_name = trim(ucwords($_POST['acc-name']));
+				$acc_num = trim($_POST['acc-num']);
 
-				if(!is_numeric($txtacc)){
+				if(!is_numeric($acc_num)){
 					echo "<script>alert('Invalid account number!')</script>";
 				}
 				else {
 					##
 					$table = "payout";
-					$attr_list = ["purchase_id", "payout_method", "payout_account"];
-					$data_list = [$_GET['id'], $cbomethod, $txtacc];
+					$attr_list = ["purchase_id", "payout_method", "account_name", "account_number", "payout_datetime"];
+					$data_list = [$_GET['id'], $cbomethod, $acc_name, $acc_num, date("Y-m-d H:i:s")];
 					##
 					create($table, $attr_list, qmark_generator(count($attr_list)), $data_list);
-					## SEND EMAIL
+					
+					## SEND EMAIL | PROVIDER
+					$provider = read("provider", ["provider_id"], [$_SESSION['provider']]);
+					$provider = $provider[0];
+					## SEND EMAIL | SEND TO EMAIL
+					$to = $provider['provider_email'];
+					## SEND EMAIL | SUBJECT
+					$subject = "Request Payout";
+					## SEND EMAIL | MESSAGE
+					$txt = "Hi {$provider['provider_fname']},\n\nPlease be advise that you must wait for admin to upload proof of payment for your request.\nThank you for choosing us!";
+					$txt .= "\n\n\nBest regards,\nTeam Wakecords";
+
+					mail($to, $subject, $txt);
+
 					## REDIRECTING
 					header("Location: purchase.php?requests");
 					exit;
@@ -1070,7 +1153,19 @@
 					$condition = "purchase_id";
 					##
 					update($table, $attr_list, $data_list, $condition);
-					## SEND EMAIL
+					
+					## SEND EMAIL | PROVIDER
+					$provider = DB::query("SELECT * FROM payout a JOIN purchase b ON a.purchase_id = b.purchase_id JOIN services c ON b.service_id = c.service_id JOIN provider d ON c.provider_id = d.provider_id WHERE a.purchase_id = ?", array($_GET['id']), "READ");
+					$provider = $provider[0];
+					## SEND EMAIL | SEND TO EMAIL
+					$to = $provider['provider_email'];
+					## SEND EMAIL | SUBJECT
+					$subject = "Payout Proof of Payment";
+					## SEND EMAIL | MESSAGE
+					$txt = "Hi {$provider['provider_fname']},\n\nPlease be advise that admin has paid and uploaded proof of payment.\nThank you for your service!";
+					$txt .= "\n\n\nBest regards,\nTeam Wakecords";
+
+					mail($to, $subject, $txt);
 					## REDIRECTING
 					header("Location: purchase.php?uploaded");
 					exit;
@@ -1174,6 +1269,10 @@
 					return implode(",",$array);
 				}
 			break;
+			## FOR TIME
+			case "time":
+				return $type["church_mass_time"];
+			break;
 			## FOR PRICE / COST
 			case "price":
 				return number_format($service["service_cost"],0,"","");
@@ -1189,6 +1288,19 @@
 		}
 		
 		return "";
+	}
+	## CONVERT ARRAY INTO SELECT TAG
+	function select_array($array, $type){
+		echo "
+		<div>
+			<label>".ucwords($type).": </label>
+			<select name='cbo{$type}' required>
+				<option value=''>BROWSE OPTIONS</option>";
+				for($i=0; $i<count($array)-1; $i++) 
+					echo "<option value='".$array[$i]."'>".$array[$i]."</option>";
+		echo "
+			</select>
+		</div>";
 	}
 	## DISPLAY FUNERAL SERVICES
 	function services($type, $defer=NULL){
@@ -1278,11 +1390,12 @@
 							</h3>
 							<p>
 								".limit_text($results['service_desc'], 10)."
+								<span class='gray-italic' style='display:block;'>on ".date("M j, Y", strtotime($results['church_mass_date']))."</span>
 							</p>
 							<p>Priest: <b>{$results['church_priest']}</b></p>
 							<div class='buttons'>
 								<a title='View' href='funeral_tradition_this.php?service_id=".$results['service_id']."&id={$results['provider_id']}'><i class='fa-solid fa-eye'></i></a>
-								<a title='Donate' href='#'><i class='fa-solid fa-heart'></i></a>
+								<a title='Donate' href='#'><i class='fa-solid fa-circle-dollar-to-slot'></i></a>
 							</div>
 						</div>
 						";
@@ -1293,6 +1406,34 @@
 
 			## HEADSTONE SERVICES
 			case "headstone":
+				$services = DB::query("SELECT * FROM services a JOIN headstone b ON a.service_id = b.service_id", array(), "READ");
+
+					if(count($services) > 0){
+						foreach($services as $results){
+							$_SESSION['headstone_name'] = ucwords($results['stone_color'])." ".ucwords($results['stone_kind'])." ".ucwords($results['stone_type'])." Headstone";
+							## FOR USERS
+							echo "
+							<div class='card-0 no-padding'>
+								<img src='images/providers/".$results['service_type']."/".$results['provider_id']."/".$results['service_img']."'>
+								<h3>{$_SESSION['headstone_name']}
+									<span>
+										".ratings($results['service_id'], true)."
+										<i class='fa-solid fa-star'></i>
+										(".ratings_count($results['service_id'], true).")
+									</span>
+								</h3>
+								<p>
+									".limit_text($results['service_desc'], 10)."
+								</p>
+								<div class='card-price'>₱ ".number_format($results['service_cost'], 2, '.', ',')."</div>
+								<div class='buttons'>
+									<a title='View' href='funeral_tradition_this.php?service_id=".$results['service_id']."&id={$results['provider_id']}'><i class='fa-solid fa-eye'></i></a>
+								</div>
+							</div>
+							";
+						}
+					}
+					else messaging("error", "No headstone services posted!");
 			break;
 
 			## FLOWER SERVICES
@@ -1381,7 +1522,8 @@
 					$txtpriest = trim(ucwords($_POST['txtpriest']));
 					$date = $_POST['date'];
 					$txtcemetery = trim(ucwords($_POST['txtcemetery']));
-					$cbtime = "10:00am - 11:00am, 11:00am - 12:00nn, 12:00nn - 01:00pm, 01:00pm - 02:00pm, 02:00pm - 03:00pm";
+					$txttime = trim($_POST['txttime']);
+					## $cbtime = "10:00am - 11:00am, 11:00am - 12:00nn, 12:00nn - 01:00pm, 01:00pm - 02:00pm, 02:00pm - 03:00pm";
 					$checked = false;
 					##
 					if(!isset($_POST['cbaddress'])) {
@@ -1397,7 +1539,7 @@
 					$service = $service[0];	
 					## ADD TO SPECIFIC TYPE
 					$attr_list = ["service_id", "church_church", "church_cemetery", "church_priest", "church_mass_date", "church_mass_time", "church_address"];
-					$data_list = [$service['service_id'], $txtsname, $txtcemetery, $txtpriest, $date, $cbtime];
+					$data_list = [$service['service_id'], $txtsname, $txtcemetery, $txtpriest, $date, $txttime];
 					##
 					if($checked) array_push($data_list, $provider['provider_address']);
 					else array_push($data_list, $txtaddress);
@@ -1416,10 +1558,52 @@
 	}
 	## EDITING SERVICE
 	function service_editing($id){
-		$numqty = $_POST['numqty'];
+		$services = read("services", ["service_id"], [$id]);
+		$services = $services[0];
+		## DECLARING
 		$txtdesc = $_POST['txtdesc'];
+		$attr_list = ["service_desc"];
+		$data_list = [$txtdesc];
+		##
+		switch($services['service_type']){
+			case "church":
+				array_push($data_list, $id);
+				## UPDATE SERVICE DESCRIPTION
+				update("services", $attr_list, $data_list, "service_id");
+				## REFRESH LIST
+				$attr_list = [];
+				$data_list = [];
+				## READ CHURCH SERVICES
+				$church = read("church", ["service_id"], [$id]);
+				$church = $church[0];
+				## 
+				$txttime = trim($_POST['txttime']);
+				array_push($attr_list, "church_mass_time");
+				array_push($data_list, $txttime, $id);
+				## UPDATE CHURCH SERVICE MASS TIME
+				update("church", $attr_list, $data_list, "service_id");
+				## UPDATE PURCHASE STATUS IF PURCHASE TIME DOES NOT EXIST IN CHURCH MASS TIME
+				$mass_time = explode(",",$txttime);
+				$purchases = read("purchase", ["service_id"], [$id]);
 
-		update("services", ["service_qty", "service_desc"], [$numqty, $txtdesc, $id], "service_id");
+				if(count($purchases) > 0) {
+					foreach($purchases as $purchase) {
+						if(!in_array($purchase['purchase_sched_time'], $mass_time))
+							update("purchase", ["purchase_status", "purchase_progress"], ["re-schedule", 0, $purchase['purchase_id']], "purchase_id");
+					}
+				}
+				
+			break;
+			default:
+				$numqty = $_POST['numqty'];
+				array_push($attr_list, "service_qty");
+				array_push($data_list, $numqty, $id);
+
+				update("services", $attr_list, $data_list, "service_id");
+			break;
+		}
+		
+		
 		header("Location: services.php?updated");
 		exit;
 	}
@@ -1439,9 +1623,8 @@
 	## SERVICE TYPE EXISTS IN ARRAY BOOLEAN
 	function service_type_exist_bool($type, $type_list){
 		for($i=0;$i<count($type_list);$i++){
-			if($type == $type_list[$i]) {
-				return true;
-			}
+			if($type == $type_list[$i]) return true;
+			continue;
 		}
 		return false;
 	}
@@ -1532,17 +1715,22 @@
 	## UPDATE FUNERAL ADDITIONAL DETAILS
 	function update_details($type){
 		$txtname = trim(ucwords($_POST['txtname']));
-		$txtbdt = $_POST['txtbdt'];
-		$txtbadd = trim(ucwords($_POST['txtbadd']));
+		##
+		if($type == "funeral" || $type == "church") {
+			$txtbdt = $_POST['txtbdt'];
+			$txtbadd = trim(ucwords($_POST['txtbadd']));
+		}
 		## ERROR TRAPPING
 		if(preg_match('/\d/', $txtname)){
 			echo "<script>alert('Firstname cannot have a number!')</script>";
 		}
 		else {
 			$table = "details";
-			$attr_list = ["deceased_name","burial_datetime","burial_add"];
-			$data_list = [$txtname, date("Y-m-d H:i:s", strtotime($txtbdt)), $txtbadd];
-
+			##
+			if($type == "funeral" || $type == "church") {
+				$attr_list = ["deceased_name","burial_datetime","burial_add"];
+				$data_list = [$txtname, date("Y-m-d H:i:s", strtotime($txtbdt)), $txtbadd];
+			}
 			switch($type){
 				case "funeral":
 					$txtdadd = trim(ucwords($_POST['txtdadd']));
@@ -1552,6 +1740,17 @@
 	
 				case "church":
 					array_push($data_list, $_GET['purchaseid']);
+				break;
+
+				case "headstone":
+					$dbirth = $_POST['dbirth'];
+					$ddeath = $_POST['ddeath'];
+					$ddeliver = $_POST['ddeliver'];
+					$txtdadd = trim(ucwords($_POST['txtdadd']));
+					$txtmsg = trim(ucwords($_POST['txtmsg']));
+					
+					$attr_list = ["deceased_name", "birth_date", "death_date", "delivery_date", "delivery_add", "message"];
+					$data_list = [$txtname, date("Y-m-d", strtotime($dbirth)), date("Y-m-d", strtotime($ddeath)), date("Y-m-d", strtotime($ddeliver)), $txtdadd, $txtmsg, $_GET['purchaseid']];
 				break;
 			}
 			## UPDATE DETAILS TABLE
@@ -1893,7 +2092,3 @@
 		}
 		else return false;
 	}
-
-	
-	
-	

@@ -52,12 +52,21 @@
 											$service_ = $service_[0];
 
 											$differ_ = service_type($service_['service_type'], $service_['service_id']);
+											$name = $differ_[1];
+
+											if($service_['service_type'] == "headstone") {
+												$headstone = read("headstone", ["service_id"], [$service_['service_id']]);
+												$headstone = $headstone[0];
+
+												$name = $headstone["stone_color"]." ".$headstone["stone_kind"]." ".$headstone["stone_type"];
+												$name = ucwords($name);
+											} 
 
 											array_push($type_list, $service_['service_type']);
 
 											echo "
 											<ul>
-												<li>".$differ_[1]."</li>
+												<li>{$name}</li>
 												<li>x".$results['purchase_qty']."</li>
 												<li>₱ ".number_format($results['purchase_total'],2,'.',',')."</li>
 											</ul>
@@ -166,12 +175,12 @@
 											<input type='date' name='datedeath' required>
 										</div>
 										<div>
-											<label>Message <span>*<span></label>
-											<input type='text' name='txtmsg' placeholder='Write a message here for the deceased.' required>
-										</div>
-										<div>
 											<label>Delivery date <span>*<span></label>
 											<input type='date' name='datedeliveryheadstone' required>
+										</div>
+										<div>
+											<label>Message <span>*<span></label>
+											<input type='text' name='txtmsg' placeholder='Write a message here for the deceased.' required>
 										</div>
 									</div>
 									";
@@ -210,30 +219,57 @@
 							</div>
 							<!-- CARD DETAILS -->
 							<div class="banner-section details card">
-								<h3>Card Details 
-									<ul>
-										<li><i class="fa-brands fa-cc-mastercard"></i></li>
-										<li><i class="fa-brands fa-cc-amex"></i></li>
-										<li><i class="fa-brands fa-cc-visa"></i></li>
-									</ul>
-								</h3>
+								<select name="cbomethod" onclick="payment_method(this);">
+									<option value="">BROWSE PAYMENT METHOD</option>
+									<option value="gcash" selected>Gcash</option>
+									<option value="card">Card</option>
+								</select>
+								
+								<div id='card-payment' style='display:none;'>
+									<h3>Card Details 
+										<ul>
+											<li><i class="fa-brands fa-cc-mastercard"></i></li>
+											<li><i class="fa-brands fa-cc-amex"></i></li>
+											<li><i class="fa-brands fa-cc-visa"></i></li>
+										</ul>
+									</h3>
 
-								<div class="details-con">
-									<div>
-										<label for="label-name">Account Name <span>*<span></label>
-										<input type="text" name="txtaccname">
+									<div class="details-con">
+										<div>
+											<label>Account Name <span>*<span></label>
+											<input type="text" id="card-name" name="card-name">
+										</div>
+										<div>
+											<label>Card Number <span>*<span></label>
+											<input type="text" id="card-num" name="card-num" minlength='16' maxlength='16'>
+										</div>
+										<div>
+											<label>Expiration Date <span>*<span></label>
+											<input type="month" id="card-expiry" name="mthexpiry">
+										</div>
+										<div>
+											<label>CVV <span>*<span></label>
+											<input type="text" id="card-cvv" name="txtcvv" minlength='3' maxlength='3'>
+										</div>
 									</div>
-									<div>
-										<label for="label-name">Card Number <span>*<span></label>
-										<input type="text" name="txtcard" minlength='16' maxlength='16'>
-									</div>
-									<div>
-										<label for="label-name">Expiration Date <span>*<span></label>
-										<input type="month" name="mthexpiry">
-									</div>
-									<div>
-										<label for="label-name">CVV <span>*<span></label>
-										<input type="text" name="txtcvv" minlength='3' maxlength='3'>
+								</div>
+
+								<div id='gcash-payment'>
+									<h3>Gcash Details 
+										<ul>
+											<li><i class="fa-solid fa-g"></i></li>
+										</ul>
+									</h3>
+
+									<div class="details-con">
+										<div>
+											<label>Account Name <span>*<span></label>
+											<input type="text" id="gcash-name" name="gcash-name" required>
+										</div>
+										<div>
+											<label>Account Number <span>*<span></label>
+											<input type="text" id="gcash-num" name="gcash-num" minlength='11' maxlength='11' placeholder='Format: 09XX' required>
+										</div>
 									</div>
 								</div>
 							</div>
@@ -256,5 +292,34 @@
 			</section>
 		</div>
 	</div>
+	<script>
+		function payment_method(that){
+			const gcash = document.getElementById("gcash-payment");
+			const card = document.getElementById("card-payment");
+
+			if(that.value == "gcash") {
+				gcash.style.display = "block";
+				document.getElementById("gcash-name").required = true;
+				document.getElementById("gcash-num").required = true;
+
+				card.style.display = "none";
+				document.getElementById("card-name").required = false;
+				document.getElementById("card-num").required = false;
+				document.getElementById("card-expiry").required = false;
+				document.getElementById("card-cvv").required = false;
+			}
+			else if(that.value == "card") {
+				gcash.style.display = "none";
+				document.getElementById("gcash-name").required = false;
+				document.getElementById("gcash-num").required = false;
+
+				card.style.display = "block";
+				document.getElementById("card-name").required = true;
+				document.getElementById("card-num").required = true;
+				document.getElementById("card-expiry").required = true;
+				document.getElementById("card-cvv").required = true;
+			}
+		}
+	</script>
 </body>
 </html>

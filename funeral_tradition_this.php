@@ -31,7 +31,7 @@
 							$service_type = read("services", ["service_id"], [$_GET['service_id']]);
 							$service_type = $service_type[0];
 							##
-							$service = DB::query("SELECT * FROM services s JOIN {$service_type['service_type']} f ON s.service_id = f.service_id WHERE s.service_id=?", array($_GET['service_id']), "READ");
+							$service = DB::query("SELECT * FROM services a JOIN {$service_type['service_type']} b ON a.service_id = b.service_id WHERE a.service_id=?", array($_GET['service_id']), "READ");
 							$service = $service[0];
 							
 							if(isset($_SESSION['provider'])){
@@ -54,13 +54,16 @@
 									$service_link = "headstone.php";
 									$a_link = "headstone.php";
 								}
-								
 							}
 							else {
 								$service_link = "funeral.php";
 								$a_link = "funeral_tradition.php";
 							}
-								
+							## DECLARE ARRAYS
+							$size_array = array();
+							$font_array = array();
+							$qty_array = array();
+							for($i=1; $i<=$service['service_qty']; $i++) array_push($qty_array, $i);
 
 							## NAME BASED ON SERVICE PROVIDER
 							switch($service_type['service_type']){
@@ -74,11 +77,15 @@
 								break;
 
 								case "headstone":
-									echo "
-									<h2><a href='{$service_link}'>Services</a> <span>> <a href='{$a_link}'>{$provider['provider_company']}</a> > {$_SESSION['headstone_name']}</span></h2>
-									";
+									$size_array = explode(",",$service['stone_size']);
+									$font_array = explode(",",$service['stone_font']);
 									## SERVICE NAME
-									$service_name = $_SESSION['headstone_name'];
+									$service_name = $service['stone_color']." ".$service['stone_kind']." ".$service['stone_type'];
+									$service_name = ucwords($service_name);
+									##
+									echo "
+									<h2><a href='{$service_link}'>Services</a> <span>> <a href='{$a_link}'>{$provider['provider_company']}</a> > {$service_name}</span></h2>
+									";
 								break;
 
 								case "church":
@@ -114,27 +121,21 @@
 								##
 								if(isset($_SESSION['seeker']) && !isset($_GET['rate']) && !isset($_GET['rated'])){
 								echo "
-									<form method='post'>"; 
+								<form method='post'>
+									<div class='selection-con'>";
 									if($service_type['service_type'] != "church") {
-								echo "
-										<div>"; 
+								
+										## SELECT TAG FOR SIZES
 										if(count($size_array) > 0 && $size_array[0] != NULL) {
-										echo "
-											<label for='cbosize'>Sizes: </label>
-											<select name='cbosize' required>
-												<option value=''>BROWSE OPTIONS</option>";
-												for($i=0;$i<count($size_array);$i++) 
-													echo "<option value='".$size_array[$i]."'>".$size_array[$i]."</option>";
-								echo "		</select>";
+											select_array($size_array, "sizes");
 									 	} 
-								echo "
-											<label for='cbomaxqty'>Quantity: </label>
-											<select name='cbomaxqty' required>
-												<option value=''>BROWSE OPTIONS</option>";
-												for($i=1;$i<=$service['service_qty'];$i++) 
-													echo "<option value='".$i."'>".$i."</option>";
-								echo "		</select>
-										</div>"; 
+										## SELECT TAG FOR FONTS
+										if(count($font_array) > 0 && $font_array[0] != NULL) {
+											select_array($font_array, "fonts");
+										}
+										## SELECT TAG FOR QTY
+										select_array($qty_array, "quantity");
+								 
 									## FOR CHURCH
 									} else {
 
@@ -146,8 +147,10 @@
 								echo "		</select>
 										</div>";
 									}
-								echo "	<button type='submit' name='btnadd' class='btn trad' onclick=\"return confirm('Confirm booking?');\">Book</button>
-									</form>";
+								echo "
+									</div>	
+										<button type='submit' name='btnadd' class='btn trad' onclick=\"return confirm('Confirm booking?');\">Book</button>
+								</form>";
 								}
 								else {
 									if($service_type['service_type'] != "church")
@@ -161,17 +164,24 @@
 									switch($service_type['service_type']){
 										## FOR FUNERAL
 										case "funeral":
-											$cbomaxqty = $_POST['cbomaxqty'];
-											$cbosize = $_POST['cbosize'];
+											$cbomaxqty = $_POST['cboquantity'];
+											$cbosize = $_POST['cbosizes'];
 											$attr_list = ["service_id", "seeker_id", "cart_qty", "cart_size"];
 											$data_list = [$service['service_id'], $_SESSION['seeker'], $cbomaxqty, $cbosize];
 										break;
 										## FOR CHURCH
 										case "church":
 											$cbotime = $_POST['cbotime'];
-											// $txtdeceased = $_POST['txtdeceased'];
 											$attr_list = ["service_id", "seeker_id", "cart_sched_time"];
 											$data_list = [$service['service_id'], $_SESSION['seeker'], $cbotime];
+										break;
+										## FOR HEADSTONE
+										case "headstone":
+											$cbomaxqty = $_POST['cboquantity'];
+											$cbosize = $_POST['cbosizes'];
+											$cbofont = $_POST['cbofonts'];
+											$attr_list = ["service_id", "seeker_id", "cart_qty", "cart_size", "cart_font"];
+											$data_list = [$service['service_id'], $_SESSION['seeker'], $cbomaxqty, $cbosize, $cbofont];
 										break;
 									}
 									

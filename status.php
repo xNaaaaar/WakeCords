@@ -6,7 +6,7 @@
 	if(isset($_GET['updated']))
 		echo "<script>alert('Successfully updated!')</script>";
 
-
+	if(isset($_SESSION['provider'])) $provider = provider();
 ?>
 
 <body>
@@ -35,7 +35,7 @@
 							echo "<h2><a href='purchase.php'>Transactions</a> <span>> Status</span></h2>";
 						}
 						## UPDATE PROGRESS STATUS FOR PROVIDER
-						if(isset($_SESSION['provider']) && !progress_limits($_GET['purchaseid'])) {
+						if(isset($_SESSION['provider']) && !progress_limits($_GET['purchaseid']) && $provider['provider_type'] != "church") {
 							echo "<a class='btn btn-link-absolute' href='updating.php?id=".$_GET['purchaseid']."&purchase' onclick='return confirm(\"Are you sure you want to update purchase progress?\");'>Update Progress</a>";
 						}?>
 
@@ -63,12 +63,14 @@
 										<?php
 										## TYPE [notify, success, error]
 										if(isset($_SESSION['seeker'])) messaging("notify", "Note: ");
+										echo "
+										<label>".$purchase['seeker_fname']." ".$purchase['seeker_lname']."</label>
+										<label><strong>".$purchase['seeker_phone']."</strong></label>";
 										##
 										switch($purchase['service_type']){
+											## FOR FUNERAL
 											case "funeral":
 												echo "
-												<label>".$purchase['seeker_fname']." ".$purchase['seeker_lname']."</label>
-												<label><b>".$purchase['seeker_phone']."</b></label>
 												<div class='hr full-width'></div>
 												
 												<label>Deceased name</label>
@@ -84,14 +86,13 @@
 												<input type='text' disabled value='".$details['delivery_add']."'>
 												";
 											break;
+											## FOR CHURCH
 											case "church":
 												$burial_dt = date("M j, Y - h:i a", strtotime($details['burial_datetime']));
 												if(empty($details['burial_datetime'])){
 													$burial_dt = date("M j, Y - h:i a");
 												}
 												echo "
-												<label>".$purchase['seeker_fname']." ".$purchase['seeker_lname']."</label>
-												<label><strong>".$purchase['seeker_phone']."</strong></label>
 												<label>Scheduled on: <em class='gray-italic'>".$purchase['purchase_sched_time']."</em><label>
 												<div class='hr full-width'></div>
 												
@@ -103,6 +104,30 @@
 
 												<label>Burial address</label>
 												<input type='text' disabled value='".$details['burial_add']."'>
+												";
+											break;
+											## FOR HEADSTONE
+											case "headstone":
+												echo "
+												<div class='hr full-width'></div>
+												
+												<label>Deceased name</label>
+												<input type='text' disabled value='".$details['deceased_name']."'>
+
+												<label>Birth date</label>
+												<input type='text' disabled value='".date("M j, Y", strtotime($details['birth_date']))."'>
+
+												<label>Death date</label>
+												<input type='text' disabled value='".date("M j, Y", strtotime($details['death_date']))."'>
+
+												<label>Delivery date</label>
+												<input type='text' disabled value='".date("M j, Y", strtotime($details['delivery_date']))."'>
+
+												<label>Delivery address</label>
+												<input type='text' disabled value='".$details['delivery_add']."'>
+
+												<label>Headstone message</label>
+												<input type='text' disabled value='".$details['message']."'>
 												";
 											break;
 										}
@@ -132,7 +157,6 @@
 										</figure>
 										<p>Thank you for purchasing!</p>
 										
-
 										<div class="receipt-details">
 											<?php
 											echo "

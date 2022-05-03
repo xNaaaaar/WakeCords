@@ -574,7 +574,7 @@
 								";
 							}
 
-							} ## END OF, IF SERVICE IS BOOKED
+							} ## END OF, IF SERVICE IS NOT BOOKED
 							
 							if($user['provider_type'] != "catering" && $user['provider_type'] != "church"){
 								echo "
@@ -586,9 +586,27 @@
 								</div>
 								";
 							}
+
+							if($user['provider_type'] == "church"){
+								echo "
+								<div style='width:100%;'>
+									<label class='label-span'>Time <span>(please follow time format, separated by comma)</span></label>
+									<input type='text' name='txttime' value='";
+									echo ($edit) ? return_value("services", $_GET['id'], "time"):"10:00am - 11:00am, 11:00am - 12:00nn, 12:00nn - 01:00pm, 01:00pm - 02:00pm, 02:00pm - 03:00pm";
+									echo "' required>
+								</div>
+								";
+							}
+							## FOR DESCRIPTIONS WIDTH
+							if(isset($_GET['edit']) && service_is_booked($_GET['id']) && $user['provider_type'] != "church") {
+								$width = "width:49.3%;";
+							}
+							else {
+								$width = "width:100%;";
+							}
 							?>
 
-							<div style='<?php echo (isset($_GET['edit']) && service_is_booked($_GET['book'])) ? "width:49.3%;":"width:100%;"; ?>'>
+							<div style='<?php echo $width; ?>'>
 								<label class='label-span'>Description <span><?php echo (!empty($desc)) ? "({$desc})":""; ?></span></label>
 								<textarea name="txtdesc" placeholder='Write here...' required><?php echo ($edit) ? return_value("services", $_GET['id'], "desc"):""; ?></textarea>
 							</div>

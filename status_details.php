@@ -32,19 +32,11 @@
 						$services = $services[0];
 
 						echo "
-						<form class='profile column' method='post'>
+						<form class='profile' method='post'>
 							<button class='btn btn-link-absolute higher-top' type='submit' name='btnupdate'>Update</button>
 							<div>
 								<label>Deceased name</label>
 								<input type='text' name='txtname' value='".$details['deceased_name']."'>
-							</div>
-							<div>
-								<label>Burial datetime</label>
-								<input type='datetime-local' name='txtbdt' value='".date("Y-m-d\TH:i", strtotime($details['burial_datetime']))."'>
-							</div>
-							<div>
-								<label>Burial address</label>
-								<input type='text' name='txtbadd' value='".$details['burial_add']."'>
 							</div>
 						";
 
@@ -53,6 +45,14 @@
 							case "funeral":
 								echo "
 								<div>
+									<label>Burial datetime</label>
+									<input type='datetime-local' name='txtbdt' value='".date("Y-m-d\TH:i", strtotime($details['burial_datetime']))."'>
+								</div>
+								<div>
+									<label>Burial address</label>
+									<input type='text' name='txtbadd' value='".$details['burial_add']."'>
+								</div>
+								<div>
 									<label>Delivery address</label>
 									<input type='text' name='txtdadd' value='".$details['delivery_add']."'>
 								</div>
@@ -60,6 +60,45 @@
 							break;
 							## FOR CHURCH SERVICES
 							case "church":
+								echo "
+								<div>
+									<label>Burial datetime</label>
+									<input type='datetime-local' name='txtbdt' value='".date("Y-m-d\TH:i", strtotime($details['burial_datetime']))."'>
+								</div>
+								<div>
+									<label>Burial address</label>
+									<input type='text' name='txtbadd' value='".$details['burial_add']."'>
+								</div>
+								";
+							break;
+							## FOR HEADSTONE SERVICES
+							case "headstone":
+								echo "
+								<div>
+									<label>Birth date</label>
+									<input type='date' name='dbirth' value='".date("Y-m-d", strtotime($details['birth_date']))."'>
+								</div>
+
+								<div>
+									<label>Death date</label>
+									<input type='date' name='ddeath' value='".date("Y-m-d", strtotime($details['death_date']))."'>
+								</div>
+								
+								<div>
+									<label>Delivery date</label>
+									<input type='date' name='ddeliver' value='".date("Y-m-d", strtotime($details['delivery_date']))."'>
+								</div>
+								
+								<div>
+									<label>Delivery address</label>
+									<input type='text' name='txtdadd' value='".$details['delivery_add']."'>
+								</div>
+								
+								<div>
+									<label>Headstone message</label>
+									<input type='text' name='txtmsg' value='".$details['message']."'>
+								</div>
+								";
 							break;
 						}
 

@@ -22,6 +22,29 @@
 
 			if(count($details)>0){
 				delete("details", $_GET['attr'], $_GET['data']);
+
+				## SEND EMAIL | PROVIDER
+				$provider = DB::query("SELECT * FROM purchase a JOIN services b ON a.service_id = b.service_id JOIN church d ON d.service_id = b.service_id JOIN provider c ON b.provider_id = c.provider_id WHERE purchase_id = ?", array($_GET['data']), "READ");
+				$provider = $provider[0];
+				## SEND EMAIL | SEEKER
+				$seeker = DB::query("SELECT * FROM purchase a JOIN seeker b ON a.seeker_id = b.seeker_id WHERE purchase_id = ?", array($_GET['data']), "READ");
+				$seeker = $seeker[0];
+				## SEND EMAIL | SEND TO EMAIL
+				$to_provider = $provider['provider_email'];
+				## SEND EMAIL | SUBJECT
+				$subject = "Purchase Cancelled";
+				## SEND EMAIL | MESSAGE
+				$txt = "Hi {$provider['provider_fname']},\n\nPlease be advise that seeker:{$seeker['seeker_fname']} has canceled their schedule ".$provider['purchase_sched_time']." on ".date("M j, Y", strtotime($provider['church_mass_date'])).".\nThank you for your service!";
+				$txt .= "\n\n\nBest regards,\nTeam Wakecords";
+
+				mail($to_provider, $subject, $txt);
+				## SEND EMAIL | SEND TO EMAIL
+				$to_seeker = $seeker['seeker_email'];
+				## SEND EMAIL | MESSAGE
+				$txt = "Hi {$seeker['seeker_fname']},\n\nPlease be advise that your scheduled ".$provider['purchase_sched_time']." on ".date("M j, Y", strtotime($provider['church_mass_date']))." has successfully canceled.\nPlease visit services to find more available mass time!";
+				$txt .= "\n\n\nBest regards,\nTeam Wakecords";
+
+				mail($to_seeker, $subject, $txt);
 				$checker = true;
 			}
 			delete($_GET['table'], $_GET['attr'], $_GET['data']);
@@ -34,6 +57,8 @@
 	}
 	else if(isset($_GET['url'])){
 		if($checker){
+			
+			##
 			header("Location: ".$_GET['url'].".php?canceled");
 		}
 		else header("Location: ".$_GET['url'].".php?deleted");
