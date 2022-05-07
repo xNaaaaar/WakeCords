@@ -3,6 +3,8 @@
 	error_reporting(E_ERROR | E_WARNING | E_PARSE | E_NOTICE);
 	date_default_timezone_set('Asia/Manila');
 	require_once("others/db.php");
+	require_once('vendor/autoload.php');
+
 	ob_start();
 	
 	## ARRAY ID OF QUERY
@@ -187,6 +189,90 @@
 			$stars--;
 		}
 		return $text;
+	}
+	## CREATING EWALLET SOURCE
+	function ewallet_create_source($method, $amount){
+		$client = new \GuzzleHttp\Client();
+
+		$response = $client->request('POST', 'https://api.paymongo.com/v1/sources', [
+		'body' => '{
+			"data":
+			{
+				"attributes":
+				{
+					"amount":'.$amount.',
+					"redirect":
+					{
+						"success":"http://localhost:8080/Capstone/WakeCords/thanks.php?success",
+						"failed":"http://localhost:8080/Capstone/WakeCords/thanks.php?failed"},
+						"type":"'.$method.'",
+						"currency":"PHP"
+					}
+				}
+			}',
+		'headers' => [
+			'Accept' => 'application/json',
+			'Authorization' => 'Basic cGtfdGVzdF93RlNlWFZUZ2R5NXZ0NGVUdFJ3U1g3YVg6c2tfdGVzdF9MMm1ManEzcFQxVGltTnNnamgzZzFoREw=',
+			'Content-Type' => 'application/json',
+		],
+		]);
+
+		// echo $response->getBody();
+		$json_object = json_decode($response);
+		$redirect_url = $json_object->data->attributes->redirect->checkout_url;
+		$_SESSION['source_id'] = $json_object->data->id;
+		##
+		header("Location: ".$redirect_url);
+	}
+	## GETTING EWALLET SOURCE
+	function ewallet_source($method, $amount){
+		$curl = curl_init();
+
+		curl_setopt_array($curl, [
+		CURLOPT_URL => 'https://api.paymongo.com/v1/sources',
+		CURLOPT_RETURNTRANSFER => true,
+		CURLOPT_ENCODING => '',
+		CURLOPT_MAXREDIRS => 10,
+		CURLOPT_TIMEOUT => 30,
+		CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+		CURLOPT_CUSTOMREQUEST => 'POST',
+		CURLOPT_POSTFIELDS => "{
+			\"data\":
+			{
+				\"attributes\":
+				{
+					\"amount\":".$amount.",
+					\"redirect\":
+					{
+						\"success\":\"http://localhost:8080/Capstone/WakeCords/thanks.php?success\",
+						\"failed\":\"http://localhost:8080/Capstone/WakeCords/thanks.php?failed\"},
+						\"type\":\"".$method."\",
+						\"currency\":\"PHP\"
+					}
+				}
+			}",
+		CURLOPT_HTTPHEADER => [
+			"Accept: application/json",
+			"Authorization: Basic cGtfdGVzdF93RlNlWFZUZ2R5NXZ0NGVUdFJ3U1g3YVg6",
+			"Content-Type: application/json"
+		],
+		]);
+
+		$response = curl_exec($curl);
+		$err = curl_error($curl);
+
+		curl_close($curl);
+
+		if ($err) {
+		echo "cURL Error #:" . $err;
+		} else {
+			$json_object = json_decode($response);
+			$redirect_url = $json_object->data->attributes->redirect->checkout_url;
+			$_SESSION['source_id'] = $json_object->data->id;
+			##
+			header("Location: ".$redirect_url);
+			// echo $response;
+		}
 	}
 	## SUBSCRIBED PROVIDER
 	function is_subscribed(){
@@ -479,26 +565,25 @@
 	## NECESSARY UPDATE AFTER PAYING
 	function pay_purchase($type_list, $purchase_list){
 		## DECLARE DATA
-		$cbomethod = $_POST['cbomethod'];
-		##
 		if(service_type_exist_bool("funeral", $type_list) || service_type_exist_bool("headstone", $type_list)){
-			$txtdeceasedname = trim(ucwords($_POST['txtdeceasedname']));
-		}
-
-		if(!service_type_exist_bool("church", $type_list)){
-			$txtdeliveryadd = trim(ucwords($_POST['txtdeliveryadd']));
-		}
-
-		if(service_type_exist_bool("funeral", $type_list) || service_type_exist_bool("headstone", $type_list)){
+			$cbomethod = $_SESSION['field_array'][0];
+			$txtdeceasedname = $_SESSION['field_array'][1];
+			## SESSIONS ARE LOCATED IN payment.php
 			if(service_type_exist_bool("funeral", $type_list)){
-				$dtburial = $_POST['dtburial'];
-				$txtburialadd = trim(ucwords($_POST['txtburialadd']));
+				$dtburial = $_SESSION['field_array_funeral'][0];
+				$txtburialadd = $_SESSION['field_array_funeral'][1];
 			}
+			## SESSIONS ARE LOCATED IN payment.php
 			if(service_type_exist_bool("headstone", $type_list)){
-				$datebirth = $_POST['datebirth'];
-				$datedeath = $_POST['datedeath'];
-				$datedeliveryheadstone = $_POST['datedeliveryheadstone'];
-				$txtmsg = trim(ucwords($_POST['txtmsg']));
+				$datebirth = $_SESSION['field_array_headstone'][0];
+				$datedeath = $_SESSION['field_array_headstone'][1];
+				$datedeliveryheadstone = $_SESSION['field_array_headstone'][2];
+				$txtmsg = $_SESSION['field_array_headstone'][3];
+			}
+			## SESSIONS ARE LOCATED IN payment.php
+			if($cbomethod == "gcash") {
+				$acc_name = $_SESSION['field_array'][2];
+				$acc_num = $_SESSION['field_array'][3];
 			}
 			## ERROR TRAP
 			if(preg_match('/\d/', $txtdeceasedname)){
@@ -507,8 +592,8 @@
 			else {
 				## INSERT DATA INTO FUNERAL
 				foreach($purchase_list as $results){
-					$attr_list = ["purchase_id", "deceased_name", "delivery_add"];
-					$data_list = [$results['purchase_id'], $txtdeceasedname, $txtdeliveryadd];
+					$attr_list = ["purchase_id", "deceased_name"];
+					$data_list = [$results['purchase_id'], $txtdeceasedname];
 					## FOR FUNERAL
 					if(service_type_exist_bool("funeral", $type_list)){
 						array_push($attr_list, "burial_datetime", "burial_add");
@@ -541,15 +626,6 @@
 					}
 
 					## CREATE PAYMENT TABLE
-					if($cbomethod == "gcash") {
-						$acc_name = trim(ucwords($_POST['gcash-name']));
-						$acc_num = $_POST['gcash-num'];
-					}
-					else if($cbomethod == "card") {
-						$acc_name = trim(ucwords($_POST['card-name']));
-						$acc_num = $_POST['card-num'];
-					}
-					
 					$attr_list = ["purchase_id", "payment_method", "account_name", "account_number", "payment_datetime"];
 					$data_list = [$results['purchase_id'], $cbomethod, $acc_name, $acc_num, date("Y-m-d H:i:s")];
 

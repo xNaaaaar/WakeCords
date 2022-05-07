@@ -134,7 +134,16 @@
 											select_array($font_array, "fonts");
 										}
 										## SELECT TAG FOR QTY
-										select_array($qty_array, "quantity");
+										echo "
+										<div>
+											<label>Quantity: </label>
+											<select name='cboquantity' required>
+												<option value=''>BROWSE OPTIONS</option>";
+												for($i=1; $i<=$service_type['service_qty']; $i++) 
+													echo "<option value='".$i."'>".$i."</option>";
+										echo "
+											</select>
+										</div>";
 								 
 									## FOR CHURCH
 									} else {

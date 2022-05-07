@@ -1,0 +1,8 @@
+# Ignores vendor folder
+vendor
+
+# Ignores composer.json
+composer.json
+
+# Ignores composer.lock
+composer.lock

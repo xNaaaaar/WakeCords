@@ -25,28 +25,45 @@
 							<i class="fa-solid fa-circle-check"></i>	
 							<?php
 							if(user_type() == "seeker"){
-								echo "
-								<h2>Thank you for purchasing!</h2>
+								if(isset($_GET['success'])){
+									## UPDATE NECESSARY UPDATE IN DATABASE
+									pay_purchase($_SESSION['type_list'], $_SESSION['list']);
+									##
+									echo "
+									<h2>Thank you for purchasing!</h2>
 
-								<p>You can also browse more services or check your purchases:</p>
-								<ol>
-									<li><a href='funeral.php'>Services</a></li>
-									<li><a href='purchase.php'>Purchases</a></li>
-								</ol>
-								";
-								## SEND EMAIL
-								try {
-									$read = read("seeker", ["seeker_id"], [$_SESSION['seeker']]);
-									$read = $read[0];
+									<p>You can also browse more services or check your purchases:</p>
+									<ol>
+										<li><a href='funeral.php'>Services</a></li>
+										<li><a href='purchase.php'>Purchases</a></li>
+									</ol>
+									";
+									## SEND EMAIL
+									try {
+										$read = read("seeker", ["seeker_id"], [$_SESSION['seeker']]);
+										$read = $read[0];
 
-									$subject = "Purchase Receipt";
-									$txt = "Hi {$read['seeker_fname']} {$read['seeker_lname']},\nThank you for your purchase! Here's your receipt: ";
-									$txt .= "\n\n\nBest regards,\nTeam Wakecords";
-									
-									// mail($read['seeker_email'], $subject, $txt);
+										$subject = "Purchase Receipt";
+										$txt = "Hi {$read['seeker_fname']} {$read['seeker_lname']},\nThank you for your purchase! Here's your receipt: ";
+										$txt .= "\n\n\nBest regards,\nTeam Wakecords";
+										
+										// mail($read['seeker_email'], $subject, $txt);
+									}
+									catch (Exception $e) {
+										echo "Error sending email! Error found: ".$e->getMessage();
+									}
 								}
-								catch (Exception $e) {
-									echo "Error sending email! Error found: ".$e->getMessage();
+								##
+								if(isset($_GET['failed'])){
+									echo "
+									<h2>Sorry! Your purchase has been failed. Try again later!</h2>
+
+									<p>You can also browse more services or check your purchases:</p>
+									<ol>
+										<li><a href='funeral.php'>Services</a></li>
+										<li><a href='purchase.php'>Purchases</a></li>
+									</ol>
+									";
 								}
 							}
 							else if(user_type() == "provider"){

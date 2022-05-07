@@ -118,6 +118,7 @@
 									</div>
 									";
 								}
+								
 								if(service_type_exist_bool("funeral", $type_list)){
 									echo "
 									<h5>Funeral</h5>
@@ -161,7 +162,7 @@
 									</div>
 									";
 								}
-
+								
 								if(service_type_exist_bool("headstone", $type_list)){
 									echo "
 									<h5>Headstone</h5>
@@ -222,7 +223,7 @@
 								<select name="cbomethod" onclick="payment_method(this);">
 									<option value="">BROWSE PAYMENT METHOD</option>
 									<option value="gcash" selected>Gcash</option>
-									<option value="card">Card</option>
+									<!-- <option value="card">Card</option> -->
 								</select>
 								
 								<div id='card-payment' style='display:none;'>
@@ -279,10 +280,25 @@
 							<?php
 
 							if(isset($_POST['btnpay'])){
-								pay_purchase($type_list, $list);
+								$_SESSION['field_array'] = [$_POST['cbomethod'], trim(ucwords($_POST['txtdeceasedname'])), trim(ucwords($_POST['gcash-name'])), $_POST['gcash-num']];
 
-								header("Location: thanks.php");
-								exit;
+								if(service_type_exist_bool("funeral", $type_list)){
+									$_SESSION['field_array_funeral'] = [$_POST['dtburial'], trim(ucwords($_POST['txtburialadd']))];
+								}
+
+								if(service_type_exist_bool("headstone", $type_list)){
+									$_SESSION['field_array_headstone'] = [$_POST['datebirth'], $_POST['datedeath'], $_POST['datedeliveryheadstone'], trim(ucwords($_POST['txtmsg']))];
+								}
+
+								## PAYMENT FOR GCASH
+								if($_POST['cbomethod'] == "gcash") {
+									##
+									$_SESSION['type_list'] = $type_list;
+									$_SESSION['list'] = $list;
+									ewallet_source($_POST['cbomethod'], number_format($total,2,'',''));
+								}
+								// header("Location: thanks.php");
+								// exit;
 							}
 
 							?>
