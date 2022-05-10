@@ -118,6 +118,9 @@
 								";
 								if($service_type['service_type'] != "church")
 									echo "<div class='card-price trad'>₱ ".number_format($service['service_cost'], 2, '.', ',')."</div>";
+								## CHECK IF SERVICE QTY IS 0
+								$qty_status = "";
+								if($service_type['service_qty'] == 0) $qty_status = "Out of Stock";
 								##
 								if(isset($_SESSION['seeker']) && !isset($_GET['rate']) && !isset($_GET['rated'])){
 								echo "
@@ -136,7 +139,7 @@
 										## SELECT TAG FOR QTY
 										echo "
 										<div>
-											<label>Quantity: </label>
+											<label>Quantity: <span style='color:red;'>{$qty_status}</span></label>
 											<select name='cboquantity' required>
 												<option value=''>BROWSE OPTIONS</option>";
 												for($i=1; $i<=$service_type['service_qty']; $i++) 

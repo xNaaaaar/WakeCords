@@ -1420,6 +1420,11 @@
 
 					if(count($services) > 0){
 						foreach($services as $results){
+							## CHECK IF SERVICE QTY IS 0
+							$qty_status = "";
+							if($results['service_qty'] == 0) {
+								$qty_status = "Out of Stock";
+							}
 							## FOR USERS
 							echo "
 							<div class='card-0 no-padding'>
@@ -1434,6 +1439,7 @@
 								<p>
 									".limit_text($results['service_desc'], 10)."
 								</p>
+								<div style='color:red;text-align:center;'>{$qty_status}</div>
 								<div class='card-price'>₱ ".number_format($results['service_cost'], 2, '.', ',')."</div>
 								<div class='buttons'>
 									<a title='View' href='funeral_tradition_this.php?service_id=".$results['service_id']."&id={$results['provider_id']}'><i class='fa-solid fa-eye'></i></a>
@@ -1712,24 +1718,6 @@
 		elseif($status == "pending") return "blue";
 		else return "red";
 	}
-	## PAYMENT FOR SUBSCRIPTION
-	function subs_payment($type, $cost){
-		$current = date("Y-m-d");
-		$start_date = strtotime(date("Y-m-d"));
-		$subs = "subscription";
-		$attr_list = ["provider_id","subs_startdate","subs_duedate","subs_description","subs_cost"];
-		$data_list = [$_SESSION['provider'], $current];
-		##
-		if($type == "monthly"){
-			$end_date = date("Y-m-d", strtotime("+1 month", $start_date));
-		}
-		else if($type == "yearly"){
-			$end_date = date("Y-m-d", strtotime("+1 year", $start_date));
-		}
-		##
-		array_push($data_list, $end_date, $_SESSION['subs_desc'], $cost);
-		create($subs, $attr_list, qmark_generator(count($attr_list)), $data_list);
-	}
 	## DETERMINE IF THIS SUBSCRIPTION IS A MONTH OR YEAR
 	function subscription(){
 		$subs = read("subscription", ["provider_id"], [$_SESSION['provider']]);
@@ -1754,6 +1742,25 @@
 				$expired = false;
 		}
 		return $expired;
+	}
+	## PAYMENT FOR SUBSCRIPTION
+	function subscription_payment($type, $cost){
+		$table = "subscription";
+		$current = date("Y-m-d");
+		$start_date = strtotime($current);
+		##
+		$attr_list = ["provider_id","subs_startdate","subs_duedate","subs_description","subs_cost"];
+		$data_list = [$_SESSION['provider'], $current];
+		##
+		if($type == "monthly"){
+			$end_date = date("Y-m-d", strtotime("+1 month", $start_date));
+		}
+		else if($type == "yearly"){
+			$end_date = date("Y-m-d", strtotime("+1 year", $start_date));
+		}
+		##
+		array_push($data_list, $end_date, $_SESSION['subs_desc'], $cost);
+		create($table, $attr_list, qmark_generator(count($attr_list)), $data_list);
 	}
 	## AVAILABLE TIME FOR CHURCH
 	function time_available($time_string, $service_id){

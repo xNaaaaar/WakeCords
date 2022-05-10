@@ -229,7 +229,7 @@
 					## FOR PROVIDER ONLY
 					if(user_type() == "provider" && $status == "verified"){
 					?>
-					<div class="banner-div no-padding-top" style="padding-top:var(--size-6);">
+					<div class="banner-div no-padding-top" id="subscription" style="padding-top:var(--size-6);">
 						
 						<?php
 						if(is_subscribed()){

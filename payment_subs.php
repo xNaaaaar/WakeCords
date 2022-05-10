@@ -74,30 +74,53 @@
 							</div>
 							<!-- CARD DETAILS -->
 							<div class="banner-section details card">
-								<h3>Card Details 
-									<ul>
-										<li><i class="fa-brands fa-cc-mastercard"></i></li>
-										<li><i class="fa-brands fa-cc-amex"></i></li>
-										<li><i class="fa-brands fa-cc-visa"></i></li>
-									</ul>
-								</h3>
+								<select name="cbomethod" onclick="payment_method(this);">
+									<option value="">BROWSE PAYMENT METHOD</option>
+									<option value="gcash" selected>Gcash</option>
+									<!-- <option value="card">Card</option> -->
+								</select>
 
-								<div class="details-con">
-									<div>
-										<label for="label-name">Account Name <span>*<span></label>
-										<input type="text" name="txtaccname">
+								<div id='gcash-payment'>
+									<h3><i class="fa-solid fa-g"></i> Gcash Details</h3>
+
+									<div class="details-con">
+										<div>
+											<label>Account Name <span>*<span></label>
+											<input type="text" id="gcash-name" name="gcash-name" required>
+										</div>
+										<div>
+											<label>Account Number <span>*<span></label>
+											<input type="text" id="gcash-num" name="gcash-num" minlength='11' maxlength='11' placeholder='Format: 09XX' required>
+										</div>
 									</div>
-									<div>
-										<label for="label-name">Card Number <span>*<span></label>
-										<input type="text" name="txtcard" minlength='16' maxlength='16'>
-									</div>
-									<div>
-										<label for="label-name">Expiration Date <span>*<span></label>
-										<input type="month" name="mthexpiry">
-									</div>
-									<div>
-										<label for="label-name">CVV <span>*<span></label>
-										<input type="text" name="txtcvv" minlength='3' maxlength='3'>
+								</div>
+								
+								<div id='card-payment' style='display:none;'>
+									<h3>Card Details 
+										<ul>
+											<li><i class="fa-brands fa-cc-mastercard"></i></li>
+											<li><i class="fa-brands fa-cc-amex"></i></li>
+											<li><i class="fa-brands fa-cc-visa"></i></li>
+										</ul>
+									</h3>
+
+									<div class="details-con">
+										<div>
+											<label>Account Name <span>*<span></label>
+											<input type="text" id="card-name" name="card-name">
+										</div>
+										<div>
+											<label>Card Number <span>*<span></label>
+											<input type="text" id="card-num" name="card-num" minlength='16' maxlength='16'>
+										</div>
+										<div>
+											<label>Expiration Date <span>*<span></label>
+											<input type="month" id="card-expiry" name="mthexpiry">
+										</div>
+										<div>
+											<label>CVV <span>*<span></label>
+											<input type="text" id="card-cvv" name="txtcvv" minlength='3' maxlength='3'>
+										</div>
 									</div>
 								</div>
 							</div>
@@ -107,10 +130,14 @@
 							<?php
 
 							if(isset($_POST['btnpay'])){
-								subs_payment($type, $cost);
+								$_SESSION['subscription_type'] = $type;
+								$_SESSION['subscription_price'] = number_format($cost,2,'.',',');
 
-								header("Location: thanks.php");
-								exit;
+								ewallet_source("gcash", number_format($cost,2,'',''));
+								// subs_payment($_SESSION['subscription_type'], $_SESSION['subscription_price']);
+
+								// header("Location: thanks.php");
+								// exit;
 							}
 
 							?>
@@ -120,5 +147,34 @@
 			</section>
 		</div>
 	</div>
+	<script>
+		function payment_method(that){
+			const gcash = document.getElementById("gcash-payment");
+			const card = document.getElementById("card-payment");
+
+			if(that.value == "gcash") {
+				gcash.style.display = "block";
+				document.getElementById("gcash-name").required = true;
+				document.getElementById("gcash-num").required = true;
+
+				card.style.display = "none";
+				document.getElementById("card-name").required = false;
+				document.getElementById("card-num").required = false;
+				document.getElementById("card-expiry").required = false;
+				document.getElementById("card-cvv").required = false;
+			}
+			else if(that.value == "card") {
+				gcash.style.display = "none";
+				document.getElementById("gcash-name").required = false;
+				document.getElementById("gcash-num").required = false;
+
+				card.style.display = "block";
+				document.getElementById("card-name").required = true;
+				document.getElementById("card-num").required = true;
+				document.getElementById("card-expiry").required = true;
+				document.getElementById("card-cvv").required = true;
+			}
+		}
+	</script>
 </body>
 </html>

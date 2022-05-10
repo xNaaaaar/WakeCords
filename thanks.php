@@ -29,15 +29,7 @@
 									## UPDATE NECESSARY UPDATE IN DATABASE
 									pay_purchase($_SESSION['type_list'], $_SESSION['list']);
 									##
-									echo "
-									<h2>Thank you for purchasing!</h2>
-
-									<p>You can also browse more services or check your purchases:</p>
-									<ol>
-										<li><a href='funeral.php'>Services</a></li>
-										<li><a href='purchase.php'>Purchases</a></li>
-									</ol>
-									";
+									echo "<h2>Thank you for purchasing!</h2>";
 									## SEND EMAIL
 									try {
 										$read = read("seeker", ["seeker_id"], [$_SESSION['seeker']]);
@@ -55,27 +47,34 @@
 								}
 								##
 								if(isset($_GET['failed'])){
-									echo "
-									<h2>Sorry! Your purchase has been failed. Try again later!</h2>
-
-									<p>You can also browse more services or check your purchases:</p>
-									<ol>
-										<li><a href='funeral.php'>Services</a></li>
-										<li><a href='purchase.php'>Purchases</a></li>
-									</ol>
-									";
+									echo "<h2>Sorry! Your purchase has been failed. Try again later!</h2>";
 								}
+
+								echo "
+								<p>You can also browse more services or check your purchases:</p>
+								<ol>
+									<li><a href='funeral.php'>Services</a></li>
+									<li><a href='purchase.php'>Purchases</a></li>
+								</ol>";
 							}
 							else if(user_type() == "provider"){
+								if(isset($_GET['success'])){
+									## UPDATE SUBSCRIPTION
+									subscription_payment($_SESSION['subscription_type'], $_SESSION['subscription_price']);
+									##
+									echo "<h2>Thank you for subscribing!</h2>";
+								}
+								##
+								if(isset($_GET['failed'])){
+									echo "<h2>Sorry! Your subscription has been failed. Try again later!</h2>";
+								}
+								##
 								echo "
-								<h2>Thank you for subscribing!</h2>
-
-								<p>You can also browse profile or check your services purchases:</p>
+								<p>You can also browse your profile and subscription details:</p>
 								<ol>
 									<li><a href='profile.php'>Profile</a></li>
-									<li><a href='purchase.php'>Purchases</a></li>
-								</ol>
-								";
+									<li><a href='profile.php#subscription'>Subscription</a></li>
+								</ol>";
 							}
 							?>
 						</div>
