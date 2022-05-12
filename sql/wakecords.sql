@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 12, 2022 at 08:25 AM
+-- Generation Time: May 12, 2022 at 12:46 PM
 -- Server version: 10.4.19-MariaDB
 -- PHP Version: 7.3.28
 
@@ -124,6 +124,13 @@ CREATE TABLE `details` (
   `cemetery_add` varchar(100) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+--
+-- Dumping data for table `details`
+--
+
+INSERT INTO `details` (`purchase_id`, `deceased_name`, `burial_datetime`, `burial_add`, `delivery_add`, `delivery_date`, `message`, `birth_date`, `death_date`, `delivery_datetime`, `num_pax`, `cemetery_add`) VALUES
+(51, 'Deceased Name', '2022-05-21 18:05:00', 'Sample Burial Address', 'My Updated Delivery Address', NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
 -- --------------------------------------------------------
 
 --
@@ -138,6 +145,13 @@ CREATE TABLE `feedback` (
   `feedback_comments` varchar(250) DEFAULT NULL,
   `feedback_date` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `feedback`
+--
+
+INSERT INTO `feedback` (`feedback_id`, `seeker_id`, `service_id`, `feedback_star`, `feedback_comments`, `feedback_date`) VALUES
+(6, 17, 46, 4, '', '2022-05-12');
 
 -- --------------------------------------------------------
 
@@ -162,6 +176,16 @@ CREATE TABLE `funeral` (
   `funeral_type` varchar(20) NOT NULL,
   `funeral_size` varchar(100) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `funeral`
+--
+
+INSERT INTO `funeral` (`service_id`, `funeral_name`, `funeral_type`, `funeral_size`) VALUES
+(45, 'St. Jude', 'traditional', 'size #1,size #2,size #4,'),
+(46, 'St. Catherine', 'cremation', 'size #2,size #5,'),
+(47, 'St. Bernadette', 'traditional', 'size #3,size #4,size #5,'),
+(48, 'St. Paul', 'traditional', 'size #4,sample size#1');
 
 -- --------------------------------------------------------
 
@@ -192,6 +216,13 @@ CREATE TABLE `payment` (
   `payment_datetime` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+--
+-- Dumping data for table `payment`
+--
+
+INSERT INTO `payment` (`purchase_id`, `payment_method`, `account_name`, `account_number`, `payment_datetime`) VALUES
+(51, 'gcash', 'My Name', '09345588383', '2022-05-12 18:06:54');
+
 -- --------------------------------------------------------
 
 --
@@ -206,6 +237,13 @@ CREATE TABLE `payout` (
   `payout_datetime` datetime DEFAULT NULL,
   `payout_image` varchar(100) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `payout`
+--
+
+INSERT INTO `payout` (`purchase_id`, `payout_method`, `account_name`, `account_number`, `payout_datetime`, `payout_image`) VALUES
+(51, 'gcash', 'Nelmar Citan', '04958283757', '2022-05-12 18:21:48', '627ce005351128.55894108.png');
 
 -- --------------------------------------------------------
 
@@ -234,7 +272,9 @@ CREATE TABLE `provider` (
 
 INSERT INTO `provider` (`provider_id`, `provider_logo`, `provider_company`, `provider_desc`, `provider_fname`, `provider_mi`, `provider_lname`, `provider_type`, `provider_phone`, `provider_address`, `provider_email`, `provider_pass`) VALUES
 (7, '627beb937df714.58366619.png', 'Church Corporation', '', 'Nicyl', 'H', 'Lapas', 'church', '09457239646', 'Escario Street', 'nicyllapas@gmail.com', 'd7e73fb6980b78278c69b4e9f024f16a'),
-(8, '627c6bfc278075.93773823.jpg', 'Cosmopolitan', '', 'Jane', 'V', 'Doe', 'funeral', '09457239646', 'Fake Address St.', 'funeral@wakecords.com', 'd7e73fb6980b78278c69b4e9f024f16a');
+(8, '627c6bfc278075.93773823.jpg', 'Cosmopolitan', '', 'Jane', 'V', 'Doe', 'funeral', '09457239646', 'Fake Address St.', 'funeral@wakecords.com', 'd7e73fb6980b78278c69b4e9f024f16a'),
+(9, '627cc232f1dc11.01858196.png', 'Marbles', '', 'Jooon', 'K', 'Dee', 'headstone', '09457239646', 'My Sample Address', 'headstone@wakecords.com', 'd7e73fb6980b78278c69b4e9f024f16a'),
+(10, '627cd7b895bb55.68335576.jpg', 'St. Peter', '', 'Jane', 'J', 'Dee', 'funeral', '09457239646', 'Sample Fake Address', 'saintpeter@wakecords.com', 'd7e73fb6980b78278c69b4e9f024f16a');
 
 -- --------------------------------------------------------
 
@@ -255,6 +295,14 @@ CREATE TABLE `purchase` (
   `purchase_status` varchar(15) NOT NULL,
   `purchase_progress` int(2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `purchase`
+--
+
+INSERT INTO `purchase` (`purchase_id`, `seeker_id`, `service_id`, `purchase_total`, `purchase_qty`, `purchase_size`, `purchase_font`, `purchase_date`, `purchase_sched_time`, `purchase_status`, `purchase_progress`) VALUES
+(51, 17, 46, '30000.00', 1, 'size #2', NULL, '2022-05-12', NULL, 'rated', 5),
+(52, 17, 48, '30000.00', 1, 'size #4', NULL, '2022-05-12', NULL, 'to pay', 0);
 
 -- --------------------------------------------------------
 
@@ -290,7 +338,9 @@ CREATE TABLE `requirement` (
 INSERT INTO `requirement` (`req_id`, `provider_id`, `seeker_id`, `req_type`, `req_img`, `req_status`) VALUES
 (8, NULL, 17, 'death certificate', '627be29e2b2ed6.83989884.jpg', 'verified'),
 (9, 7, NULL, 'business permit', '627beba7ddb7a5.00566049.jpg', 'verified'),
-(10, 8, NULL, 'business permit', '627c6c2deac569.28939915.jpg', 'pending');
+(10, 8, NULL, 'business permit', '627c6c2deac569.28939915.jpg', 'verified'),
+(11, 9, NULL, 'business permit', '627cc247365271.47266135.jpg', 'pending'),
+(12, 10, NULL, 'business permit', '627cd7c6519e11.94355213.jpg', 'verified');
 
 -- --------------------------------------------------------
 
@@ -353,7 +403,11 @@ CREATE TABLE `services` (
 
 INSERT INTO `services` (`service_id`, `provider_id`, `service_type`, `service_desc`, `service_cost`, `service_qty`, `service_img`, `service_status`) VALUES
 (43, 7, 'church', 'This is my sample description for church services', NULL, NULL, '627befec9075d1.61066175.jpg', 'active'),
-(44, 7, 'church', 'This is my example church services.', NULL, NULL, '627c66d6635626.49891797.jpg', 'active');
+(44, 7, 'church', 'This is my example church services.', NULL, NULL, '627c66d6635626.49891797.jpg', 'active'),
+(45, 8, 'funeral', 'This is my sample description for St. Jude traditional services.', '50000.00', 5, '627cd8baab3078.81509166.png', 'active'),
+(46, 8, 'funeral', 'This is my sample description for St. Catherine cremation services.', '30000.00', 0, '627cd90552d5b3.83874925.jpg', 'inactive'),
+(47, 8, 'funeral', 'This is my sample description for St. Bernadette traditional funeral services.', '40000.00', 4, '627cda89dbb2c7.95809111.png', 'active'),
+(48, 10, 'funeral', 'This is my description for St. Paul traditional funeral services.', '30000.00', 3, '627ce5026bbe33.40763445.png', 'active');
 
 -- --------------------------------------------------------
 
@@ -374,7 +428,9 @@ CREATE TABLE `subscription` (
 --
 
 INSERT INTO `subscription` (`provider_id`, `subs_startdate`, `subs_duedate`, `subs_description`, `subs_cost`) VALUES
-(7, '2022-05-12', '2022-06-12', 'Provider can post and boost their service in an affordable amount.', '200.00');
+(7, '2022-05-12', '2022-06-12', 'Provider can post and boost their service in an affordable amount.', '200.00'),
+(8, '2022-05-12', '2023-05-12', 'Provider can post and boost their service in an affordable amount.', '2000.00'),
+(10, '2022-05-12', '2022-06-12', 'Provider can post and boost their service in an affordable amount.', '200.00');
 
 --
 -- Indexes for dumped tables
@@ -526,25 +582,25 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `cart_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=82;
+  MODIFY `cart_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=84;
 
 --
 -- AUTO_INCREMENT for table `feedback`
 --
 ALTER TABLE `feedback`
-  MODIFY `feedback_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `feedback_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `provider`
 --
 ALTER TABLE `provider`
-  MODIFY `provider_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `provider_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `purchase`
 --
 ALTER TABLE `purchase`
-  MODIFY `purchase_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
+  MODIFY `purchase_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
 
 --
 -- AUTO_INCREMENT for table `request`
@@ -556,7 +612,7 @@ ALTER TABLE `request`
 -- AUTO_INCREMENT for table `requirement`
 --
 ALTER TABLE `requirement`
-  MODIFY `req_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `req_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `seeker`
@@ -568,7 +624,7 @@ ALTER TABLE `seeker`
 -- AUTO_INCREMENT for table `services`
 --
 ALTER TABLE `services`
-  MODIFY `service_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
+  MODIFY `service_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=49;
 
 --
 -- Constraints for dumped tables
