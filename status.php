@@ -61,11 +61,14 @@
 									<div class="display-none" id="collapse-info">
 										<div class='hr full-width'></div>
 										<?php
-										## TYPE [notify, success, error]
-										if(isset($_SESSION['seeker'])) messaging("notify", "Note: ");
 										echo "
 										<label>".$purchase['seeker_fname']." ".$purchase['seeker_lname']."</label>
 										<label><strong>".$purchase['seeker_phone']."</strong></label>";
+										## TYPE [notify, success, error]
+										if(isset($_SESSION['seeker'])) {
+											messaging("notify", "You cannot update these details if progress has started.");
+										}
+										
 										##
 										switch($purchase['service_type']){
 											## FOR FUNERAL
@@ -134,10 +137,10 @@
 
 										if(isset($_SESSION['seeker'])){
 											if($purchase['purchase_progress'] == 0){
-												echo "<a class='btn' href='status_details.php?purchaseid=".$_GET['purchaseid']."'>Update details</a>";
+												echo "<a class='btn update-details' href='status_details.php?purchaseid=".$_GET['purchaseid']."'>Update details</a>";
 											}
 											else if($purchase['purchase_progress'] == 1 && $purchase['service_type'] == "church"){
-												echo "<a class='btn' href='status_details.php?purchaseid=".$_GET['purchaseid']."'>Update details</a>";
+												echo "<a class='btn update-details' href='status_details.php?purchaseid=".$_GET['purchaseid']."'>Update details</a>";
 											}
 										}
 											

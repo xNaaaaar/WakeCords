@@ -37,7 +37,7 @@
 								<label>Payout Method</label>
 								<select name="cbomethod" required>
 									<option value="">BROWSE OPTIONS</option>
-									<option value="card">Card</option>
+									<!-- <option value="card">Card</option> -->
 									<option value="gcash">Gcash</option>
 								</select>
 							</div>
