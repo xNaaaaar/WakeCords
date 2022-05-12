@@ -16,6 +16,7 @@
 		echo "<script>alert('Successfully uploaded proof of payment!')</script>";
 
 	if(isset($_POST['btnresched'])) {
+		$proceed = true;
 		$numid = $_POST['numid'];
 		$cbotime = $_POST['cbotime'];
 		## SEND EMAIL | PROVIDER
@@ -24,25 +25,42 @@
 		## SEND EMAIL | SEEKER
 		$seeker = DB::query("SELECT * FROM purchase a JOIN seeker b ON a.seeker_id = b.seeker_id WHERE purchase_id = ?", array($numid), "READ");
 		$seeker = $seeker[0];
-		## SEND EMAIL | SEND TO EMAIL
-		$to_provider = $provider['provider_email'];
 		## SEND EMAIL | SUBJECT
 		$subject = "Mass Time Rescheduled";
+		## SEND EMAIL | SEND TO EMAIL
+		$to_provider = $provider['provider_email'];
 		## SEND EMAIL | MESSAGE
 		$txt = "Hi {$provider['provider_fname']},\n\nPlease be advise that seeker:{$seeker['seeker_fname']} has reschedule their mass schedule from {$provider['purchase_sched_time']} to {$cbotime}.\nThank you for your service!";
 		$txt .= "\n\n\nBest regards,\nTeam Wakecords";
 
-		mail($to_provider, $subject, $txt);
+		## SEND EMAIL
+		try {
+			mail($to_provider, $subject, $txt);
+		}
+		catch (Exception $e) {
+			$proceed = false;
+			echo "<script>alert('Error sending email! Error found: ".$e->getMessage()."')</script>";
+		}
+		
 		## SEND EMAIL | SEND TO EMAIL
 		$to_seeker = $seeker['seeker_email'];
 		## SEND EMAIL | MESSAGE
 		$txt = "Hi {$seeker['seeker_fname']},\n\nPlease be advise that you can only reschedule once and your scheduled {$provider['purchase_sched_time']} has successfully rescheduled to {$cbotime}.\nThank you!";
 		$txt .= "\n\n\nBest regards,\nTeam Wakecords";
 
-		mail($to_seeker, $subject, $txt);
-		##
-		update("purchase", ["purchase_sched_time", "purchase_status", "purchase_progress"], [$cbotime, "scheduled", 1, $numid], "purchase_id");
-		echo "<script>alert('Rescheduled successfully!')</script>";
+		## SEND EMAIL
+		try {
+			mail($to_seeker, $subject, $txt);
+		}
+		catch (Exception $e) {
+			$proceed = false;
+			echo "<script>alert('Error sending email! Error found: ".$e->getMessage()."')</script>";
+		}
+		
+		if($proceed) {
+			update("purchase", ["purchase_sched_time", "purchase_status", "purchase_progress"], [$cbotime, "scheduled", 1, $numid], "purchase_id");
+			echo "<script>alert('Rescheduled successfully!')</script>";
+		}
 	}
 ?>
 

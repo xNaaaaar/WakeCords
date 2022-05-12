@@ -3,7 +3,7 @@
 	error_reporting(E_ERROR | E_WARNING | E_PARSE | E_NOTICE);
 	date_default_timezone_set('Asia/Manila');
 	require_once("others/db.php");
-	require_once('vendor/autoload.php');
+	## require_once('vendor/autoload.php');
 
 	ob_start();
 	
@@ -59,6 +59,25 @@
 			header('Location: profile.php?updated');
 			exit;
 		}
+	}
+	##
+	function check_having_enough_qty($service_id, $qty){
+		$total_qty = $qty;
+		## CHECK CART QTY OF SPECIFIC SERVICE BOOKED
+		$cart_services = read("cart", ["service_id"], [$service_id]);
+
+		$services = read("services", ["service_id"], [$service_id]);
+		$services = $services[0];
+		##
+		if(count($cart_services) > 0){
+			foreach($cart_services as $cart_service){
+				if(!empty($cart_service['cart_qty'])){
+					$total_qty += $cart_service['cart_qty'];
+				}
+			}
+		}
+		if($services['service_qty'] - $total_qty < 0) return false;
+		return true; 
 	}
 	## CREATE FUNCTION
 	function create($table, $attr_list, $qmark_list, $data_list){
@@ -244,8 +263,8 @@
 					\"amount\":".$amount.",
 					\"redirect\":
 					{
-						\"success\":\"http://localhost:8080/Capstone/WakeCords/thanks.php?success\",
-						\"failed\":\"http://localhost:8080/Capstone/WakeCords/thanks.php?failed\"},
+						\"success\":\"http://localhost/WakeCords/thanks.php?success\",
+						\"failed\":\"http://localhost/WakeCords/thanks.php?failed\"},
 						\"type\":\"".$method."\",
 						\"currency\":\"PHP\"
 					}

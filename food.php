@@ -1,5 +1,9 @@
 <!-- HEAD AREA -->
-<?php include("others/head.php"); ?>
+<?php 
+	include("others/functions.php");
+	include("others/head.php"); 
+	
+?>
 
 <body>
 	<div class="container">
@@ -27,48 +31,9 @@
 						include("others/tabs.php");?>
 
 						<div class="banner-cards">
-							<div class="card-0">
-								<a href="">
-									<img src="images/coffin.png" alt="">
-									<h3>Title</h3>
-									<p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ad corrupti beatae magni rerum doloribus, vitae inventore. Tempore quod fugit commodi!</p>
-								</a>
-							</div>
-							<div class="card-0">
-								<a href="">
-									<img src="images/coffin.png" alt="">
-									<h3>Title Title</h3>
-									<p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ad corrupti beatae magni rerum doloribus, </p>
-								</a>
-							</div>
-							<div class="card-0">
-								<a href="">
-									<img src="images/coffin.png" alt="">
-									<h3>Title</h3>
-									<p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ad corrupti beatae magni rerum doloribus, vitae inventore. </p>
-								</a>
-							</div>
-							<div class="card-0">
-								<a href="">
-									<img src="images/coffin.png" alt="">
-									<h3>Title Title</h3>
-									<p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ad corrupti, vitae inventore. Tempore quod fugit commodi!</p>
-								</a>
-							</div>
-							<div class="card-0">
-								<a href="">
-									<img src="images/coffin.png" alt="">
-									<h3>Title TitleTitle</h3>
-									<p>Lorem ipsum dolor,  adipisicing elit. Ad corrupti beatae magni rerum doloribus, vitae inventore. Tempore quod fugit commodi!</p>
-								</a>
-							</div>
-							<div class="card-0">
-								<a href="">
-									<img src="images/coffin.png" alt="">
-									<h3>Title</h3>
-									<p>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ad corrupti beatae magni rerum doloribus, fugit commodi!</p>
-								</a>
-							</div>
+							<?php
+							messaging("error", "Food catering services is currently not available!");
+							?>
 						</div>
 					</div>
 				</div>

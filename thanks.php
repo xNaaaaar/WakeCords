@@ -42,7 +42,7 @@
 										// mail($read['seeker_email'], $subject, $txt);
 									}
 									catch (Exception $e) {
-										echo "Error sending email! Error found: ".$e->getMessage();
+										echo "<script>alert('Error sending email! Error found: ".$e->getMessage()."')</script>";
 									}
 								}
 								##

@@ -57,8 +57,6 @@
 	}
 	else if(isset($_GET['url'])){
 		if($checker){
-			
-			##
 			header("Location: ".$_GET['url'].".php?canceled");
 		}
 		else header("Location: ".$_GET['url'].".php?deleted");

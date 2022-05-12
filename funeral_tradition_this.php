@@ -96,7 +96,6 @@
 									$service_name = $service['church_church'];
 								break;
 							}
-							
 						?>
 						 
 						<div class="banner-cards trad">
@@ -173,6 +172,8 @@
 								</div>";
 								##
 								if(isset($_POST['btnadd'])){
+									$proceed = true;
+									##
 									switch($service_type['service_type']){
 										## FOR FUNERAL
 										case "funeral":
@@ -180,12 +181,29 @@
 											$cbosize = $_POST['cbosizes'];
 											$attr_list = ["service_id", "seeker_id", "cart_qty", "cart_size"];
 											$data_list = [$service['service_id'], $_SESSION['seeker'], $cbomaxqty, $cbosize];
+											
 										break;
 										## FOR CHURCH
 										case "church":
-											$cbotime = $_POST['cbotime'];
-											$attr_list = ["service_id", "seeker_id", "cart_sched_time"];
-											$data_list = [$service['service_id'], $_SESSION['seeker'], $cbotime];
+											$cbotime = trim($_POST['cbotime']);
+											$services = read("cart", ["seeker_id"], [$_SESSION['seeker']]);
+
+											if(count($services) > 0){
+												foreach($services as $service){
+													if(!empty($service['cart_sched_time']) && trim($service['cart_sched_time']) == $cbotime){
+														$proceed = false;
+														break;
+													}
+												}
+											}
+
+											if($proceed){
+												$attr_list = ["service_id", "seeker_id", "cart_sched_time"];
+												$data_list = [$service['service_id'], $_SESSION['seeker'], $cbotime];
+											} else {
+												echo "<script>alert('This schedule: {$cbotime} exist in your cart! Cannot proceed to booking.')</script>";
+											}
+											
 										break;
 										## FOR HEADSTONE
 										case "headstone":
@@ -198,10 +216,12 @@
 									}
 									
 									##
-									create("cart", $attr_list, qmark_generator(count($attr_list)), $data_list);
+									if($proceed){
+										create("cart", $attr_list, qmark_generator(count($attr_list)), $data_list);
 
-									header("Location: cart.php?cart_success");
-									exit;
+										header("Location: cart.php?cart_success");
+										exit;
+									}
 								}
 							?>
 							

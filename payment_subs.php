@@ -61,12 +61,12 @@
 									
 									if(isset($_GET['monthly'])){
 										echo "
-										<li><h3>₱ 200.00</h3></li>
+										<li><h3>₱ ".number_format($cost,2,'.',',')."</h3></li>
 										";
 									}
 									else if(isset($_GET['yearly'])){
 										echo "
-										<li><h3>₱ 2,000.00</h3></li>
+										<li><h3>₱ ".number_format($cost,2,'.',',')."</h3></li>
 										";
 									}
 									?>
@@ -131,7 +131,7 @@
 
 							if(isset($_POST['btnpay'])){
 								$_SESSION['subscription_type'] = $type;
-								$_SESSION['subscription_price'] = number_format($cost,2,'.',',');
+								$_SESSION['subscription_price'] = number_format($cost,2,'.','');
 
 								ewallet_source("gcash", number_format($cost,2,'',''));
 								// subs_payment($_SESSION['subscription_type'], $_SESSION['subscription_price']);
