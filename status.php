@@ -91,12 +91,14 @@
 											break;
 											## FOR CHURCH
 											case "church":
+												$church = read("church", ["service_id"], [$purchase['service_id']]);
+												$church = $church[0];
 												$burial_dt = date("M j, Y - h:i a", strtotime($details['burial_datetime']));
 												if(empty($details['burial_datetime'])){
 													$burial_dt = date("M j, Y - h:i a");
 												}
 												echo "
-												<label>Scheduled on: <em class='gray-italic'>".$purchase['purchase_sched_time']."</em><label>
+												<label>Scheduled on: <em class='gray-italic'>".$purchase['purchase_sched_time']." of ".date("M j, Y", strtotime($church['church_mass_date']))."</em><label>
 												<div class='hr full-width'></div>
 												
 												<label>Deceased name</label>
