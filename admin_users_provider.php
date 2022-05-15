@@ -5,12 +5,30 @@
 
 	if(isset($_GET['verify'])){
 		update("requirement", ["req_status"], ["verified", $_GET['verify']], "req_id");
+		## SEND EMAIL
+		$provider_reqs = DB::query("SELECT * FROM requirement a JOIN provider b ON a.provider_id = b.provider_id WHERE req_id = ?", array($_GET['verify']), "READ");
+		$provider_reqs = $provider_reqs[0];
+		##
+		$subject = "Account Verification";
+		$txt = "Hi {$provider_reqs['provider_fname']},\n\nAdmin successfully verified your account. You may now subscribe to post services!";
+		$txt .= "\n\n\nBest regards,\nTeam Wakecords";
+		##
+		mail($provider_reqs['provider_email'], $subject, $txt);
 
 		echo "<script>alert('Successfully verified user!')</script>";
 	}
 
 	if(isset($_GET['reject'])){
-		update("requirement", ["req_status"], ["not verified", $_GET['reject']], "req_id");
+		update("requirement", ["req_status"], ["not verified", $_GET['reject']], "provider_id");
+		## SEND EMAIL
+		$reason = trim($_POST['listreason']);
+		$provider_reqs = provider($_GET['reject']);
+		##
+		$subject = "Account Rejected";
+		$txt = "Hi {$provider_reqs['provider_fname']},\n\nSorry to say this but your account has been rejected because of a ".$reason.".";
+		$txt .= "\n\n\nBest regards,\nTeam Wakecords";
+		##
+		mail($provider_reqs['provider_email'], $subject, $txt);
 
 		echo "<script>alert('Successfully rejected user!')</script>";
 	}

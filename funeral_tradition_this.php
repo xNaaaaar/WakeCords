@@ -59,11 +59,14 @@
 								$service_link = "funeral.php";
 								$a_link = "funeral_tradition.php";
 							}
-							## DECLARE ARRAYS
-							$size_array = array();
-							$font_array = array();
-							$qty_array = array();
-							for($i=1; $i<=$service['service_qty']; $i++) array_push($qty_array, $i);
+
+							if($service_type['service_type'] != "church"){
+								## DECLARE ARRAYS
+								$size_array = array();
+								$font_array = array();
+								$qty_array = array();
+								for($i=1; $i<=$service['service_qty']; $i++) array_push($qty_array, $i);
+							}
 
 							## NAME BASED ON SERVICE PROVIDER
 							switch($service_type['service_type']){
@@ -113,11 +116,10 @@
 										</h3>
 										<p>
 											".$service['service_desc']."
-										</p>	
+										</p>
+										<div class='card-price trad'>₱ ".number_format($service['service_cost'], 2, '.', ',')."</div>	
 								";
-								if($service_type['service_type'] != "church")
-									echo "<div class='card-price trad'>₱ ".number_format($service['service_cost'], 2, '.', ',')."</div>";
-								## CHECK IF SERVICE QTY IS 0
+								## OUT OF STOCK IF QTY IS 0
 								$qty_status = "";
 								if($service_type['service_qty'] == 0) $qty_status = "Out of Stock";
 								##
@@ -149,14 +151,41 @@
 								 
 									## FOR CHURCH
 									} else {
-
-								echo "	<div>
-											<label>Time: </label>
-											<select name='cbotime' required>
-												<option value=''>BROWSE OPTIONS</option>"; 
-												echo time_available($service['church_mass_time'], $_GET['service_id']);
-								echo "		</select>
-										</div>";
+									// echo time_available($service['church_mass_time'], $_GET['service_id']);
+								echo "	<div class='gray-note'>
+											\"Note: Please provide burial mass time and take note that burial date is the day after your wake no. of days. For example: If you provided 7 days for the wake mass, the 8th day is the burial mass date.\"
+										</div>
+										<div>
+											<label>Wake Mass Start Date: </label>
+											<input type='date' name='datestart' required>
+										</div>
+										<div>
+											<label>Wake Mass Time: </label>
+											<input list='wake_time' name='waketime' placeholder='Ex. 06:00pm - 07:00pm' required>
+											<datalist id='wake_time'>
+												<option value='03:00pm - 04:00pm'>
+												<option value='04:00pm - 05:00pm'>
+												<option value='05:00pm - 06:00pm'>
+												<option value='06:00pm - 07:00pm'>
+												<option value='07:00pm - 08:00pm'>
+											</datalist>
+										</div>
+										<div>
+											<label>Wake Mass No. of Days: </label>
+											<input type='number' name='numdays' placeholder='Enter No. of Days' required>
+										</div>
+										<div>
+											<label>Burial Mass Time: </label>
+											<input list='burial_time' name='burialtime' placeholder='Ex. 06:00pm - 07:00pm' required>
+											<datalist id='burial_time'>
+												<option value='03:00pm - 04:00pm'>
+												<option value='04:00pm - 05:00pm'>
+												<option value='05:00pm - 06:00pm'>
+												<option value='06:00pm - 07:00pm'>
+												<option value='07:00pm - 08:00pm'>
+											</datalist>
+										</div>
+										";
 									}
 								echo "
 									</div>	
@@ -185,23 +214,47 @@
 										break;
 										## FOR CHURCH
 										case "church":
-											$cbotime = trim($_POST['cbotime']);
-											$services = read("cart", ["seeker_id"], [$_SESSION['seeker']]);
+											$datestart = $_POST['datestart'];
+											$waketime = trim($_POST['waketime']);
+											$numdays = $_POST['numdays'];
+											$burialtime = trim($_POST['burialtime']);
+											// CHECK IF CHURCH SERVICE EXIST IN PURCHASE
+											$services = DB::query("SELECT * FROM purchase a JOIN services b ON a.service_id = b.service_id WHERE seeker_id = ?", array($_SESSION['seeker']), "READ");
 
 											if(count($services) > 0){
 												foreach($services as $service){
-													if(!empty($service['cart_sched_time']) && trim($service['cart_sched_time']) == $cbotime){
+													// IF ALREADY HAVE PURCHASE CHURCH MASS SERVICE
+													if($service['service_type'] == "church"){
+														$proceed = false;
+														break;
+													}
+												}
+											}
+											// CHECK IF CHURCH SERVICE EXIST IN CART
+											$services = DB::query("SELECT * FROM cart a JOIN services b ON a.service_id = b.service_id WHERE seeker_id = ?", array($_SESSION['seeker']), "READ");
+
+											if(count($services) > 0){
+												foreach($services as $service){
+													// IF ALREADY HAVE PURCHASE CHURCH MASS SERVICE
+													if($service['service_type'] == "church"){
 														$proceed = false;
 														break;
 													}
 												}
 											}
 
-											if($proceed){
-												$attr_list = ["service_id", "seeker_id", "cart_sched_time"];
-												$data_list = [$service['service_id'], $_SESSION['seeker'], $cbotime];
-											} else {
-												echo "<script>alert('This schedule: {$cbotime} exist in your cart! Cannot proceed to booking.')</script>";
+											if($datestart < date("Y-m-d")) {
+												echo "<script>alert('Date start must be a future date.')</script>";
+												$proceed = false;
+											}
+											else {
+												if($proceed){
+													$attr_list = ["service_id", "seeker_id", "cart_wake_start_date", "cart_wake_time", "cart_num_days", "cart_burial_time"];
+													$data_list = [$_GET['service_id'], $_SESSION['seeker'], $datestart, $waketime, $numdays, $burialtime];
+												} 
+												else {
+													echo "<script>alert('You cannot book church mass service because you have an existing church mass service.')</script>";
+												}
 											}
 											
 										break;

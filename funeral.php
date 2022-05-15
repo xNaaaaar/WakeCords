@@ -2,7 +2,6 @@
 <?php 
 	include("others/functions.php");
 	include("others/head.php"); 
-	
 ?>
 
 <body>

@@ -9,6 +9,17 @@
 		}
 	}
 
+	function open_modal($name, $id){
+		let open = document.querySelector('#modal-'+$name+$id);
+		let close = document.querySelector('#close-'+$name+$id);
+
+		open.showModal();
+
+		close.addEventListener('click', () => {
+			open.close();
+		})
+	}
+
 	// <?php
 	// echo "let x = {$_GET['id']}";
 	// ?>

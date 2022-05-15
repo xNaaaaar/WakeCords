@@ -4,10 +4,12 @@
 	include("others/head.php"); 
 
 	if(isset($_POST['btnupdate'])){
-		if(isset($_SESSION['seeker']))
+		if(isset($_SESSION['seeker'])){
 			upload_required("seeker", $_SESSION['seeker']);
-		else
+		}
+		else {
 			upload_required("provider", $_SESSION['provider']);
+		}
 	}
 ?>
 

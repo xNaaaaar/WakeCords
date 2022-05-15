@@ -9,6 +9,9 @@
 	## SUCCESSFULLY UPDATED
 	if(isset($_GET['updated'])) echo "<script>alert('Updated successfully!')</script>";
 
+	## SUCCESSFULLY UPDATED
+	if(isset($_GET['sent_updated'])) echo "<script>alert('Updated successfully. Please check your email for additional info.')</script>";
+
 	$user = current_user();
 
 	## SUBSCRIPTION DESCRIPTION
@@ -33,6 +36,11 @@
 				<div class="wrapper">
 					<div class="banner-div">
 						<h2>Profile</h2>
+						<?php
+						if(user_type() != "admin"){
+							echo messaging("notify", "Note: You can visit user guide <a href='user_guide.php'>here</a>.");
+						}
+						?>
 						<a class="btn btn-link-absolute" href="edit_profile.php">Update</a>
 						<?php
 						if(isset($_SESSION['provider']))
@@ -65,12 +73,12 @@
 								<input type="text" placeholder="<?php echo (user_type() == 'seeker')?$user['seeker_lname']:$user['provider_lname']; ?>" disabled>
 							</div>
 							<div>
-								<label>Address</label>
-								<input type="text" placeholder="<?php echo (user_type() == 'seeker')?$user['seeker_address']:$user['provider_address']; ?>" disabled>
-							</div>
-							<div>
 								<label>Phone</label>
 								<input type="text" placeholder="<?php echo (user_type() == 'seeker')?$user['seeker_phone']:$user['provider_phone']; ?>" disabled>
+							</div>
+							<div>
+								<label>Complete Address</label>
+								<input type="text" placeholder="<?php echo (user_type() == 'seeker')?$user['seeker_address']:$user['provider_address']; ?>" disabled>
 							</div>
 
 							<?php
@@ -137,13 +145,13 @@
 					<?php 
 					## FOR NON-ADMIN
 					if(user_type() != "admin"){ ?>
-					<div id="required" class="banner-div no-padding-top">	
-						<h2>Requirements
+					<div id="required" class="banner-div no-padding-top">
 						<?php
 						## USER STATUS [VERIFIED, NOT VERIFIED, PENDING]
 						$exist = false;
-						if(user_type() == "seeker" || user_type() == "provider"){
-							$status = user_status();
+						$status = user_status();
+						if(user_type() == "provider" && $user['provider_type'] != "church"){
+							echo "<h2>Business Permit";
 							if($status != "")
 								echo "<span class='btn status ".status_color()."'>".$status."</span>";
 							echo "</h2>";
@@ -175,7 +183,6 @@
 								}
 
 								echo "
-								
 								<figure>
 									<figcaption>Click to view <mark id='open-img'>".$image_name['req_type']."</mark></figcaption>	
 								</figure>
@@ -283,22 +290,24 @@
 	</div>
 	<script>
 		// FOR REQUIREMENTS MODAL
-		let img = document.querySelector('#modal-img');
-		let open = document.querySelector('#open-img');
-		let close = document.querySelector('#close-img');
+		<?php if($user['provider_type'] != "church") { ?>
+			let img = document.querySelector('#modal-img');
+			let open = document.querySelector('#open-img');
+			let close = document.querySelector('#close-img');
 
-		open.addEventListener('click', () => {
-			img.showModal();
-		})
+			open.addEventListener('click', () => {
+				img.showModal();
+			})
 
-		close.addEventListener('click', () => {
-			img.close();
-		})
+			close.addEventListener('click', () => {
+				img.close();
+			})
+		<?php } ?>
 		
 		// FOR SUBSCRIPTION MODAL
-		let subs = document.querySelector('#modal-subs');
-		let open_subs = document.querySelector('#open-subs');
-		let close_subs = document.querySelector('#close-subs');
+		let subs = document.getElementById('modal-subs');
+		let open_subs = document.getElementById('open-subs');
+		let close_subs = document.getElementById('close-subs');
 
 		open_subs.addEventListener('click', () => {
 			subs.showModal();

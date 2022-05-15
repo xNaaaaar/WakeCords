@@ -1,4 +1,17 @@
 <ul class="sidebar " data-sidebar>
+  <?php
+    ## FOR NOT ADMIN
+    if(user_type() != "admin"){
+  ?>
+  <li class="sidebar-list">
+    <a class="sidebar-link <?php echo ($this_page == 'guide')?'active':''; ?>" href="user_guide.php" title="User Guide">
+    <i class="fa-solid fa-file-lines"></i>
+      <div>User Guide</div>
+    </a>
+  </li>
+  <?php
+    }
+  ?>
   <li class="sidebar-list">
     <a class="sidebar-link <?php echo ($this_page == 'profile')?'active':''; ?>" href="profile.php" title="Profile">
       <i class="fa-solid fa-user"></i>

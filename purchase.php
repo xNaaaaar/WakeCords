@@ -114,15 +114,15 @@
 	</div>
 	<script>
 		// FOR RESCHED MODAL
-		function open_modal($id){
-			let resched = document.querySelector('#modal-resched'+$id);
+		function open_modal($name, $id){
+			let open = document.querySelector('#modal-'+$name+$id);
 			//let open_resched = document.querySelector('#open-resched');
-			let close_resched = document.querySelector('#close-resched'+$id);
+			let close = document.querySelector('#close-'+$name+$id);
 
-			resched.showModal();
+			open.showModal();
 
-			close_resched.addEventListener('click', () => {
-				resched.close();
+			close.addEventListener('click', () => {
+				open.close();
 			})
 		}
 	</script>

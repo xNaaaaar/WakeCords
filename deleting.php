@@ -11,8 +11,10 @@
 			$service = read("services", ["service_id"], [$_GET['data']]);
 			$service = $service[0];
 			## DELETE THE IMAGE FILE
-			$path = "images/providers/".$service['service_type']."/".$_SESSION['provider']."/".$service["service_img"];
-			if(!unlink($path)) echo "<script>alert('An error occurred in deleting image!')</script>";
+			if(!isset($_GET['logo'])){
+				$path = "images/providers/".$service['service_type']."/".$_SESSION['provider']."/".$service["service_img"];
+				if(!unlink($path)) echo "<script>alert('An error occurred in deleting image!')</script>";
+			}
 			## DELETE IN SERVICES
 			delete("services", $_GET['attr'], $_GET['data']);
 		}

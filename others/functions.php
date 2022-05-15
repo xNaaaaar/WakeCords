@@ -127,6 +127,10 @@
 							$ratePathImages = 'images/seekers/'.$userid['seeker_id'];
 							## CREATE A FOLDER FOR UPLOADING DEATH CERT
 							if(!file_exists($ratePathImages)) mkdir($ratePathImages,0777,true);
+
+							## CREATE REQUIREMENTS VERIFIED FOR SEEKER
+							$attr_list = ["seeker_id", "req_type", "req_status"];
+							create("requirement", $attr_list, qmark_generator(count($attr_list)), [$userid['seeker_id'], "seeker", "verified"]);
 						}
 
 						break;
@@ -148,7 +152,13 @@
 							$ratePathImages = 'images/providers/'.$userid['provider_type'].'/'.$userid['provider_id'];
 							## CREATE A FOLDER FOR UPLOADING DEATH CERT
 							if(!file_exists($ratePathImages)) mkdir($ratePathImages,0777,true);
-						}
+
+							## CREATE REQUIREMENTS VERIFIED FOR CHURCH
+							if($userid['provider_type'] == "church"){
+								$attr_list = ["provider_id", "req_type", "req_status"];
+								create("requirement", $attr_list, qmark_generator(count($attr_list)), [$userid['provider_id'], $userid['provider_type'], "verified"]);
+							}
+						}	
 
 						break;
 					
@@ -426,12 +436,15 @@
 							<div class='my-cart-details'>
 								<div class='my-cart-title'>
 									<h3>".$cart['church_church']."</h3>
-									<p>".limit_text($cart['service_desc'], 10)."</p>
+									<p>".$cart['service_desc']."</p>
+
+									<p style='font-size:1rem;margin-top:1em;'>Wake mass start date: <span style='color:#aaa;'>".date("M j, Y", strtotime($cart['cart_wake_start_date']))."</span></p>
+									<p style='font-size:1rem;'>Wake mass no. of days: <span style='color:#aaa;'>{$cart['cart_num_days']}</span></p>
+									<p style='font-size:1rem;'>Wake mass time: <span style='color:#aaa;'>{$cart['cart_wake_time']}</span></p>
+									<p style='font-size:1rem;'>Burial mass date: <span style='color:#aaa;'>".date("M j, Y", strtotime($cart['cart_wake_start_date']."+ {$cart['cart_num_days']} days"))."</span></p>
+									<p style='font-size:1rem;'>Burial mass time: <span style='color:#aaa;'>{$cart['cart_burial_time']}</span></p>
 								</div>
-								<div>
-									<p>Scheduled time:</p>
-									<p style='color:#aaa;'>{$cart['cart_sched_time']}</p>
-								</div>
+								<h3>₱ ".number_format($cart['service_cost'],2,'.',',')."</h3>
 							</div>
 							<div class='my-cart-qty'><a href='deleting.php?table=cart&attr=cart_id&data=".$cart['cart_id']."' onclick=\"return confirm('Are you sure you want to delete this to cart?');\"><i class='fa-solid fa-trash-can'></i></a></div>
 						</div>
@@ -492,7 +505,7 @@
 
 			if(isset($_POST['btncheckout'])){
 				$table = "purchase";
-				$attr_list = ["seeker_id", "service_id", "purchase_total", "purchase_qty", "purchase_size", "purchase_date", "purchase_sched_time", "purchase_status", "purchase_progress"];
+				$attr_list = ["seeker_id", "service_id", "purchase_total", "purchase_qty", "purchase_size", "purchase_date", "purchase_status", "purchase_progress"];
 				$cart_table = read("cart", ["seeker_id"], [$_SESSION['seeker']]);
 				$checker = false;
 				
@@ -505,19 +518,20 @@
 						case "funeral":
 							$per_cost = $service_["service_cost"] * $results['cart_qty'];
 
-							$data_list = [$results['seeker_id'], $results['service_id'], $per_cost, $results['cart_qty'], $results['cart_size'], date('Y-m-d'), NULL, "to pay", 0];
+							$data_list = [$results['seeker_id'], $results['service_id'], $per_cost, $results['cart_qty'], $results['cart_size'], date('Y-m-d'), "to pay", 0];
 						break;
 						##
 						case "church":
 							$checker = true;
-							$data_list = [$results['seeker_id'], $results['service_id'], NULL, NULL, NULL, date('Y-m-d'), $results['cart_sched_time'], "scheduled", 0];
+							$attr_list = ["seeker_id", "service_id", "purchase_total", "purchase_date", "purchase_wake_date", "purchase_wake_time", "purchase_num_days", "purchase_burial_time", "purchase_status", "purchase_progress"];
+							$data_list = [$results['seeker_id'], $results['service_id'], $service_["service_cost"], date('Y-m-d'), $results['cart_wake_start_date'], $results['cart_wake_time'], $results['cart_num_days'], $results['cart_burial_time'], "for approval", 0];
 						break;
 						##
 						case "headstone":
 							$per_cost = $service_["service_cost"] * $results['cart_qty'];
 							array_push($attr_list, "purchase_font");
 
-							$data_list = [$results['seeker_id'], $results['service_id'], $per_cost, $results['cart_qty'], $results['cart_size'], date('Y-m-d'), NULL, "to pay", 0, $results['cart_font']];
+							$data_list = [$results['seeker_id'], $results['service_id'], $per_cost, $results['cart_qty'], $results['cart_size'], date('Y-m-d'), "to pay", 0, $results['cart_font']];
 						break;
 					}
 					## GET ALL IDS BEFORE CREATING
@@ -525,13 +539,33 @@
 					## CREATE PURCHASE
 					create($table, $attr_list, qmark_generator(count($attr_list)), $data_list);
 
-					## ADD TO DETAILS FOR CHURCH
+					## FOR CHURCH
 					if($service_['service_type'] == "church") {
-						## GET THE LAST CREATED ID
-						$purchase_id = last_created_id($table, $ids_array);
+					// 	## GET THE LAST CREATED ID
+					// 	$purchase_id = last_created_id($table, $ids_array);
+					// 	##
+					// 	$attr_list = ["purchase_id"];
+					// 	create("details", $attr_list, qmark_generator(count($attr_list)), [$purchase_id]);
+						
+						## SEND EMAIL TO SEEKER
+						$seeker = read("seeker", ["seeker_id"], [$_SESSION['seeker']]);
+						$seeker = $seeker[0];
 						##
-						$attr_list = ["purchase_id"];
-						create("details", $attr_list, qmark_generator(count($attr_list)), [$purchase_id]);
+						$subject = "Pending Approval";
+						$txt = "Hi {$seeker['seeker_fname']},\n\nPlease be advice that your church service booking will take 1-3 days for church provider's approval.";
+						$txt .= "\n\n\nBest regards,\nTeam Wakecords";
+						##
+						mail($provider['seeker_email'], $subject, $txt);
+
+						## SEND EMAIL TO PROVIDER
+						$provider = provider($service_['provider_id']);
+						##
+						$subject = "Waiting for Approval";
+						$txt = "Hi {$provider['provider_fname']},\n\nPlease be advice that {$seeker['seeker_fname']}(seeker) booked church services and is waiting for your approval.";
+						$txt .= "\n\n\nBest regards,\nTeam Wakecords";
+						##
+						mail($provider['provider_email'], $subject, $txt);
+
 					}
 				}
 				## DELETE ALL DATA IN CART
@@ -572,6 +606,7 @@
 		</dialog>
 		";
 	}
+	## GENERATE RANDOM PASSWORD
 	function password_generator(){
 		$characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     	$charactersLength = strlen($characters);
@@ -732,6 +767,7 @@
 						<div class='card-0 no-padding'>
 							<a href='funeral_tradition_this.php?service_id=".$results['service_id']."&id={$results['provider_id']}'>
 								<img src='images/providers/".$results['service_type']."/".$results['provider_id']."/".$results['service_img']."'>
+								<h3 style='margin-bottom:0;line-height:1;font-size:25px;'>₱ ".number_format($results['service_cost'], 2, '.', ',')."</h3>
 								<h3>".$results['funeral_name']."
 									<span>
 										".ratings($results['service_id'], true)."
@@ -742,10 +778,12 @@
 								<p>
 									".limit_text($results['service_desc'], 10)."
 								</p>
-								<div class='card-price'>₱ ".number_format($results['service_cost'], 2, '.', ',')."</div>
+								
 							</a>
 							<div class='buttons'>	
 						"; 
+						// SERVICE COST CARD
+						// <div class='card-price'>₱ ".number_format($results['service_cost'], 2, '.', ',')."</div>
 
 						if(!service_is_booked($results['service_id'])){
 							echo "
@@ -773,6 +811,7 @@
 						<div class='card-0 no-padding'>
 							<a href='funeral_tradition_this.php?service_id=".$results['service_id']."&id={$results['provider_id']}'>
 								<img src='images/providers/".$results['service_type']."/".$results['provider_id']."/".$results['service_img']."'>
+								<h3 style='margin-bottom:0;line-height:1;font-size:25px;'>₱ ".number_format($results['service_cost'], 2, '.', ',')."</h3>
 								<h3>".$results['church_church']."
 									<span class='gray-italic inline'>({$results['church_cemetery']})</span>
 									<span>
@@ -817,6 +856,7 @@
 						<div class='card-0 no-padding'>
 							<a href='funeral_tradition_this.php?service_id=".$results['service_id']."&id={$results['provider_id']}'>
 								<img src='images/providers/".$results['service_type']."/".$results['provider_id']."/".$results['service_img']."'>
+								<h3 style='margin-bottom:0;line-height:1;font-size:25px;'>₱ ".number_format($results['service_cost'], 2, '.', ',')."</h3>
 								<h3>".$_SESSION['headstone_name']."
 									<span>
 										".ratings($results['service_id'], true)."
@@ -827,7 +867,6 @@
 								<p>
 									".limit_text($results['service_desc'], 10)."
 								</p>
-								<div class='card-price'>₱ ".number_format($results['service_cost'], 2, '.', ',')."</div>
 							</a>
 							<div class='buttons'>	
 						"; 
@@ -868,8 +907,8 @@
 		else if(isset($_SESSION['provider'])){
 			$list = DB::query("SELECT * FROM purchase a JOIN services b ON a.service_id = b.service_id WHERE provider_id = ?", array($_SESSION['provider']), "READ");
 			
-			$provider = provider();
-			if($provider['provider_type'] == "church") $is_church = true;
+			// $provider = provider();
+			// if($provider['provider_type'] == "church") $is_church = true;
 		}
 		else $list = read('purchase');
 		
@@ -877,9 +916,6 @@
 			echo "
 			<div class='list'>
 				<div></div>
-				"; 
-				echo ($is_church) ? "<div>Time</div>":"";
-				echo "
 				<div>Status</div>
 				<div>Requests</div>
 			</div>
@@ -930,9 +966,9 @@
 						<p>".limit_text($service_['service_desc'], 10)."</p>
 					</div>";
 					##  
-					if($is_church) {
-						echo "<div><span style='display:flex;align-items:center;justify-content:center;gap:0 5px;'>{$list[$j]['purchase_sched_time']}</span></div>";
-					}
+					// if($is_church) {
+						// echo "<div><span style='display:flex;align-items:center;justify-content:center;gap:0 5px;'>{$list[$j]['purchase_sched_time']}</span></div>";
+					// }
 				echo "
 					<div>
 						<span style='display:flex;align-items:center;justify-content:center;gap:0 5px;'>"; 
@@ -1026,7 +1062,7 @@
 				## STATUS IS SCHEDULED / RE-SCHEDULE - WHEN CHURCH UPDATE MASS TIME WHERE SEEKER BOOKED
 				if(($list[$j]['purchase_status'] == "scheduled" || $list[$j]['purchase_status'] == "re-schedule") && $list[$j]['purchase_progress'] == 0 && isset($_SESSION['seeker'])){
 					## RESCHED BUTTON
-					echo "<mark class='status' id='open-resched' onclick='open_modal({$list[$j]['purchase_id']});'>resched</mark>";
+					echo "<mark class='status' id='open-resched' onclick='open_modal(\"resched\", {$list[$j]['purchase_id']});'>resched</mark>";
 					##
 					$days_remaining = (strtotime(date($differ_['church_mass_date'])) - strtotime(date("Y-m-d"))) /60/60/24;
 					## CAN CANCEL IF MORE THAN 3 DAYS REMAINING BEFORE SERVICE DATE
@@ -1059,6 +1095,33 @@
 						}
 					echo "	
 					</dialog>";
+				}
+
+				## STATUS IS FOR APPROVAL FOR CHURCH SERVICES
+				if($list[$j]['purchase_status'] == "for approval"){
+					if(isset($_SESSION['provider'])){
+						echo "
+						<mark class='status' id='open-approval' onclick='open_modal(\"approval\", {$list[$j]['purchase_id']});'>view</mark>
+						";
+					}
+
+					## DIALOG FOR APPROVAL BUTTONS
+					echo "
+					<dialog class='modal-img' id='modal-approval{$list[$j]['purchase_id']}'>
+						<button id='close-approval{$list[$j]['purchase_id']}'>+</button>
+						<form method='post' style='text-align:left;'>
+							<h2>Mass Information</h2>
+							<p style='font-size:1rem;margin-bottom:0;'>Wake mass start date: <span style='color:#aaa;'>".date("M j, Y", strtotime($list[$j]['purchase_wake_date']))."</span></p>
+							<p style='font-size:1rem;margin-bottom:0;'>Wake mass no. of days: <span style='color:#aaa;'>{$list[$j]['purchase_num_days']}</span></p>
+							<p style='font-size:1rem;margin-bottom:0;'>Wake mass time: <span style='color:#aaa;'>{$list[$j]['purchase_wake_time']}</span></p>
+							<p style='font-size:1rem;margin-bottom:0;'>Burial mass date: <span style='color:#aaa;'>".date("M j, Y", strtotime($list[$j]['purchase_wake_date']."+ {$list[$j]['purchase_num_days']} days"))."</span></p>
+							<p style='font-size:1rem;'>Burial mass time: <span style='color:#aaa;'>{$list[$j]['purchase_burial_time']}</span></p>
+							
+							<button class='btn'>Approved</button>
+							<button class='btn'>Reject</button>
+						</form>
+					</dialog>
+					";
 				}
 
 				echo "
@@ -1316,9 +1379,45 @@
 			case "date":
 				if($service['service_type'] == "church") return $type["church_mass_date"];
 			break;
-			## FOR ADDRESS
-			case "address":
-				if($service['service_type'] == "church") return $type["church_address"];
+			## FOR STREET ADDRESS
+			case "address_street":
+				if($service['service_type'] == "church") {
+					## GETTING THE SPECIFIC ADDRESSES
+					$address = $type["church_address"];
+				}
+				## EXPLODED ADDRESS
+				$address = explode(",", $address);
+				return $address[0];
+			break;
+			## FOR BARANGAY ADDRESS
+			case "address_brgy":
+				if($service['service_type'] == "church") {
+					## GETTING THE SPECIFIC ADDRESSES
+					$address = $type["church_address"];
+				}
+				## EXPLODED ADDRESS
+				$address = explode(",", $address);
+				return $address[1];
+			break;
+			## FOR PROVINCE ADDRESS
+			case "address_province":
+				if($service['service_type'] == "church") {
+					## GETTING THE SPECIFIC ADDRESSES
+					$address = $type["church_address"];
+				}
+				## EXPLODED ADDRESS
+				$address = explode(",", $address);
+				return $address[3];
+			break;
+			## FOR CITY ADDRESS
+			case "address_city":
+				if($service['service_type'] == "church") {
+					## GETTING THE SPECIFIC ADDRESSES
+					$address = $type["church_address"];
+				}
+				## EXPLODED ADDRESS
+				$address = explode(",", $address);
+				return $address[2];
 			break;
 			## FOR SOME TYPE
 			case "type":
@@ -1441,13 +1540,15 @@
 						foreach($services as $results){
 							## CHECK IF SERVICE QTY IS 0
 							$qty_status = "";
-							if($results['service_qty'] == 0) {
-								$qty_status = "Out of Stock";
-							}
+							if($results['service_qty'] == 0) $qty_status = "Out of Stock";
 							## FOR USERS
 							echo "
 							<div class='card-0 no-padding'>
 								<img src='images/providers/".$results['service_type']."/".$results['provider_id']."/".$results['service_img']."'>
+								<h3 style='margin-bottom:0;line-height:1;font-size:25px;"; 
+							## IF QTY IS EMPTY
+							if(!empty($qty_status)) echo "text-decoration:line-through;color:gray;";
+							echo "'>₱ ".number_format($results['service_cost'], 2, '.', ',')."</h3>
 								<h3>".$results['funeral_name']."
 									<span>
 										".ratings($results['service_id'], true)."
@@ -1458,8 +1559,7 @@
 								<p>
 									".limit_text($results['service_desc'], 10)."
 								</p>
-								<div style='color:red;text-align:center;'>{$qty_status}</div>
-								<div class='card-price'>₱ ".number_format($results['service_cost'], 2, '.', ',')."</div>
+								<p style='color:red;text-align:center;font-size:1.5rem;'>{$qty_status}</p>
 								<div class='buttons'>
 									<a title='View' href='funeral_tradition_this.php?service_id=".$results['service_id']."&id={$results['provider_id']}'><i class='fa-solid fa-eye'></i></a>
 								</div>
@@ -1481,6 +1581,7 @@
 						<div class='card-0 no-padding'>
 							
 							<img src='images/providers/".$results['service_type']."/".$results['provider_id']."/".$results['service_img']."'>
+							<h3 style='margin-bottom:0;line-height:1;font-size:25px;'>₱ ".number_format($results['service_cost'], 2, '.', ',')."</h3>
 							<h3>".$results['church_church']."
 								<span class='gray-italic inline'>({$results['church_cemetery']})</span>
 								<span>
@@ -1491,7 +1592,6 @@
 							</h3>
 							<p>
 								".limit_text($results['service_desc'], 10)."
-								<span class='gray-italic' style='display:block;'>on ".date("M j, Y", strtotime($results['church_mass_date']))."</span>
 							</p>
 							<p>Priest: <b>{$results['church_priest']}</b></p>
 							<div class='buttons'>
@@ -1516,6 +1616,7 @@
 							echo "
 							<div class='card-0 no-padding'>
 								<img src='images/providers/".$results['service_type']."/".$results['provider_id']."/".$results['service_img']."'>
+								<h3 style='margin-bottom:0;line-height:1;font-size:25px;'>₱ ".number_format($results['service_cost'], 2, '.', ',')."</h3>
 								<h3>{$_SESSION['headstone_name']}
 									<span>
 										".ratings($results['service_id'], true)."
@@ -1526,7 +1627,6 @@
 								<p>
 									".limit_text($results['service_desc'], 10)."
 								</p>
-								<div class='card-price'>₱ ".number_format($results['service_cost'], 2, '.', ',')."</div>
 								<div class='buttons'>
 									<a title='View' href='funeral_tradition_this.php?service_id=".$results['service_id']."&id={$results['provider_id']}'><i class='fa-solid fa-eye'></i></a>
 								</div>
@@ -1555,19 +1655,24 @@
 		## DECLARE VARIABLES
 		$provider = provider();
 		## 
-		if($provider['provider_type'] != "headstone")
-			$txtsname = trim(ucwords($_POST['txtsname']));
-		##
-		if($provider['provider_type'] != "church"){
-			$txtothers = trim($_POST['txtothers']);
-			$numprice = $_POST['numprice'];
-		}	
-		##
-		if($provider['provider_type'] != "catering" && $provider['provider_type'] != "church")
-			$numqty = $_POST['numqty'];
-		##
+		if($provider['provider_type'] != "headstone") $txtsname = trim(ucwords($_POST['txtsname']));
+		if($provider['provider_type'] != "church") $txtothers = trim($_POST['txtothers']);	
+		if($provider['provider_type'] != "catering" && $provider['provider_type'] != "church") $numqty = $_POST['numqty'];
+		## FOR ALL SERVICES
+		$numprice = $_POST['numprice'];
 		$txtdesc = trim($_POST['txtdesc']);
-		$imageName = upload_image("file_img", "images/providers/".$provider['provider_type']."/".$_SESSION['provider']."/");
+		## USE EXISTING IMAGE IS CHECKED
+		if(isset($_POST['cblogo'])) {
+			$service_img = read("services", ["service_id"], [$_GET['id']]);
+			$service_img = $service_img[0];
+			
+			$imageName = $service_img['service_img'];
+			$imageName = trim($imageName);
+		}
+		else {
+			$imageName = upload_image("file_img", "images/providers/".$provider['provider_type']."/".$_SESSION['provider']."/");
+		}
+		
 		## ERROR TRAPPINGS
 		if($imageName === 1){
 			echo "<script>alert('An error occurred in uploading your image!')</script>";
@@ -1597,6 +1702,35 @@
 					
 				break;
 
+				case "church":
+					$txtpriest = trim(ucwords($_POST['txtpriest']));
+					// $date = $_POST['date'];
+					$txtcemetery = trim(ucwords($_POST['txtcemetery']));
+					// $txttime = trim($_POST['txttime']);
+					## $cbtime = "10:00am - 11:00am, 11:00am - 12:00nn, 12:00nn - 01:00pm, 01:00pm - 02:00pm, 02:00pm - 03:00pm";
+					$checked = false;
+					##
+					if(isset($_POST['cbaddress']))
+						$checked = true;
+					else {
+						$txtaddress = trim(ucwords($_POST['txtstreet'])).", ".trim(ucwords($_POST['txtbrgy'])).", ".trim(ucwords($_POST['txtcity'])).", ".trim(ucwords($_POST['txtprovince']));
+					}
+					##
+					$attr_list = ["provider_id", "service_type", "service_desc", "service_cost", "service_img", "service_status"];
+					array_push($data_list, $provider['provider_id'], $provider['provider_type'], $txtdesc, $numprice, $imageName, "active");
+					## ADDED TO SERVICES
+					create($table, $attr_list, qmark_generator(count($attr_list)), $data_list);
+					$service = read("services", ["service_img"], [$imageName]);
+					$service = $service[0];	
+					## ADD TO SPECIFIC TYPE
+					$attr_list = ["service_id", "church_church", "church_cemetery", "church_priest", "church_address"];
+					$data_list = [$service['service_id'], $txtsname, $txtcemetery, $txtpriest];
+					##
+					if($checked) array_push($data_list, $provider['provider_address']);
+					else array_push($data_list, $txtaddress);
+					
+				break;
+
 				case "headstone":
 					$cbotype = $_POST['cbotype'];
 					$cbokind = $_POST['cbokind'];
@@ -1618,42 +1752,9 @@
 					$data_list = [$service['service_id'], $cbokind, $cbotype, $cbcolor, $cbsize, $cbfont];
 					
 				break;
-
-				case "church":
-					$txtpriest = trim(ucwords($_POST['txtpriest']));
-					$date = $_POST['date'];
-					$txtcemetery = trim(ucwords($_POST['txtcemetery']));
-					$txttime = trim($_POST['txttime']);
-					## $cbtime = "10:00am - 11:00am, 11:00am - 12:00nn, 12:00nn - 01:00pm, 01:00pm - 02:00pm, 02:00pm - 03:00pm";
-					$checked = false;
-					##
-					if(!isset($_POST['cbaddress'])) {
-						$txtaddress = trim(ucwords($_POST['txtaddress']));
-					}
-					else $checked = true;
-					##
-					$attr_list = ["provider_id", "service_type", "service_desc", "service_img", "service_status"];
-					array_push($data_list, $provider['provider_id'], $provider['provider_type'], $txtdesc, $imageName, "active");
-					## ADDED TO SERVICES
-					create($table, $attr_list, qmark_generator(count($attr_list)), $data_list);
-					$service = read("services", ["service_img"], [$imageName]);
-					$service = $service[0];	
-					## ADD TO SPECIFIC TYPE
-					$attr_list = ["service_id", "church_church", "church_cemetery", "church_priest", "church_mass_date", "church_mass_time", "church_address"];
-					$data_list = [$service['service_id'], $txtsname, $txtcemetery, $txtpriest, $date, $txttime];
-					##
-					if($checked) array_push($data_list, $provider['provider_address']);
-					else array_push($data_list, $txtaddress);
-					
-				break;
-
-				case "church":
-
-				break;
 			}
-			##
+			## CREATE SPECIFIC 
 			create($provider['provider_type'], $attr_list, qmark_generator(count($attr_list)), $data_list);
-			## 
 			echo "<script>alert('Successfully added new service!')</script>";
 		}
 	}
@@ -1910,7 +2011,7 @@
 				}	
 			}	
 
-			$txtaddress = trim(ucwords($_POST['txtaddress']));
+			$txtaddress = trim(ucwords($_POST['txtstreet'])).", ".trim(ucwords($_POST['txtbrgy'])).", ".trim(ucwords($_POST['txtcity'])).", ".trim(ucwords($_POST['txtprovince']));
 			$txtphone = trim($_POST['txtphone']);
 		}
 		## ERROR TRAP
@@ -2006,7 +2107,7 @@
 					}
 					else create($table, $attr_list, qmark_generator(count($attr_list)), $data_list);
 					
-					break;
+				break;
 					
 				case "provider":
 					$attr_list = ["provider_id", "req_type", "req_img", "req_status"];
@@ -2024,11 +2125,18 @@
 						update($table, $attr_list, $data_list, "req_id");
 					}
 					else create($table, $attr_list, qmark_generator(count($attr_list)), $data_list);
-
-					break;
+					## SEND EMAIL
+					$provider = provider();
+					##
+					$subject = "Pending Verification";
+					$txt = "Hi {$provider['provider_fname']},\n\nPlease be advice that permit verification will take 1-3 days.";
+					$txt .= "\n\n\nBest regards,\nTeam Wakecords";
+					##
+					mail($provider['provider_email'], $subject, $txt);
+				break;
 			}
-
-			header('Location: profile.php?updated');
+			
+			header('Location: profile.php?sent_updated');
 			exit;
 		}
 	}
@@ -2055,7 +2163,7 @@
 						echo "
 							<div>".$reqs['req_status']."</div>
 							<div>
-								<a href='admin_users.php?id=".$count."' onclick='open_modal();' class='img-link'>
+								<a onclick='open_modal(\"image\", {$count});' class='img-link'>
 									<figure>
 										<img src='images/seekers/".$results['seeker_id']."/".$reqs['req_img']."'>
 									</figure>
@@ -2064,10 +2172,11 @@
 						";
 
 						if($reqs['req_status'] == "pending"){
+							## <a href='admin_users.php?reject=".$reqs['req_id']."' class='verify btn status' onclick='return confirm(\"Are you sure you want to reject this requirement?\");'>reject</a>
 							echo "
 							<div>
 								<a href='admin_users.php?verify=".$reqs['req_id']."' class='verify btn status' onclick='return confirm(\"Are you sure you want to verify this requirement?\");'>verify</a>
-								<a href='admin_users.php?reject=".$reqs['req_id']."' class='verify btn status' onclick='return confirm(\"Are you sure you want to reject this requirement?\");'>reject</a>
+								<a class='btn status' onclick='open_modal(\"reject\", 0);'></a>
 							</div>
 							";
 						} else echo "<div> — </div>";
@@ -2075,8 +2184,8 @@
 						echo "
 						</div>
 
-						<dialog class='modal-img' id='modal-img".$count."'>
-							<button onclick='close_modal();'>+</button>
+						<dialog class='modal-img' id='modal-image".$count."'>
+							<button id='close-image".$count."'>+</button>
 							<figure class='open-image'>
 								<img src='images/seekers/".$results['seeker_id']."/".$reqs['req_img']."'>
 							</figure>
@@ -2118,7 +2227,7 @@
 						echo "
 							<div>".$reqs['req_status']."</div>
 							<div>
-								<a href='admin_users_provider.php?id=".$count."' onclick='open_modal();' class='img-link'>
+								<a onclick='open_modal(\"image\", {$count});' class='img-link'>
 									<figure>
 										<img src='images/providers/".$results['provider_type']."/".$results['provider_id']."/".$reqs['req_img']."'>
 									</figure>
@@ -2129,8 +2238,8 @@
 						if($reqs['req_status'] == "pending"){
 							echo "
 							<div>
-								<a href='admin_users_provider.php?verify=".$reqs['req_id']."' class='verify btn status' onclick='return confirm(\"Are you sure you want to verify this requirement?\");'>verify</a>
-								<a href='admin_users_provider.php?reject=".$reqs['req_id']."' class='verify btn status' onclick='return confirm(\"Are you sure you want to reject this requirement?\");'>reject</a>
+								<a href='admin_users_provider.php?verify=".$reqs['req_id']."' class='btn status' onclick='return confirm(\"Are you sure you want to verify this requirement?\");'>verify</a>
+								<a class='btn status' onclick='open_modal(\"reject\", 0);'>reject</a>
 							</div>
 							";
 						} else echo "<div> — </div>";
@@ -2138,11 +2247,25 @@
 						echo "
 						</div>
 
-						<dialog class='modal-img' id='modal-img".$count."'>
-							<button onclick='close_modal();'>+</button>
+						<dialog class='modal-img' id='modal-image".$count."'>
+							<button id='close-image".$count."'>+</button>
 							<figure class='open-image'>
 								<img src='images/providers/".$results['provider_type']."/".$results['provider_id']."/".$reqs['req_img']."'>
 							</figure>
+						</dialog>
+
+						<dialog class='modal-img' id='modal-reject0' style='width:400px;'>
+							<button id='close-reject0'>+</button>
+							<form method='post' action='admin_users_provider.php?reject=".$reqs['req_id']."'>
+								<h3>Reason for rejection</h3>
+								<p style='line-height:1;font-style:italic;color:gray;font-size:16px;'>Please indicate your reason for rejection below!</p>
+								<input list='reasons' name='listreason'>
+								<datalist id='reasons'>
+									<option value='blurred image'>
+									<option value='problem with image'>
+								</datalist>
+								<button class='btn' type='submit' name='btnsubmit'>Submit</button>
+							</form>
 						</dialog>
 						";
 					}

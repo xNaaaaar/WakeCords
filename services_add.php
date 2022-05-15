@@ -5,7 +5,6 @@
 
 	$user = provider();
 
-	echo "";
 	## 
 	if(isset($_POST['btnadd'])) {
 		service_adding();
@@ -13,8 +12,15 @@
 	## UPDATE FOR NO BOOKING
 	if(isset($_POST['btn_upd0'])){
 		service_adding();
-		header("Location: deleting.php?table={$user['provider_type']}&attr=service_id&data=".$_GET['id']."&url=services&update");
-		exit;
+		##
+		if(isset($_POST['cblogo'])) {
+			header("Location: deleting.php?table={$user['provider_type']}&attr=service_id&data=".$_GET['id']."&url=services&update&logo");
+			exit;
+		}
+		else {
+			header("Location: deleting.php?table={$user['provider_type']}&attr=service_id&data=".$_GET['id']."&url=services&update");
+			exit;
+		}
 	}
 	## UPDATE WITH BOOKING
 	if(isset($_POST['btn_upd1'])){
@@ -64,7 +70,6 @@
 								##
 								$type = read($service['service_type'], ["service_id"], [$_GET['id']]);
 								$type = $type[0];
-								##
 								## PREVIEW IMAGE DIALOG
 								echo "
 								<dialog class='modal-img aspect-ratio' id='modal-img'>
@@ -95,17 +100,30 @@
 							</div>";
 							## DO THIS IF SERVICE HAS NO BOOKING
 							if((isset($_GET['edit']) && !service_is_booked($_GET['id'])) || $edit == false){
-
+							## FOR CHECKBOX TO USE IMAGE
+							if($edit){
+								// echo "
+								// <div style='width:100%;' class='checkbox'>
+								// 	<div class='full'>
+								// 		<input id='profile-logo' type='checkbox' name='cblogo'>
+								// 		<label class='label-span'><span>Check to use existing service image below.</span></label>
+								// 	</div>
+								// </div>";
+							}
+							##
 							echo "
 							<div>
 								<label>Image 
-							"; 
-								if($edit) echo "<mark class='mark-style' id='open-img'>preview</mark>"; ## ↑ 
+							";
+							## FOR PREVIEWING 
+							if($edit) echo "<mark class='mark-style' id='open-img'>preview</mark>"; ## ↑ 
+							##
 							echo "
 								</label>
-								<input type='file' name='file_img' required>
+								<input id='image-file' type='file' name='file_img' required>
 							</div>
 							";
+							
 							## SWITCH FOR DIFFERENT PROVIDER TYPE
 							switch($user['provider_type']){
 								## FOR FUNERAL SERVICES
@@ -323,6 +341,23 @@
 								break;
 								## FOR CHURCH SERVICES
 								case "church":
+									// <div>
+									// 	<label>Date</label>
+									// 	<input type='date' name='date' value='"; 
+									// 	echo ($edit) ? return_value("services", $_GET['id'], "date"):"";
+									// 	echo "' required>
+									// </div>
+									$width = "style='width:100%;'";
+
+									// ## GETTING THE SPECIFIC ADDRESSES
+									// if(user_type() == 'seeker') $address = $user['seeker_address'];
+									// else $address = $user['provider_address'];
+									// $empty_address = false;
+									// ## CHECK IF ADDRESS IS EMPTY
+									// if(empty($address)) $empty_address = true;
+									// ## EXPLODED ADDRESS
+									// $address = explode(",", $address);
+
 									echo "
 									<div>
 										<label>Priest</label>
@@ -342,23 +377,38 @@
 										echo ($edit) ? return_value("services", $_GET['id'], "cemetery"):"";
 										echo "' required>
 									</div>
+
+									<h3 style='width:100%;'>Complete Address</h3>
+									<div style='width:100%;' class='checkbox'>
+										<div class='full'>
+											<input id='profile-address' type='checkbox' name='cbaddress'>
+											<label class='label-span'><span>Check to use address in Profile.</span></label>
+										</div>
+									</div>
+
 									<div>
-										<label>Date</label>
-										<input type='date' name='date' value='"; 
-										echo ($edit) ? return_value("services", $_GET['id'], "date"):"";
+										<label>House No. / Street</label>
+										<input id='street' class='' type='text' name='txtstreet' value='"; 
+										echo ($edit) ? return_value("services", $_GET['id'], "address_street"):"";
 										echo "' required>
 									</div>
 									<div>
-										<label>Address</label>
-										<input id='address' class='' type='text' name='txtaddress' value='"; 
-										echo ($edit) ? return_value("services", $_GET['id'], "address"):"";
+										<label>Sitio / Barangay</label>
+										<input id='brgy' class='' type='text' name='txtbrgy' value='"; 
+										echo ($edit) ? return_value("services", $_GET['id'], "address_brgy"):"";
 										echo "' required>
-										<div class='checkbox'>
-											<div class='full'>
-												<input id='profile-address' type='checkbox' name='cbaddress'>
-												<label class='label-span'><span>Check to use address in Profile.</span></label>
-											</div>
-										</div>
+									</div>
+									<div>
+										<label>Province</label>
+										<input id='province' class='' type='text' name='txtprovince' value='"; 
+										echo ($edit) ? return_value("services", $_GET['id'], "address_province"):"";
+										echo "' required>
+									</div>
+									<div>
+										<label>City</label>
+										<input id='city' class='' type='text' name='txtcity' value='"; 
+										echo ($edit) ? return_value("services", $_GET['id'], "address_city"):"";
+										echo "' required>
 									</div>
 									";
 								break;
@@ -562,17 +612,15 @@
 									";
 								break;
 							}
-
-							if($user['provider_type'] != "church"){
-								echo "
-								<div {$width}>
-									<label>Price</label>
-									<input type='number' name='numprice' placeholder='Ex. 50000 for 50k' value='";
-									echo ($edit) ? return_value("services", $_GET['id'], "price"):"";
-									echo "' required>
-								</div>
-								";
-							}
+							## PAMISA PRICE
+							echo "
+							<div {$width}>
+								<label>Price</label>
+								<input type='number' name='numprice' placeholder='Ex. 50000 for 50k' value='";
+								echo ($edit) ? return_value("services", $_GET['id'], "price"):"";
+								echo "' required>
+							</div>
+							";
 
 							} ## END OF, IF SERVICE IS NOT BOOKED
 							
@@ -587,7 +635,7 @@
 								";
 							}
 
-							if($user['provider_type'] == "church"){
+							if($user['provider_type'] == "church" && false){
 								echo "
 								<div style='width:100%;'>
 									<label class='label-span'>Time <span>(please follow time format, separated by comma)</span></label>
@@ -639,17 +687,61 @@
 	
 	if($user['provider_type'] == "church") { ?>
 		let p_address = document.getElementById('profile-address');
-		let address = document.getElementById('address');
+		let street = document.getElementById('street');
+		let brgy = document.getElementById('brgy');
+		let province = document.getElementById('province');
+		let city = document.getElementById('city');
 
 		p_address.addEventListener("click", () => {
 			if(p_address.checked) {
-				address.classList.add("readonly");
-				address.readOnly = true;
-				address.required = false;
+				street.classList.add("readonly");
+				street.readOnly = true;
+				street.required = false;
+
+				brgy.classList.add("readonly");
+				brgy.readOnly = true;
+				brgy.required = false;
+
+				province.classList.add("readonly");
+				province.readOnly = true;
+				province.required = false;
+
+				city.classList.add("readonly");
+				city.readOnly = true;
+				city.required = false;
 			} else {
-				address.classList.remove("readonly");
-				address.readOnly = false;
-				address.required = true;
+				street.classList.remove("readonly");
+				street.readOnly = false;
+				street.required = true;
+
+				brgy.classList.remove("readonly");
+				brgy.readOnly = false;
+				brgy.required = true;
+
+				province.classList.remove("readonly");
+				province.readOnly = false;
+				province.required = true;
+
+				city.classList.remove("readonly");
+				city.readOnly = false;
+				city.required = true;
+			}
+		})
+
+		// FOR SERVICE IMAGE
+		let profile_logo = document.getElementById("profile-logo");
+		let image_file = document.getElementById("image-file");
+
+		profile_logo.addEventListener("click", () => {
+			if(profile_logo.checked){
+				image_file.classList.add("readonly");
+				image_file.readOnly = true;
+				image_file.required = false;
+			}
+			else {
+				image_file.classList.remove("readonly");
+				image_file.readOnly = false;
+				image_file.required = true;
 			}
 		})
 	<?php
