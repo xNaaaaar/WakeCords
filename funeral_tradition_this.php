@@ -155,37 +155,7 @@
 								echo "	<div class='gray-note'>
 											\"Note: Please provide burial mass time and take note that burial date is the day after your wake no. of days. For example: If you provided 7 days for the wake mass, the 8th day is the burial mass date.\"
 										</div>
-										<div>
-											<label>Wake Mass Start Date: </label>
-											<input type='date' name='datestart' required>
-										</div>
-										<div>
-											<label>Wake Mass Time: </label>
-											<input list='wake_time' name='waketime' placeholder='Ex. 06:00pm - 07:00pm' required>
-											<datalist id='wake_time'>
-												<option value='03:00pm - 04:00pm'>
-												<option value='04:00pm - 05:00pm'>
-												<option value='05:00pm - 06:00pm'>
-												<option value='06:00pm - 07:00pm'>
-												<option value='07:00pm - 08:00pm'>
-											</datalist>
-										</div>
-										<div>
-											<label>Wake Mass No. of Days: </label>
-											<input type='number' name='numdays' placeholder='Enter No. of Days' required>
-										</div>
-										<div>
-											<label>Burial Mass Time: </label>
-											<input list='burial_time' name='burialtime' placeholder='Ex. 06:00pm - 07:00pm' required>
-											<datalist id='burial_time'>
-												<option value='03:00pm - 04:00pm'>
-												<option value='04:00pm - 05:00pm'>
-												<option value='05:00pm - 06:00pm'>
-												<option value='06:00pm - 07:00pm'>
-												<option value='07:00pm - 08:00pm'>
-											</datalist>
-										</div>
-										";
+										".mass_required_details();
 									}
 								echo "
 									</div>	

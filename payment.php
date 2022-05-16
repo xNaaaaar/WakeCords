@@ -85,8 +85,8 @@
 								</ul>
 								<ul>
 									<li></li>
-									<li>Total Cost:</li>
-									<li>₱ <?php echo number_format($total,2,'.',','); ?></li>
+									<li><h3>Total Cost:</h3></li>
+									<li><h3>₱ <?php echo number_format($total,2,'.',','); ?></h3></li>
 								</ul>
 							</div>
 							<!-- ADDITIONAL DETAILS -->
@@ -204,15 +204,15 @@
 								}
 
 								if(service_type_exist_bool("church", $type_list)){
-									echo "
-									<h5>Church</h5>
-									<div class='details-con'>
-										<div>
-											<label>Cemetery address with plan (optional)</label>
-											<input type='text' name='txtcemaddress'>
-										</div>
-									</div>
-									";
+									// echo "
+									// <h5>Church</h5>
+									// <div class='details-con'>
+									// 	<div>
+									// 		<label>Cemetery address with plan (optional)</label>
+									// 		<input type='text' name='txtcemaddress'>
+									// 	</div>
+									// </div>
+									// ";
 								}
 								
 								?>
@@ -280,13 +280,16 @@
 							<?php
 
 							if(isset($_POST['btnpay'])){
-								$_SESSION['field_array'] = [$_POST['cbomethod'], trim(ucwords($_POST['txtdeceasedname'])), trim(ucwords($_POST['gcash-name'])), $_POST['gcash-num']];
+								## USE FOR pay_purchase() FUNCTION
+								$_SESSION['field_array'] = [$_POST['cbomethod'], trim(ucwords($_POST['txtdeceasedname'])), trim(ucwords($_POST['gcash-name'])), $_POST['gcash-num'], $total];
 
 								if(service_type_exist_bool("funeral", $type_list)){
+									## USE FOR pay_purchase() FUNCTION
 									$_SESSION['field_array_funeral'] = [$_POST['dtburial'], trim(ucwords($_POST['txtburialadd']))];
 								}
 
 								if(service_type_exist_bool("headstone", $type_list)){
+									## USE FOR pay_purchase() FUNCTION
 									$_SESSION['field_array_headstone'] = [$_POST['datebirth'], $_POST['datedeath'], $_POST['datedeliveryheadstone'], trim(ucwords($_POST['txtmsg']))];
 								}
 

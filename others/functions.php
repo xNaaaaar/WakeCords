@@ -376,6 +376,40 @@
 		}
 		else echo "<script>alert('Email address or password is incorrect!')</script>";
 	}
+	## MASS DETAILS
+	function mass_required_details($wake_date="", $wake_time="", $num_days="", $burial_time=""){
+		return "
+		<div>
+			<label>Wake Mass Start Date: </label>
+			<input type='date' name='datestart' value='{$wake_date}' required>
+		</div>
+		<div>
+			<label>Wake Mass Time: </label>
+			<input list='wake_time' name='waketime' value='{$wake_time}' placeholder='Ex. 06:00pm - 07:00pm' required>
+			<datalist id='wake_time'>
+				<option value='03:00pm - 04:00pm'>
+				<option value='04:00pm - 05:00pm'>
+				<option value='05:00pm - 06:00pm'>
+				<option value='06:00pm - 07:00pm'>
+				<option value='07:00pm - 08:00pm'>
+			</datalist>
+		</div>
+		<div>
+			<label>Wake Mass No. of Days: </label>
+			<input type='number' name='numdays' value='{$num_days}' placeholder='Enter No. of Days' required>
+		</div>
+		<div>
+			<label>Burial Mass Time: </label>
+			<input list='burial_time' name='burialtime' value='{$burial_time}' placeholder='Ex. 06:00pm - 07:00pm' required>
+			<datalist id='burial_time'>
+				<option value='03:00pm - 04:00pm'>
+				<option value='04:00pm - 05:00pm'>
+				<option value='05:00pm - 06:00pm'>
+				<option value='06:00pm - 07:00pm'>
+				<option value='07:00pm - 08:00pm'>
+			</datalist>
+		</div>";
+	}
 	## TYPE [notify, success, error]
 	function messaging($type, $msg){
 		switch($type){
@@ -662,7 +696,7 @@
 					create("details", $attr_list, qmark_generator(count($attr_list)), $data_list);
 
 					## PURCHASE STATUS 'to pay' TO 'paid'
-					update("purchase", ["purchase_status"], ["paid", $results['purchase_id']], "purchase_id");
+					update("purchase", ["purchase_total", "purchase_status"], [$_SESSION['field_array'][4], "paid", $results['purchase_id']], "purchase_id");
 
 					## UPDATE SERVICE REMAINING QTY
 					$service = read("services", ["service_id"], [$results['service_id']]);
@@ -684,8 +718,8 @@
 					$data_list = [$results['purchase_id'], $cbomethod, $acc_name, $acc_num, date("Y-m-d H:i:s")];
 
 					create("payment", $attr_list, qmark_generator(count($attr_list)), $data_list);
-				}		
-			}			
+				}	
+			}		
 		}
 		if(service_type_exist_bool("candle", $type_list)){
 			$datedeliverycandle = $_POST['datedeliverycandle'];
@@ -1014,6 +1048,9 @@
 				if($list[$j]['purchase_status'] == "to pay"){
 					## FOR SEEKER
 					if(isset($_SESSION['seeker'])){
+						if($service_['service_type'] == "church"){
+							echo "<mark class='status' id='open-approval' onclick='open_modal(\"approval\", {$list[$j]['purchase_id']});'>view</mark>";
+						}
 						echo "<a href='payment.php?purchaseid=".$list[$j]['purchase_id']."' class='status' onclick='return confirm(\"Proceed to payment?\");'>pay</a>";
 						echo "<a href='deleting.php?table=purchase&attr=purchase_id&data=".$list[$j]['purchase_id']."&url=purchase' class='status' onclick='return confirm(\"Confirm deletion?\");'>delete</a>";
 					}
@@ -1097,32 +1134,61 @@
 					</dialog>";
 				}
 
-				## STATUS IS FOR APPROVAL FOR CHURCH SERVICES
-				if($list[$j]['purchase_status'] == "for approval"){
-					if(isset($_SESSION['provider'])){
+				## STATUS IS FOR APPROVAL FOR CHURCH SERVICES (PROVIDER)
+				if($list[$j]['purchase_status'] == "for approval" || $list[$j]['purchase_status'] == "rejected"){
+					echo "<mark class='status' id='open-approval' onclick='open_modal(\"approval\", {$list[$j]['purchase_id']});'>view</mark>";
+					## FOR SEEKER
+					if(isset($_SESSION['seeker'])){
 						echo "
-						<mark class='status' id='open-approval' onclick='open_modal(\"approval\", {$list[$j]['purchase_id']});'>view</mark>
+						<mark class='status' id='open-reschedule' onclick='open_modal(\"reschedule\", {$list[$j]['purchase_id']});'>resched</mark>
+						<a href='deleting.php?table=purchase&attr=purchase_id&data=".$list[$j]['purchase_id']."&url=purchase' class='status' onclick='return confirm(\"You cannot undo this process, confirm cancellation?\");'>cancel</a>
+						";
+
+						## DIALOG FOR RESCHEDULE BUTTON
+						echo "
+						<dialog class='modal-img' id='modal-reschedule{$list[$j]['purchase_id']}'>
+							<button id='close-reschedule{$list[$j]['purchase_id']}'>+</button>
+							<form method='post' style='text-align:left;'>
+								<input type='hidden' name='pid' value='{$list[$j]['purchase_id']}'></input>
+								<h2>Mass Information</h2>
+								".mass_required_details($list[$j]['purchase_wake_date'], $list[$j]['purchase_wake_time'], $list[$j]['purchase_num_days'], $list[$j]['purchase_burial_time'])."
+								<button class='btn' type='submit' name='btnreschedule' onclick='return confirm(\"Confirm reschedule purchase?\");'>Resched</button>
+							</form>
+						</dialog>
 						";
 					}
-
-					## DIALOG FOR APPROVAL BUTTONS
-					echo "
-					<dialog class='modal-img' id='modal-approval{$list[$j]['purchase_id']}'>
-						<button id='close-approval{$list[$j]['purchase_id']}'>+</button>
-						<form method='post' style='text-align:left;'>
-							<h2>Mass Information</h2>
-							<p style='font-size:1rem;margin-bottom:0;'>Wake mass start date: <span style='color:#aaa;'>".date("M j, Y", strtotime($list[$j]['purchase_wake_date']))."</span></p>
-							<p style='font-size:1rem;margin-bottom:0;'>Wake mass no. of days: <span style='color:#aaa;'>{$list[$j]['purchase_num_days']}</span></p>
-							<p style='font-size:1rem;margin-bottom:0;'>Wake mass time: <span style='color:#aaa;'>{$list[$j]['purchase_wake_time']}</span></p>
-							<p style='font-size:1rem;margin-bottom:0;'>Burial mass date: <span style='color:#aaa;'>".date("M j, Y", strtotime($list[$j]['purchase_wake_date']."+ {$list[$j]['purchase_num_days']} days"))."</span></p>
-							<p style='font-size:1rem;'>Burial mass time: <span style='color:#aaa;'>{$list[$j]['purchase_burial_time']}</span></p>
-							
-							<button class='btn'>Approved</button>
-							<button class='btn'>Reject</button>
-						</form>
-					</dialog>
-					";
 				}
+
+				## DIALOG FOR VIEWING
+				echo "
+				<dialog class='modal-img' id='modal-approval{$list[$j]['purchase_id']}'>
+					<button id='close-approval{$list[$j]['purchase_id']}'>+</button>
+					<form method='post' style='text-align:left;'>
+						<input type='hidden' name='pid' value='{$list[$j]['purchase_id']}'></input>
+						<h2>Mass Information</h2>
+						<h3 style='margin-bottom:0;'>₱ ".number_format($list[$j]['purchase_total'],2,'.',',')."</h3>
+						<h4>{$name}</h4>
+						<p>{$service_['service_desc']}</p>
+
+						<p style='font-size:1rem;margin-bottom:1em;'>
+							Wake mass start date: <span style='color:#aaa;'>".date("M j, Y", strtotime($list[$j]['purchase_wake_date']))."</span><br>
+							Wake mass no. of days: <span style='color:#aaa;'>{$list[$j]['purchase_num_days']}</span><br>
+							Wake mass time: <span style='color:#aaa;'>{$list[$j]['purchase_wake_time']}</span><br>
+							Burial mass date: <span style='color:#aaa;'>".date("M j, Y", strtotime($list[$j]['purchase_wake_date']."+ {$list[$j]['purchase_num_days']} days"))."</span><br>
+							Burial mass time: <span style='color:#aaa;'>{$list[$j]['purchase_burial_time']}</span>
+						</p>
+						"; 
+					## APPROVE & REJECT BUTTON FOR PROVIDER
+					if(isset($_SESSION['provider']) && $list[$j]['purchase_status'] == "for approval"){
+						echo "
+						<button class='btn' type='submit' name='btnapproved' onclick='return confirm(\"Confirm approval?\");'>Approved</button>
+						<a href='reject.php?purchase_id={$list[$j]['purchase_id']}' class='btn'>Reject</a>
+						";
+					}
+						echo "
+					</form>
+				</dialog>
+				";
 
 				echo "
 					</div>

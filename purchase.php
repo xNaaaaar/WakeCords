@@ -15,52 +15,72 @@
 	if(isset($_GET['uploaded']))
 		echo "<script>alert('Successfully uploaded proof of payment!')</script>";
 
-	if(isset($_POST['btnresched'])) {
-		$proceed = true;
-		$numid = $_POST['numid'];
-		$cbotime = $_POST['cbotime'];
-		## SEND EMAIL | PROVIDER
-		$provider = DB::query("SELECT * FROM purchase a JOIN services b ON a.service_id = b.service_id JOIN church d ON d.service_id = b.service_id JOIN provider c ON b.provider_id = c.provider_id WHERE purchase_id = ?", array($numid), "READ");
-		$provider = $provider[0];
-		## SEND EMAIL | SEEKER
-		$seeker = DB::query("SELECT * FROM purchase a JOIN seeker b ON a.seeker_id = b.seeker_id WHERE purchase_id = ?", array($numid), "READ");
-		$seeker = $seeker[0];
-		## SEND EMAIL | SUBJECT
-		$subject = "Mass Time Rescheduled";
-		## SEND EMAIL | SEND TO EMAIL
-		$to_provider = $provider['provider_email'];
-		## SEND EMAIL | MESSAGE
-		$txt = "Hi {$provider['provider_fname']},\n\nPlease be advise that seeker:{$seeker['seeker_fname']} has reschedule their mass schedule from {$provider['purchase_sched_time']} to {$cbotime}.\nThank you for your service!";
-		$txt .= "\n\n\nBest regards,\nTeam Wakecords";
+	// if(isset($_POST['btnresched'])) {
+	// 	$proceed = true;
+	// 	$numid = $_POST['numid'];
+	// 	$cbotime = $_POST['cbotime'];
+	// 	## SEND EMAIL | PROVIDER
+	// 	$provider = DB::query("SELECT * FROM purchase a JOIN services b ON a.service_id = b.service_id JOIN church d ON d.service_id = b.service_id JOIN provider c ON b.provider_id = c.provider_id WHERE purchase_id = ?", array($numid), "READ");
+	// 	$provider = $provider[0];
+	// 	## SEND EMAIL | SEEKER
+	// 	$seeker = DB::query("SELECT * FROM purchase a JOIN seeker b ON a.seeker_id = b.seeker_id WHERE purchase_id = ?", array($numid), "READ");
+	// 	$seeker = $seeker[0];
+	// 	## SEND EMAIL | SUBJECT
+	// 	$subject = "Mass Time Rescheduled";
+	// 	## SEND EMAIL | SEND TO EMAIL
+	// 	$to_provider = $provider['provider_email'];
+	// 	## SEND EMAIL | MESSAGE
+	// 	$txt = "Hi {$provider['provider_fname']},\n\nPlease be advise that seeker:{$seeker['seeker_fname']} has reschedule their mass schedule from {$provider['purchase_sched_time']} to {$cbotime}.\nThank you for your service!";
+	// 	$txt .= "\n\n\nBest regards,\nTeam Wakecords";
 
-		## SEND EMAIL
-		try {
-			mail($to_provider, $subject, $txt);
-		}
-		catch (Exception $e) {
-			$proceed = false;
-			echo "<script>alert('Error sending email! Error found: ".$e->getMessage()."')</script>";
-		}
+	// 	## SEND EMAIL
+	// 	try {
+	// 		mail($to_provider, $subject, $txt);
+	// 	}
+	// 	catch (Exception $e) {
+	// 		$proceed = false;
+	// 		echo "<script>alert('Error sending email! Error found: ".$e->getMessage()."')</script>";
+	// 	}
 		
-		## SEND EMAIL | SEND TO EMAIL
-		$to_seeker = $seeker['seeker_email'];
-		## SEND EMAIL | MESSAGE
-		$txt = "Hi {$seeker['seeker_fname']},\n\nPlease be advise that you can only reschedule once and your scheduled {$provider['purchase_sched_time']} has successfully rescheduled to {$cbotime}.\nThank you!";
-		$txt .= "\n\n\nBest regards,\nTeam Wakecords";
+	// 	## SEND EMAIL | SEND TO EMAIL
+	// 	$to_seeker = $seeker['seeker_email'];
+	// 	## SEND EMAIL | MESSAGE
+	// 	$txt = "Hi {$seeker['seeker_fname']},\n\nPlease be advise that you can only reschedule once and your scheduled {$provider['purchase_sched_time']} has successfully rescheduled to {$cbotime}.\nThank you!";
+	// 	$txt .= "\n\n\nBest regards,\nTeam Wakecords";
 
-		## SEND EMAIL
-		try {
-			mail($to_seeker, $subject, $txt);
-		}
-		catch (Exception $e) {
-			$proceed = false;
-			echo "<script>alert('Error sending email! Error found: ".$e->getMessage()."')</script>";
-		}
+	// 	## SEND EMAIL
+	// 	try {
+	// 		mail($to_seeker, $subject, $txt);
+	// 	}
+	// 	catch (Exception $e) {
+	// 		$proceed = false;
+	// 		echo "<script>alert('Error sending email! Error found: ".$e->getMessage()."')</script>";
+	// 	}
 		
-		if($proceed) {
-			update("purchase", ["purchase_sched_time", "purchase_status", "purchase_progress"], [$cbotime, "scheduled", 1, $numid], "purchase_id");
-			echo "<script>alert('Rescheduled successfully!')</script>";
-		}
+	// 	if($proceed) {
+	// 		update("purchase", ["purchase_sched_time", "purchase_status", "purchase_progress"], [$cbotime, "scheduled", 1, $numid], "purchase_id");
+	// 		echo "<script>alert('Rescheduled successfully!')</script>";
+	// 	}
+	// }
+	## BUTTON APPROVED IS CLICKED BY CHURCH PROVIDER
+	if(isset($_POST['btnapproved'])){
+		$purchase_id = $_POST['pid'];
+		## UPDATE PURCHASE WHEN RESCHEDULE IS CLICKED
+		update("purchase", ["purchase_status"], ["to pay", $purchase_id], "purchase_id");
+		## SUCCESS CONFIRMATION
+		echo "<script>alert('Successfully approved purchase!')</script>";
+	}
+	## BUTTON RESCHED IS CLICKED BY SEEKER
+	if(isset($_POST['btnreschedule'])) {
+		$purchase_id = $_POST['pid'];
+		$datestart = $_POST['datestart'];
+		$waketime = $_POST['waketime'];
+		$numdays = $_POST['numdays'];
+		$burialtime = $_POST['burialtime'];
+		## UPDATE PURCHASE WHEN RESCHEDULE IS CLICKED
+		update("purchase", ["purchase_wake_date", "purchase_wake_time", "purchase_num_days", "purchase_burial_time", "purchase_status"], [$datestart, $waketime, $numdays, $burialtime, "for approval", $purchase_id], "purchase_id");
+		## SUCCESS CONFIRMATION
+		echo "<script>alert('Successfully rescheduled purchase!')</script>";
 	}
 ?>
 
