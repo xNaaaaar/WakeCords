@@ -62,14 +62,32 @@
 							case "church":
 								echo "
 								<div>
-									<label>Burial datetime</label>
-									<input type='datetime-local' name='txtbdt' value='".date("Y-m-d\TH:i", strtotime($details['burial_datetime']))."'>
+									<label>Date of death</label>
+									<input type='datetime-local' name='dtdeath' value='".date("Y-m-d\TH:i", strtotime($details['death_date']))."'>
+								</div>
+								<div style='margin-bottom:0;'>
+									<label>Wake Mass Start Date: ".date("M j, Y", strtotime($services["purchase_wake_date"]))."</label>
+									<input type='hidden' name='massstart' id='massstart' value='{$services["purchase_wake_date"]}' required>
+								</div>
+								<div style='width:100%;font-style:italic;color:gray;'>
+									<label>No. of days between wake & burial mass start date: <span id='numdays1'>{$services["purchase_num_days"]}</span> days</label>
+									<input type='hidden' name='numdays' id='numdays2' value='{$services["purchase_num_days"]}'>
 								</div>
 								<div>
-									<label>Burial address</label>
-									<input type='text' name='txtbadd' value='".$details['burial_add']."'>
+									<label>Burial Mass Start Date: </label>
+									<input type='date' name='burialstart' id='burialstart' value='{$services["purchase_burial_date"]}' required>
 								</div>
-								";
+								<div>
+									<label>Burial Mass Time: </label>
+									<input list='burial_time' name='burialtime' value='{$services["purchase_burial_time"]}' placeholder='Ex. 06:00pm - 07:00pm' required>
+									<datalist id='burial_time'>
+										<option value='03:00pm - 04:00pm'>
+										<option value='04:00pm - 05:00pm'>
+										<option value='05:00pm - 06:00pm'>
+										<option value='06:00pm - 07:00pm'>
+										<option value='07:00pm - 08:00pm'>
+									</datalist>
+								</div>";
 							break;
 							## FOR HEADSTONE SERVICES
 							case "headstone":
@@ -114,5 +132,44 @@
 			</section>
 		</div>
 	</div>
+	<script>
+		// FOR NUMBER OF DAYS
+		let massstart = document.getElementById("massstart");
+		let burialstart = document.getElementById("burialstart");
+		let num_days1 = document.getElementById("numdays1");
+		let num_days2 = document.getElementById("numdays2");
+		
+		burialstart.onchange = function () {
+			let startdate = new Date(massstart.value);
+			let enddate = new Date(burialstart.value);
+			let daysBetweenDates = enddate.getTime() - startdate.getTime();
+			let days = Math.ceil(daysBetweenDates / (1000 * 60 * 60 * 24));
+
+			if(Number.isInteger(days) && days > 0) {
+				num_days1.innerHTML = days;
+				num_days2.value = days;
+			}
+			else {
+				num_days1.innerHTML = 0;
+				num_days2.value = 0;
+			}
+		}
+
+		massstart.onchange = function () {
+			let startdate = new Date(massstart.value);
+			let enddate = new Date(burialstart.value);
+			let daysBetweenDates = enddate.getTime() - startdate.getTime();
+			let days = Math.ceil(daysBetweenDates / (1000 * 60 * 60 * 24));
+
+			if(Number.isInteger(days) && days > 0) {
+				num_days1.innerHTML = days;
+				num_days2.value = days;
+			}
+			else {
+				num_days1.innerHTML = 0;
+				num_days2.value = 0;
+			}
+		}
+	</script>
 </body>
 </html>

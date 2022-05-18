@@ -35,7 +35,7 @@
 							echo "<h2><a href='purchase.php'>Transactions</a> <span>> Status</span></h2>";
 						}
 						## UPDATE PROGRESS STATUS FOR PROVIDER
-						if(isset($_SESSION['provider']) && !progress_limits($_GET['purchaseid']) && $provider['provider_type'] != "church") {
+						if(isset($_SESSION['provider']) && !progress_limits($_GET['purchaseid'])) {
 							echo "<a class='btn btn-link-absolute' href='updating.php?id=".$_GET['purchaseid']."&purchase' onclick='return confirm(\"Are you sure you want to update purchase progress?\");'>Update Progress</a>";
 						}?>
 
@@ -43,7 +43,7 @@
 							<div class="order-info">
 								<?php
 								##
-								$purchase = DB::query("SELECT * FROM purchase p JOIN seeker see ON p.seeker_id = see.seeker_id JOIN services ser ON p.service_id = ser.service_id WHERE purchase_id = ?", array($_GET['purchaseid']), "READ");
+								$purchase = DB::query("SELECT * FROM purchase a JOIN seeker b ON a.seeker_id = b.seeker_id JOIN services c ON a.service_id = c.service_id WHERE purchase_id = ?", array($_GET['purchaseid']), "READ");
 								$purchase = $purchase[0];
 
 								$service = read($purchase['service_type'], ["service_id"], [$purchase['service_id']]);
@@ -52,7 +52,9 @@
 								$details = read("details", ["purchase_id"], [$purchase['purchase_id']]);
 								$details = $details[0];
 
-								$total = $purchase['purchase_total'] + 500;
+								$fee = 500;
+								$total = $purchase['purchase_total'];
+								
 								?>
 
 								<div class="additional-info collapse">
@@ -66,7 +68,10 @@
 										<label><strong>".$purchase['seeker_phone']."</strong></label>";
 										## TYPE [notify, success, error]
 										if(isset($_SESSION['seeker'])) {
-											messaging("notify", "You cannot update these details if progress has started.");
+											if($purchase['service_type'] != "church")
+												messaging("notify", "You cannot update these details if progress has started.");
+											else if($purchase['service_type'] == "church")
+												messaging("notify", "You can update burial date & time even if progress has started.");
 										}
 										
 										##
@@ -91,24 +96,18 @@
 											break;
 											## FOR CHURCH
 											case "church":
-												$church = read("church", ["service_id"], [$purchase['service_id']]);
-												$church = $church[0];
-												$burial_dt = date("M j, Y - h:i a", strtotime($details['burial_datetime']));
-												if(empty($details['burial_datetime'])){
-													$burial_dt = date("M j, Y - h:i a");
-												}
 												echo "
-												<label>Scheduled on: <em class='gray-italic'>".$purchase['purchase_sched_time']." of ".date("M j, Y", strtotime($church['church_mass_date']))."</em><label>
+												<label>Wake mass scheduled on: <em class='gray-italic' style='display:block;'>".date("M j, Y", strtotime($purchase['purchase_wake_date'])).", everyday for ".$purchase['purchase_num_days']." days @".$purchase['purchase_wake_time']."</em><label>
 												<div class='hr full-width'></div>
 												
 												<label>Deceased name</label>
 												<input type='text' disabled value='".$details['deceased_name']."'>
 
-												<label>Burial datetime</label>
-												<input type='text' disabled value='".$burial_dt."'>
-
-												<label>Burial address</label>
-												<input type='text' disabled value='".$details['burial_add']."'>
+												<label>Date of death</label>
+												<input type='text' disabled value='".date("M j, Y", strtotime($details['death_date']))."'>
+												
+												<label>Burial date & time</label>
+												<input type='text' disabled value='".date("M j, Y", strtotime($purchase['purchase_burial_date']))." ".$purchase['purchase_burial_time']."'>
 												";
 											break;
 											## FOR HEADSTONE
@@ -138,21 +137,17 @@
 										}
 
 										if(isset($_SESSION['seeker'])){
-											if($purchase['purchase_progress'] == 0){
+											if($purchase['service_type'] == "church" && !progress_limits($_GET['purchaseid'])){
 												echo "<a class='btn update-details' href='status_details.php?purchaseid=".$_GET['purchaseid']."'>Update details</a>";
 											}
-											else if($purchase['purchase_progress'] == 1 && $purchase['service_type'] == "church"){
+											else if($purchase['purchase_progress'] == 0){
 												echo "<a class='btn update-details' href='status_details.php?purchaseid=".$_GET['purchaseid']."'>Update details</a>";
 											}
+											else {}
 										}
-											
 										?>
 									</div>
 								</div>
-								<?php
-								## DISPLAY THIS IF NOT CHURCH
-								if($purchase['service_type'] != "church") {
-								?>
 								<div class="additional-info collapse">
 									<h3>Purchase Receipt <span class="shake-x delay-1" onclick="toggleCollapse('collapse-receipt', 'collapse-receipt-icon')"><i class="fa-solid fa-chevron-down front" id="collapse-receipt-icon"></i><i class="fa-solid fa-chevron-up"></i></span></h3>
 
@@ -187,7 +182,7 @@
 												<li>".$service[1]."</li>
 												<li>".$purchase['purchase_qty']."</li>
 												<li>₱ ".number_format($purchase['service_cost'],2,'.',',')."</li>
-												<li>₱ ".number_format($purchase['purchase_total'],2,'.',',')."</li>
+												<li>₱ ".number_format($purchase['service_cost'],2,'.',',')."</li>
 											</ul>
 											";
 											?>
@@ -196,7 +191,7 @@
 												<li></li>
 												<li></li>
 												<li>Service Fee:</li>
-												<li>₱ 500.00</li>
+												<li>₱ <?php echo number_format($fee,2,'.',','); ?></li>
 											</ul>
 											<ul>
 												<li></li>
@@ -207,9 +202,6 @@
 										</div>
 									</div>
 								</div>
-								<?php
-								}
-								?>
 							</div>
 							<div class='order_status'>
 								<?php 
@@ -218,9 +210,7 @@
 								if(count($payout)>0 && !isset($_SESSION['seeker'])){
 									$payout = $payout[0];
 									if($payout['payout_image'] != NULL) {
-										echo "
-									<p>Download proof of payment by clicking <a href='images/admins/payout/{$payout['payout_image']}' download='payment_proof_{$payout['purchase_id']}' class='status'>here</a>.</p>
-									";
+										echo "<p>Download proof of payment by clicking <a href='images/admins/payout/{$payout['payout_image']}' download='payment_proof_{$payout['purchase_id']}' class='status'>here</a>.</p>";
 									}
 								}
 								## SERVICES
@@ -247,11 +237,28 @@
 										<div class='".purchase_progress($purchase['purchase_progress'], 5)."'>
 											<h3>Done</h3>
 											<p>Transaction successfully completed.</p>
-										</div>
-										";
+										</div>";
 									break;
 									## FOR CHURCH
 									case "church":
+										##
+										for($i=1; $i<=$purchase['purchase_num_days']; $i++){
+											echo "
+											<div class='".purchase_progress($purchase['purchase_progress'], $i)."'>
+												<h3>Date: ".date("M j, Y", strtotime($purchase['purchase_wake_date']."".($i - 1)." days"))."</h3>
+												<p>Wake Mass Time: ".$purchase['purchase_wake_time']."</p>
+											</div>";
+										}
+										##
+										echo "
+										<div class='".purchase_progress($purchase['purchase_progress'], $purchase['purchase_num_days'] + 1)."'>
+											<h3>Date: ".date("M j, Y", strtotime($purchase['purchase_burial_date']))."</h3>
+											<p>Wake Mass Time: ".$purchase['purchase_burial_time']."</p>
+										</div>
+										<div class='".purchase_progress($purchase['purchase_progress'], $purchase['purchase_num_days'] + 2)."'>
+											<h3>Done</h3>
+											<p>Transaction successfully completed.</p>
+										</div>";
 									break;
 									## FOR HEADSTONE
 									case "headstone":
@@ -271,8 +278,7 @@
 										<div class='".purchase_progress($purchase['purchase_progress'], 4)."'>
 											<h3>Headstone delivered succesfully</h3>
 											<p>Transaction successfully completed.</p>
-										</div>
-										";
+										</div>";
 									break;
 									## FOR FLOWER
 									case "flower":
@@ -292,8 +298,7 @@
 										<div class='".purchase_progress($purchase['purchase_progress'], 4)."'>
 											<h3>Flower delivered succesfully</h3>
 											<p>Transaction successfully completed.</p>
-										</div>
-										";
+										</div>";
 									break;
 									## FOR CATERING
 									case "catering":
@@ -313,8 +318,7 @@
 										<div class='".purchase_progress($purchase['purchase_progress'], 4)."'>
 											<h3>Food delivered succesfully</h3>
 											<p>Transaction successfully completed.</p>
-										</div>
-										";
+										</div>";
 									break;
 									## FOR CATERING
 									case "candle":
@@ -334,8 +338,7 @@
 										<div class='".purchase_progress($purchase['purchase_progress'], 4)."'>
 											<h3>Candle delivered succesfully</h3>
 											<p>Transaction successfully completed.</p>
-										</div>
-										";
+										</div>";
 									break;
 								}
 								?>

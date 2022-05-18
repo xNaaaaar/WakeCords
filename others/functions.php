@@ -377,11 +377,19 @@
 		else echo "<script>alert('Email address or password is incorrect!')</script>";
 	}
 	## MASS DETAILS
-	function mass_required_details($wake_date="", $wake_time="", $num_days="", $burial_time=""){
+	function mass_required_details($wake_date="", $wake_time="", $num_days=0, $burial_date="", $burial_time=""){
 		return "
+		<div style='width:100%;font-style:italic;color:gray;'>
+			<label>No. of days between wake & burial mass start date: <span id='numdays1'>{$num_days}</span> days</label>
+			<input type='hidden' name='numdays' id='numdays2'>
+		</div>
 		<div>
 			<label>Wake Mass Start Date: </label>
-			<input type='date' name='datestart' value='{$wake_date}' required>
+			<input type='date' name='massstart' id='massstart' value='{$wake_date}' required>
+		</div>
+		<div>
+			<label>Burial Mass Start Date: </label>
+			<input type='date' name='burialstart' id='burialstart' value='{$burial_date}' required>
 		</div>
 		<div>
 			<label>Wake Mass Time: </label>
@@ -393,10 +401,6 @@
 				<option value='06:00pm - 07:00pm'>
 				<option value='07:00pm - 08:00pm'>
 			</datalist>
-		</div>
-		<div>
-			<label>Wake Mass No. of Days: </label>
-			<input type='number' name='numdays' value='{$num_days}' placeholder='Enter No. of Days' required>
 		</div>
 		<div>
 			<label>Burial Mass Time: </label>
@@ -557,8 +561,8 @@
 						##
 						case "church":
 							$checker = true;
-							$attr_list = ["seeker_id", "service_id", "purchase_total", "purchase_date", "purchase_wake_date", "purchase_wake_time", "purchase_num_days", "purchase_burial_time", "purchase_status", "purchase_progress"];
-							$data_list = [$results['seeker_id'], $results['service_id'], $service_["service_cost"], date('Y-m-d'), $results['cart_wake_start_date'], $results['cart_wake_time'], $results['cart_num_days'], $results['cart_burial_time'], "for approval", 0];
+							$attr_list = ["seeker_id", "service_id", "purchase_total", "purchase_date", "purchase_wake_date", "purchase_wake_time", "purchase_num_days", "purchase_burial_date", "purchase_burial_time", "purchase_status", "purchase_progress"];
+							$data_list = [$results['seeker_id'], $results['service_id'], $service_["service_cost"], date('Y-m-d'), $results['cart_wake_start_date'], $results['cart_wake_time'], $results['cart_num_days'], $results['cart_burial_start_date'], $results['cart_burial_time'], "for approval", 0];
 						break;
 						##
 						case "headstone":
@@ -653,52 +657,62 @@
 	## NECESSARY UPDATE AFTER PAYING
 	function pay_purchase($type_list, $purchase_list){
 		## DECLARE DATA
-		if(service_type_exist_bool("funeral", $type_list) || service_type_exist_bool("headstone", $type_list)){
-			$cbomethod = $_SESSION['field_array'][0];
-			$txtdeceasedname = $_SESSION['field_array'][1];
-			## SESSIONS ARE LOCATED IN payment.php
-			if(service_type_exist_bool("funeral", $type_list)){
-				$dtburial = $_SESSION['field_array_funeral'][0];
-				$txtburialadd = $_SESSION['field_array_funeral'][1];
-			}
-			## SESSIONS ARE LOCATED IN payment.php
-			if(service_type_exist_bool("headstone", $type_list)){
-				$datebirth = $_SESSION['field_array_headstone'][0];
-				$datedeath = $_SESSION['field_array_headstone'][1];
-				$datedeliveryheadstone = $_SESSION['field_array_headstone'][2];
-				$txtmsg = $_SESSION['field_array_headstone'][3];
-			}
-			## SESSIONS ARE LOCATED IN payment.php
-			if($cbomethod == "gcash") {
-				$acc_name = $_SESSION['field_array'][2];
-				$acc_num = $_SESSION['field_array'][3];
-			}
-			## ERROR TRAP
-			if(preg_match('/\d/', $txtdeceasedname)){
-				echo "<script>alert('Deceased name cannot have a number!')</script>";
-			}
-			else {
-				## INSERT DATA INTO FUNERAL
-				foreach($purchase_list as $results){
-					$attr_list = ["purchase_id", "deceased_name"];
-					$data_list = [$results['purchase_id'], $txtdeceasedname];
-					## FOR FUNERAL
-					if(service_type_exist_bool("funeral", $type_list)){
-						array_push($attr_list, "burial_datetime", "burial_add");
-						array_push($data_list, date("Y-m-d H:i:s", strtotime($dtburial)), $txtburialadd);
-					}
-					## FOR HEADSTONE
-					if(service_type_exist_bool("headstone", $type_list)){
-						array_push($attr_list, "birth_date", "death_date", "delivery_date", "message");
-						array_push($data_list, $datebirth, $datedeath, $datedeliveryheadstone, $txtmsg);
-					}
-					##
-					create("details", $attr_list, qmark_generator(count($attr_list)), $data_list);
+		$cbomethod = $_SESSION['field_array'][0];
+		$txtdeceasedname = $_SESSION['field_array'][1];
+		## SESSIONS ARE LOCATED IN payment.php
+		if(service_type_exist_bool("funeral", $type_list)){
+			$dtburial = $_SESSION['field_array_funeral'][0];
+			$txtburialadd = $_SESSION['field_array_funeral'][1];
+		}
+		## SESSIONS ARE LOCATED IN payment.php
+		if(service_type_exist_bool("headstone", $type_list)){
+			$datebirth = $_SESSION['field_array_headstone'][0];
+			$datedeath = $_SESSION['field_array_headstone'][1];
+			$datedeliveryheadstone = $_SESSION['field_array_headstone'][2];
+			$txtmsg = $_SESSION['field_array_headstone'][3];
+		}
+		## SESSIONS ARE LOCATED IN payment.php
+		if(service_type_exist_bool("church", $type_list)){
+			$datedeath = $_SESSION['field_array_church'][0];
+		}
+		## SESSIONS ARE LOCATED IN payment.php
+		if($cbomethod == "gcash") {
+			$acc_name = $_SESSION['field_array'][2];
+			$acc_num = $_SESSION['field_array'][3];
+			$total = $_SESSION['field_array'][4];
+		}
+		## ERROR TRAP
+		if(preg_match('/\d/', $txtdeceasedname)){
+			echo "<script>alert('Deceased name cannot have a number!')</script>";
+		}
+		else {
+			## INSERT DATA INTO FUNERAL
+			foreach($purchase_list as $results){
+				$attr_list = ["purchase_id", "deceased_name"];
+				$data_list = [$results['purchase_id'], $txtdeceasedname];
+				## FOR FUNERAL
+				if(service_type_exist_bool("funeral", $type_list)){
+					array_push($attr_list, "burial_datetime", "burial_add");
+					array_push($data_list, date("Y-m-d H:i:s", strtotime($dtburial)), $txtburialadd);
+				}
+				## FOR HEADSTONE
+				if(service_type_exist_bool("headstone", $type_list)){
+					array_push($attr_list, "birth_date", "death_date", "delivery_date", "message");
+					array_push($data_list, $datebirth, $datedeath, $datedeliveryheadstone, $txtmsg);
+				}
+				## FOR CHURCH
+				if(service_type_exist_bool("church", $type_list)){
+					array_push($attr_list, "death_date");
+					array_push($data_list, $datedeath);
+				}
+				##
+				create("details", $attr_list, qmark_generator(count($attr_list)), $data_list);
 
-					## PURCHASE STATUS 'to pay' TO 'paid'
-					update("purchase", ["purchase_total", "purchase_status"], [$_SESSION['field_array'][4], "paid", $results['purchase_id']], "purchase_id");
+				## PURCHASE STATUS 'to pay' TO 'paid'
+				update("purchase", ["purchase_total", "purchase_status"], [$total, "paid", $results['purchase_id']], "purchase_id");
 
-					## UPDATE SERVICE REMAINING QTY
+				## UPDATE SERVICE REMAINING QTY FOR NOT CHURCH
+				if(!service_type_exist_bool("church", $type_list)){
 					$service = read("services", ["service_id"], [$results['service_id']]);
 					$service = $service[0];
 
@@ -712,35 +726,24 @@
 					if($service_['service_qty'] == 0){
 						update("services", ["service_status"], ["inactive", $results['service_id']], "service_id");
 					}
+				}
+				
+				## CREATE PAYMENT TABLE
+				$attr_list = ["purchase_id", "payment_method", "account_name", "account_number", "payment_datetime"];
+				$data_list = [$results['purchase_id'], $cbomethod, $acc_name, $acc_num, date("Y-m-d H:i:s")];
 
-					## CREATE PAYMENT TABLE
-					$attr_list = ["purchase_id", "payment_method", "account_name", "account_number", "payment_datetime"];
-					$data_list = [$results['purchase_id'], $cbomethod, $acc_name, $acc_num, date("Y-m-d H:i:s")];
-
-					create("payment", $attr_list, qmark_generator(count($attr_list)), $data_list);
-				}	
-			}		
-		}
-		if(service_type_exist_bool("candle", $type_list)){
-			$datedeliverycandle = $_POST['datedeliverycandle'];
-		}
-		if(service_type_exist_bool("flower", $type_list)){
-			$datedeliveryflower = $_POST['datedeliveryflower'];
-			$txtribbonmsg = trim(ucwords($_POST['txtribbonmsg']));
-		}
-		if(service_type_exist_bool("catering", $type_list)){
-			$dtdelivery = $_POST['dtdelivery'];
-			$numpax = $_POST['numpax'];
+				create("payment", $attr_list, qmark_generator(count($attr_list)), $data_list);
+			}	
 		}
 	}
 	## CHECKS PURCHASE PROGRESS IF LIMIT
 	function progress_limits($id){
-		## LIMITATIONS
-		$church = $candle = $headstone = $flower = $catering = 4;
-		$funeral = 5;
-
 		$purchase = DB::query("SELECT * FROM purchase a JOIN services b ON a.service_id = b.service_id WHERE purchase_id = ?", array($id), "READ");
 		$purchase = $purchase[0];
+		## LIMITATIONS
+		$candle = $headstone = $flower = $catering = 4;
+		$funeral = 5;
+		$church = $purchase["purchase_num_days"] + 2;
 
 		switch($purchase['service_type']){
 			case "funeral":
@@ -1151,7 +1154,7 @@
 							<form method='post' style='text-align:left;'>
 								<input type='hidden' name='pid' value='{$list[$j]['purchase_id']}'></input>
 								<h2>Mass Information</h2>
-								".mass_required_details($list[$j]['purchase_wake_date'], $list[$j]['purchase_wake_time'], $list[$j]['purchase_num_days'], $list[$j]['purchase_burial_time'])."
+								".mass_required_details($list[$j]['purchase_wake_date'], $list[$j]['purchase_wake_time'], $list[$j]['purchase_num_days'], $list[$j]['purchase_burial_date'], $list[$j]['purchase_burial_time'])."
 								<button class='btn' type='submit' name='btnreschedule' onclick='return confirm(\"Confirm reschedule purchase?\");'>Resched</button>
 							</form>
 						</dialog>
@@ -1174,7 +1177,7 @@
 							Wake mass start date: <span style='color:#aaa;'>".date("M j, Y", strtotime($list[$j]['purchase_wake_date']))."</span><br>
 							Wake mass no. of days: <span style='color:#aaa;'>{$list[$j]['purchase_num_days']}</span><br>
 							Wake mass time: <span style='color:#aaa;'>{$list[$j]['purchase_wake_time']}</span><br>
-							Burial mass date: <span style='color:#aaa;'>".date("M j, Y", strtotime($list[$j]['purchase_wake_date']."+ {$list[$j]['purchase_num_days']} days"))."</span><br>
+							Burial mass date: <span style='color:#aaa;'>".date("M j, Y", strtotime($list[$j]['purchase_burial_date']))."</span><br>
 							Burial mass time: <span style='color:#aaa;'>{$list[$j]['purchase_burial_time']}</span>
 						</p>
 						"; 
@@ -1985,48 +1988,78 @@
 	function update_details($type){
 		$txtname = trim(ucwords($_POST['txtname']));
 		##
-		if($type == "funeral" || $type == "church") {
-			$txtbdt = $_POST['txtbdt'];
-			$txtbadd = trim(ucwords($_POST['txtbadd']));
-		}
-		## ERROR TRAPPING
-		if(preg_match('/\d/', $txtname)){
-			echo "<script>alert('Firstname cannot have a number!')</script>";
-		}
-		else {
-			$table = "details";
-			##
-			if($type == "funeral" || $type == "church") {
-				$attr_list = ["deceased_name","burial_datetime","burial_add"];
-				$data_list = [$txtname, date("Y-m-d H:i:s", strtotime($txtbdt)), $txtbadd];
-			}
-			switch($type){
-				case "funeral":
-					$txtdadd = trim(ucwords($_POST['txtdadd']));
-					array_push($attr_list, "delivery_add");
-					array_push($data_list, $txtdadd, $_GET['purchaseid']);
-				break;
-	
-				case "church":
-					array_push($data_list, $_GET['purchaseid']);
-				break;
+		switch($type) {
+			## FOR FUNERAL 
+			case "funeral":
+				$txtbdt = $_POST['txtbdt'];
+				$txtbadd = trim(ucwords($_POST['txtbadd']));
+				$txtdadd = trim(ucwords($_POST['txtdadd']));
 
-				case "headstone":
-					$dbirth = $_POST['dbirth'];
-					$ddeath = $_POST['ddeath'];
-					$ddeliver = $_POST['ddeliver'];
-					$txtdadd = trim(ucwords($_POST['txtdadd']));
-					$txtmsg = trim(ucwords($_POST['txtmsg']));
-					
-					$attr_list = ["deceased_name", "birth_date", "death_date", "delivery_date", "delivery_add", "message"];
-					$data_list = [$txtname, date("Y-m-d", strtotime($dbirth)), date("Y-m-d", strtotime($ddeath)), date("Y-m-d", strtotime($ddeliver)), $txtdadd, $txtmsg, $_GET['purchaseid']];
-				break;
-			}
-			## UPDATE DETAILS TABLE
-			update($table, $attr_list, $data_list, "purchase_id");
-			header("Location: status.php?purchaseid=".$_GET['purchaseid']."&updated");
-			exit;
-		}		
+				$attr_list = ["deceased_name","burial_datetime","burial_add", "delivery_add"];
+				$data_list = [$txtname, date("Y-m-d H:i:s", strtotime($txtbdt)), $txtbadd, $txtdadd, $_GET['purchaseid']];
+
+				if(preg_match('/\d/', $txtname)) {
+					echo "<script>alert('Firstname cannot have a number!')</script>";
+				}
+				else {
+					## UPDATE DETAILS TABLE
+					update("details", $attr_list, $data_list, "purchase_id");
+					##
+					header("Location: status.php?purchaseid=".$_GET['purchaseid']."&updated");
+					exit;
+				}
+			break;
+
+			case "church":
+				$purchase = read("purchase", ["purchase_id"], [$_GET['purchaseid']]);
+				$purchase = $purchase[0];
+				#
+				$dtdeath = $_POST['dtdeath'];
+				$massstart = $_POST['massstart'];
+				$numdays = $_POST['numdays'];
+				$burialstart = $_POST['burialstart'];
+				$burialtime = $_POST['burialtime'];
+
+				$attr_list = ["deceased_name", "death_date"];
+				$data_list = [$txtname, $dtdeath, $_GET['purchaseid']];
+
+				$attr_list2 = ["purchase_num_days", "purchase_burial_date", "purchase_burial_time"];
+				$data_list2 = [$numdays, $burialstart, $burialtime, $_GET['purchaseid']];
+
+				if(preg_match('/\d/', $txtname)) {
+					echo "<script>alert('Firstname cannot have a number!')</script>";
+				}
+				else if($massstart < date("Y-m-d") || $burialstart < date("Y-m-d")) {
+					echo "<script>alert('Mass or burial date start must be future dates.')</script>";
+				}
+				else if($massstart > $burialstart) {
+					echo "<script>alert('Mass date start cannot be greater than or equal burial date start.')</script>";
+				}
+				else if($burialstart <= date("Y-m-d", strtotime($massstart."".($purchase['purchase_progress'])." days"))){
+					echo "<script>alert('Cannot update burial with done or currently in progress.')</script>";
+				}
+				else {
+					## UPDATE DETAILS TABLE
+					update("details", $attr_list, $data_list, "purchase_id");
+					## UPDATE PURCHASE TABLE
+					update("purchase", $attr_list2, $data_list2, "purchase_id");
+					##
+					header("Location: status.php?purchaseid=".$_GET['purchaseid']."&updated");
+					exit;
+				}
+			break;
+
+			case "headstone":
+				$dbirth = $_POST['dbirth'];
+				$ddeath = $_POST['ddeath'];
+				$ddeliver = $_POST['ddeliver'];
+				$txtdadd = trim(ucwords($_POST['txtdadd']));
+				$txtmsg = trim(ucwords($_POST['txtmsg']));
+				
+				$attr_list = ["deceased_name", "birth_date", "death_date", "delivery_date", "delivery_add", "message"];
+				$data_list = [$txtname, date("Y-m-d", strtotime($dbirth)), date("Y-m-d", strtotime($ddeath)), date("Y-m-d", strtotime($ddeliver)), $txtdadd, $txtmsg, $_GET['purchaseid']];
+			break;
+		}	
 	}
 	## UPLOAD SINGLE IMAGE
 	function upload_image($name, $target){

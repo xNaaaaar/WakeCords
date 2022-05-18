@@ -73,14 +73,25 @@
 	## BUTTON RESCHED IS CLICKED BY SEEKER
 	if(isset($_POST['btnreschedule'])) {
 		$purchase_id = $_POST['pid'];
-		$datestart = $_POST['datestart'];
+		$massstart = $_POST['massstart'];
 		$waketime = $_POST['waketime'];
 		$numdays = $_POST['numdays'];
+		$burialstart = $_POST['burialstart'];
 		$burialtime = $_POST['burialtime'];
-		## UPDATE PURCHASE WHEN RESCHEDULE IS CLICKED
-		update("purchase", ["purchase_wake_date", "purchase_wake_time", "purchase_num_days", "purchase_burial_time", "purchase_status"], [$datestart, $waketime, $numdays, $burialtime, "for approval", $purchase_id], "purchase_id");
-		## SUCCESS CONFIRMATION
-		echo "<script>alert('Successfully rescheduled purchase!')</script>";
+
+		if($massstart < date("Y-m-d") || $burialstart < date("Y-m-d")){
+			echo "<script>alert('Mass or burial date start must be future dates.')</script>";
+		}
+		else if($massstart > $burialstart) {
+			echo "<script>alert('Mass date start cannot be greater than burial date start.')</script>";
+		}
+		else {
+			## UPDATE PURCHASE WHEN RESCHEDULE IS CLICKED
+			update("purchase", ["purchase_wake_date", "purchase_wake_time", "purchase_num_days", "purchase_burial_date", "purchase_burial_time", "purchase_status"], [$massstart, $waketime, $numdays, $burialstart, $burialtime, "for approval", $purchase_id], "purchase_id");
+			## SUCCESS CONFIRMATION
+			echo "<script>alert('Successfully rescheduled purchase!')</script>";
+		}
+		
 	}
 ?>
 
@@ -144,6 +155,43 @@
 			close.addEventListener('click', () => {
 				open.close();
 			})
+		}
+
+		let massstart = document.getElementById("massstart");
+		let burialstart = document.getElementById("burialstart");
+		let num_days1 = document.getElementById("numdays1");
+		let num_days2 = document.getElementById("numdays2");
+		
+		burialstart.onchange = function () {
+			let startdate = new Date(massstart.value);
+			let enddate = new Date(burialstart.value);
+			let daysBetweenDates = enddate.getTime() - startdate.getTime();
+			let days = Math.ceil(daysBetweenDates / (1000 * 60 * 60 * 24));
+
+			if(Number.isInteger(days) && days > 0) {
+				num_days1.innerHTML = days;
+				num_days2.value = days;
+			}
+			else {
+				num_days1.innerHTML = 0;
+				num_days2.value = 0;
+			}
+		}
+
+		massstart.onchange = function () {
+			let startdate = new Date(massstart.value);
+			let enddate = new Date(burialstart.value);
+			let daysBetweenDates = enddate.getTime() - startdate.getTime();
+			let days = Math.ceil(daysBetweenDates / (1000 * 60 * 60 * 24));
+
+			if(Number.isInteger(days) && days > 0) {
+				num_days1.innerHTML = days;
+				num_days2.value = days;
+			}
+			else {
+				num_days1.innerHTML = 0;
+				num_days2.value = 0;
+			}
 		}
 	</script>
 </body>

@@ -116,6 +116,12 @@
 											<input type='text' name='txtdeliveryadd' required>
 										</div>
 									</div>
+									<div class='details-con no-padding'>
+										<div class='single'>
+											<label>Delivery address <span>*<span></label>
+											<input type='text' name='txtdeliveryadd' required>
+										</div>
+									</div>
 									";
 								}
 								
@@ -213,6 +219,15 @@
 									// 	</div>
 									// </div>
 									// ";
+									echo "
+									<h5>Church</h5>
+									<div class='details-con'>
+										<div style='width:100% !important;'>
+											<label>Death Date</label>
+											<input type='date' name='datedeath' required>
+										</div>
+									</div>
+									";
 								}
 								
 								?>
@@ -291,6 +306,11 @@
 								if(service_type_exist_bool("headstone", $type_list)){
 									## USE FOR pay_purchase() FUNCTION
 									$_SESSION['field_array_headstone'] = [$_POST['datebirth'], $_POST['datedeath'], $_POST['datedeliveryheadstone'], trim(ucwords($_POST['txtmsg']))];
+								}
+
+								if(service_type_exist_bool("church", $type_list)){
+									## USE FOR pay_purchase() FUNCTION
+									$_SESSION['field_array_church'] = [$_POST['datedeath']];
 								}
 
 								## PAYMENT FOR GCASH

@@ -184,13 +184,14 @@
 										break;
 										## FOR CHURCH
 										case "church":
-											$datestart = $_POST['datestart'];
-											$waketime = trim($_POST['waketime']);
 											$numdays = $_POST['numdays'];
+											$massstart = $_POST['massstart'];
+											$burialstart = $_POST['burialstart'];
+											$waketime = trim($_POST['waketime']);
 											$burialtime = trim($_POST['burialtime']);
 											// CHECK IF CHURCH SERVICE EXIST IN PURCHASE
 											$services = DB::query("SELECT * FROM purchase a JOIN services b ON a.service_id = b.service_id WHERE seeker_id = ?", array($_SESSION['seeker']), "READ");
-
+											// 
 											if(count($services) > 0){
 												foreach($services as $service){
 													// IF ALREADY HAVE PURCHASE CHURCH MASS SERVICE
@@ -202,7 +203,7 @@
 											}
 											// CHECK IF CHURCH SERVICE EXIST IN CART
 											$services = DB::query("SELECT * FROM cart a JOIN services b ON a.service_id = b.service_id WHERE seeker_id = ?", array($_SESSION['seeker']), "READ");
-
+											// 
 											if(count($services) > 0){
 												foreach($services as $service){
 													// IF ALREADY HAVE PURCHASE CHURCH MASS SERVICE
@@ -213,14 +214,18 @@
 												}
 											}
 
-											if($datestart < date("Y-m-d")) {
-												echo "<script>alert('Date start must be a future date.')</script>";
+											if($massstart < date("Y-m-d") || $burialstart < date("Y-m-d")){
+												echo "<script>alert('Mass or burial date start must be future dates.')</script>";
+												$proceed = false;
+											}
+											else if($massstart > $burialstart) {
+												echo "<script>alert('Mass date start cannot be greater than burial date start.')</script>";
 												$proceed = false;
 											}
 											else {
 												if($proceed){
-													$attr_list = ["service_id", "seeker_id", "cart_wake_start_date", "cart_wake_time", "cart_num_days", "cart_burial_time"];
-													$data_list = [$_GET['service_id'], $_SESSION['seeker'], $datestart, $waketime, $numdays, $burialtime];
+													$attr_list = ["service_id", "seeker_id", "cart_wake_start_date", "cart_wake_time", "cart_num_days", "cart_burial_start_date", "cart_burial_time"];
+													$data_list = [$_GET['service_id'], $_SESSION['seeker'], $massstart, $waketime, $numdays, $burialstart, $burialtime];
 												} 
 												else {
 													echo "<script>alert('You cannot book church mass service because you have an existing church mass service.')</script>";
@@ -348,6 +353,44 @@
 			review.close();
 		})
 	<?php } ?>
+
+	// FOR NUMBER OF DAYS
+	let massstart = document.getElementById("massstart");
+	let burialstart = document.getElementById("burialstart");
+	let num_days1 = document.getElementById("numdays1");
+	let num_days2 = document.getElementById("numdays2");
+	
+	burialstart.onchange = function () {
+		let startdate = new Date(massstart.value);
+		let enddate = new Date(burialstart.value);
+		let daysBetweenDates = enddate.getTime() - startdate.getTime();
+		let days = Math.ceil(daysBetweenDates / (1000 * 60 * 60 * 24));
+
+		if(Number.isInteger(days) && days > 0) {
+			num_days1.innerHTML = days;
+			num_days2.value = days;
+		}
+		else {
+			num_days1.innerHTML = 0;
+			num_days2.value = 0;
+		}
+	}
+
+	massstart.onchange = function () {
+		let startdate = new Date(massstart.value);
+		let enddate = new Date(burialstart.value);
+		let daysBetweenDates = enddate.getTime() - startdate.getTime();
+		let days = Math.ceil(daysBetweenDates / (1000 * 60 * 60 * 24));
+
+		if(Number.isInteger(days) && days > 0) {
+			num_days1.innerHTML = days;
+			num_days2.value = days;
+		}
+		else {
+			num_days1.innerHTML = 0;
+			num_days2.value = 0;
+		}
+	}
 	</script>
 <!-- FOOTER JS -->
 <?php include("others/footer-js.php"); ?>
