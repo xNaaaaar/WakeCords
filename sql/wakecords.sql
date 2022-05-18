@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 15, 2022 at 04:58 PM
+-- Generation Time: May 18, 2022 at 03:20 PM
 -- Server version: 10.4.19-MariaDB
 -- PHP Version: 7.3.28
 
@@ -68,7 +68,8 @@ CREATE TABLE `cart` (
   `cart_font` varchar(25) DEFAULT NULL,
   `cart_wake_start_date` date DEFAULT NULL,
   `cart_wake_time` varchar(50) DEFAULT NULL,
-  `cart_num_days` int(11) DEFAULT NULL,
+  `cart_num_days` int(2) DEFAULT NULL,
+  `cart_burial_start_date` date DEFAULT NULL,
   `cart_burial_time` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -103,7 +104,8 @@ CREATE TABLE `church` (
 --
 
 INSERT INTO `church` (`service_id`, `church_church`, `church_cemetery`, `church_priest`, `church_address`, `church_mass_date`, `church_mass_time`) VALUES
-(71, 'Sto. Rosario', 'Caretta', 'George Wais', '2392 E. Sabellano Street, Sitio Granada Quiot Pardo, Cebu City, Cebu', NULL, NULL);
+(71, 'Sto. Rosario', 'Caretta', 'George Wais', '2392 E. Sabellano Street, Sitio Granada Quiot Pardo, Cebu City, Cebu', NULL, NULL),
+(72, 'Lourdes Church', 'Pardo', 'Benedict Servi', '2392 E. Sabellano Street, Sitio Granada Quiot Pardo, Cebu City, Cebu', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -131,7 +133,8 @@ CREATE TABLE `details` (
 --
 
 INSERT INTO `details` (`purchase_id`, `deceased_name`, `burial_datetime`, `burial_add`, `delivery_add`, `delivery_date`, `message`, `birth_date`, `death_date`, `delivery_datetime`, `num_pax`, `cemetery_add`) VALUES
-(51, 'Deceased Name', '2022-05-21 18:05:00', 'Sample Burial Address', 'My Updated Delivery Address', NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+(51, 'Deceased Name', '2022-05-21 18:05:00', 'Sample Burial Address', 'My Updated Delivery Address', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(61, 'Asdys Sdfwe', NULL, NULL, NULL, NULL, NULL, NULL, '2022-05-14', NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -223,7 +226,8 @@ CREATE TABLE `payment` (
 --
 
 INSERT INTO `payment` (`purchase_id`, `payment_method`, `account_name`, `account_number`, `payment_datetime`) VALUES
-(51, 'gcash', 'My Name', '09345588383', '2022-05-12 18:06:54');
+(51, 'gcash', 'My Name', '09345588383', '2022-05-12 18:06:54'),
+(61, 'gcash', 'My Account Name', '09345588383', '2022-05-18 18:03:09');
 
 -- --------------------------------------------------------
 
@@ -277,7 +281,7 @@ INSERT INTO `provider` (`provider_id`, `provider_logo`, `provider_company`, `pro
 (8, '627c6bfc278075.93773823.jpg', 'Cosmopolitan', '', 'Jane', 'V', 'Doe', 'funeral', '09457239646', 'Fake Address St.', 'funeral@wakecords.com', 'd7e73fb6980b78278c69b4e9f024f16a'),
 (9, '627cc232f1dc11.01858196.png', 'Marbles', '', 'Jooon', 'K', 'Dee', 'headstone', '09457239646', 'My Sample Address', 'headstone@wakecords.com', 'd7e73fb6980b78278c69b4e9f024f16a'),
 (10, '627cd7b895bb55.68335576.jpg', 'St. Peter', '', 'Jane', 'J', 'Dee', 'funeral', '09457239646', 'Sample Fake Address', 'saintpeter@wakecords.com', 'd7e73fb6980b78278c69b4e9f024f16a'),
-(11, '6280abb997b055.59562307.jpg', 'Church Incorporation', '', 'Melnar', 'B', 'Ancit', 'church', '09457239646', '2392 E. Sabellano Street, Sitio Granada Quiot Pardo, Cebu City, Cebu', 'narancit@gmail.com', 'd7e73fb6980b78278c69b4e9f024f16a');
+(11, '6280abb997b055.59562307.jpg', 'Church Incorporation', '', 'Meelnar', 'B', 'Aancit', 'church', '09457239646', '2392 E. Sabellano Street, Sitio Granada Quiot Pardo, Cebu City, Cebu', 'narancit@gmail.com', 'd7e73fb6980b78278c69b4e9f024f16a');
 
 -- --------------------------------------------------------
 
@@ -297,6 +301,7 @@ CREATE TABLE `purchase` (
   `purchase_wake_date` date DEFAULT NULL,
   `purchase_wake_time` varchar(50) DEFAULT NULL,
   `purchase_num_days` int(2) DEFAULT NULL,
+  `purchase_burial_date` date DEFAULT NULL,
   `purchase_burial_time` varchar(50) DEFAULT NULL,
   `purchase_status` varchar(15) NOT NULL,
   `purchase_progress` int(2) NOT NULL
@@ -306,10 +311,10 @@ CREATE TABLE `purchase` (
 -- Dumping data for table `purchase`
 --
 
-INSERT INTO `purchase` (`purchase_id`, `seeker_id`, `service_id`, `purchase_total`, `purchase_qty`, `purchase_size`, `purchase_font`, `purchase_date`, `purchase_wake_date`, `purchase_wake_time`, `purchase_num_days`, `purchase_burial_time`, `purchase_status`, `purchase_progress`) VALUES
-(51, 17, 46, '30000.00', 1, 'size #2', NULL, '2022-05-12', NULL, NULL, NULL, NULL, 'rated', 5),
-(52, 17, 48, '30000.00', 1, 'size #4', NULL, '2022-05-12', NULL, NULL, NULL, NULL, 'to pay', 0),
-(56, 19, 71, '800.00', NULL, NULL, NULL, '2022-05-15', '2022-05-17', '05:00pm - 06:00pm', 10, '03:00pm - 04:00pm', 'for approval', 0);
+INSERT INTO `purchase` (`purchase_id`, `seeker_id`, `service_id`, `purchase_total`, `purchase_qty`, `purchase_size`, `purchase_font`, `purchase_date`, `purchase_wake_date`, `purchase_wake_time`, `purchase_num_days`, `purchase_burial_date`, `purchase_burial_time`, `purchase_status`, `purchase_progress`) VALUES
+(51, 17, 46, '30000.00', 1, 'size #2', NULL, '2022-05-12', NULL, NULL, NULL, NULL, NULL, 'rated', 5),
+(52, 17, 48, '30000.00', 1, 'size #4', NULL, '2022-05-12', NULL, NULL, NULL, NULL, NULL, 'to pay', 0),
+(61, 19, 71, '1300.00', NULL, NULL, NULL, '2022-05-18', '2022-05-21', '07:00pm - 08:00pm', 7, '2022-05-28', '11:00am - 12:00nn', 'paid', 0);
 
 -- --------------------------------------------------------
 
@@ -388,7 +393,7 @@ CREATE TABLE `seeker` (
 
 INSERT INTO `seeker` (`seeker_id`, `seeker_fname`, `seeker_mi`, `seeker_lname`, `seeker_address`, `seeker_phone`, `seeker_status`, `seeker_email`, `seeker_pass`) VALUES
 (17, 'Merry Joy', 'G', 'Blanco', '119A Fake Street, Sitio Kamputhaw Quiot Pardo, Cebu City, Cebu', '09457239646', 'inactive', 'joyblanco819@gmail.com', 'd250786e8127c338aa76955b8c1faab2'),
-(19, 'New', 'G', 'Saker', '5583 Fake Street, Fake Sitio In Brgy, Cebu City, Cebu', '09457239646', 'inactive', 'seeker@gmail.com', 'd250786e8127c338aa76955b8c1faab2');
+(19, 'Newtwo', 'G', 'Sakeer', '5583 Fake Street, Fake Sitio In Brgy, Cebu City, Cebu', '09457239646', 'inactive', 'seeker@gmail.com', 'd250786e8127c338aa76955b8c1faab2');
 
 -- --------------------------------------------------------
 
@@ -416,7 +421,8 @@ INSERT INTO `services` (`service_id`, `provider_id`, `service_type`, `service_de
 (46, 8, 'funeral', 'This is my sample description for St. Catherine cremation services.', '30000.00', 0, '627cd90552d5b3.83874925.jpg', 'inactive'),
 (47, 8, 'funeral', 'This is my sample description for St. Bernadette traditional funeral services.', '40000.00', 4, '627cda89dbb2c7.95809111.png', 'active'),
 (48, 10, 'funeral', 'This is my description for St. Paul traditional funeral services.', '30000.00', 3, '627ce5026bbe33.40763445.png', 'active'),
-(71, 11, 'church', 'This package includes: wake pamisa (x no. of days) and burial pamisa after wake pamisa.', '800.00', NULL, '6280ca1aaebc65.26001768.jpg', 'active');
+(71, 11, 'church', 'This package includes: wake pamisa (x no. of days) and burial pamisa after wake pamisa.', '800.00', NULL, '6280ca1aaebc65.26001768.jpg', 'active'),
+(72, 11, 'church', 'This package includes: wake mass (x no. of days) and burial mass after wake mass.', '750.00', NULL, '62821ff2eac687.79673148.jpg', 'active');
 
 -- --------------------------------------------------------
 
@@ -591,7 +597,7 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `cart_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=108;
+  MODIFY `cart_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=115;
 
 --
 -- AUTO_INCREMENT for table `feedback`
@@ -609,7 +615,7 @@ ALTER TABLE `provider`
 -- AUTO_INCREMENT for table `purchase`
 --
 ALTER TABLE `purchase`
-  MODIFY `purchase_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=57;
+  MODIFY `purchase_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=62;
 
 --
 -- AUTO_INCREMENT for table `request`
@@ -633,7 +639,7 @@ ALTER TABLE `seeker`
 -- AUTO_INCREMENT for table `services`
 --
 ALTER TABLE `services`
-  MODIFY `service_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=72;
+  MODIFY `service_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=73;
 
 --
 -- Constraints for dumped tables
