@@ -1100,42 +1100,42 @@
 				}
 
 				## STATUS IS SCHEDULED / RE-SCHEDULE - WHEN CHURCH UPDATE MASS TIME WHERE SEEKER BOOKED
-				if(($list[$j]['purchase_status'] == "scheduled" || $list[$j]['purchase_status'] == "re-schedule") && $list[$j]['purchase_progress'] == 0 && isset($_SESSION['seeker'])){
-					## RESCHED BUTTON
-					echo "<mark class='status' id='open-resched' onclick='open_modal(\"resched\", {$list[$j]['purchase_id']});'>resched</mark>";
-					##
-					$days_remaining = (strtotime(date($differ_['church_mass_date'])) - strtotime(date("Y-m-d"))) /60/60/24;
-					## CAN CANCEL IF MORE THAN 3 DAYS REMAINING BEFORE SERVICE DATE
-					if($days_remaining > 3) {
-						echo "<a class='status' href='deleting.php?table=purchase&attr=purchase_id&data=".$list[$j]['purchase_id']."&url=purchase' onclick='return confirm(\"Confirm cancellation?\");'>cancel</a>";
-					}
-					##
-					$time_available = time_available($differ_['church_mass_time'], $list[$j]['service_id']);
+				// if(($list[$j]['purchase_status'] == "scheduled" || $list[$j]['purchase_status'] == "re-schedule") && $list[$j]['purchase_progress'] == 0 && isset($_SESSION['seeker'])){
+				// 	## RESCHED BUTTON
+				// 	echo "<mark class='status' id='open-resched' onclick='open_modal(\"resched\", {$list[$j]['purchase_id']});'>resched</mark>";
+				// 	##
+				// 	$days_remaining = (strtotime(date($differ_['church_mass_date'])) - strtotime(date("Y-m-d"))) /60/60/24;
+				// 	## CAN CANCEL IF MORE THAN 3 DAYS REMAINING BEFORE SERVICE DATE
+				// 	if($days_remaining > 3) {
+				// 		echo "<a class='status' href='deleting.php?table=purchase&attr=purchase_id&data=".$list[$j]['purchase_id']."&url=purchase' onclick='return confirm(\"Confirm cancellation?\");'>cancel</a>";
+				// 	}
+				// 	##
+				// 	$time_available = time_available($differ_['church_mass_time'], $list[$j]['service_id']);
 
-					echo "
-					<dialog class='modal-img' id='modal-resched{$list[$j]['purchase_id']}'>
-						<button id='close-resched{$list[$j]['purchase_id']}'>+</button>";
-						## 
-						if(empty($time_available)) {
-							echo "<div class='note red' style='width:fit-content;'><i class='fa-solid fa-circle-info'></i> Fully booked pamisa's schedules.</div>";
-						}
-						else {
-							echo "
-							<h2>Reschedule Church Pamisa</h2>
-							<div class='note blue'><i class='fa-solid fa-circle-info'></i> Note: You can only reschedule once.</div>
-							<form method='post' style='text-align:left;margin-block:1.5em;'>
-								<input type='hidden' name='numid' value='{$list[$j]['purchase_id']}'></input>
-								<label>Time Available on ".date("M j, Y", strtotime($differ_['church_mass_date']))."</label>
-								<select name='cbotime' required>
-									<option value=''>BROWSE OPTIONS</option>
-									{$time_available}
-								</select>
-								<button class='btn' type='submit' name='btnresched'>Reschedule</button>
-							</form>";
-						}
-					echo "	
-					</dialog>";
-				}
+				// 	echo "
+				// 	<dialog class='modal-img' id='modal-resched{$list[$j]['purchase_id']}'>
+				// 		<button id='close-resched{$list[$j]['purchase_id']}'>+</button>";
+				// 		## 
+				// 		if(empty($time_available)) {
+				// 			echo "<div class='note red' style='width:fit-content;'><i class='fa-solid fa-circle-info'></i> Fully booked pamisa's schedules.</div>";
+				// 		}
+				// 		else {
+				// 			echo "
+				// 			<h2>Reschedule Church Pamisa</h2>
+				// 			<div class='note blue'><i class='fa-solid fa-circle-info'></i> Note: You can only reschedule once.</div>
+				// 			<form method='post' style='text-align:left;margin-block:1.5em;'>
+				// 				<input type='hidden' name='numid' value='{$list[$j]['purchase_id']}'></input>
+				// 				<label>Time Available on ".date("M j, Y", strtotime($differ_['church_mass_date']))."</label>
+				// 				<select name='cbotime' required>
+				// 					<option value=''>BROWSE OPTIONS</option>
+				// 					{$time_available}
+				// 				</select>
+				// 				<button class='btn' type='submit' name='btnresched'>Reschedule</button>
+				// 			</form>";
+				// 		}
+				// 	echo "	
+				// 	</dialog>";
+				// }
 
 				## STATUS IS FOR APPROVAL FOR CHURCH SERVICES (PROVIDER)
 				if($list[$j]['purchase_status'] == "for approval" || $list[$j]['purchase_status'] == "rejected"){
@@ -1143,10 +1143,13 @@
 					## FOR SEEKER
 					if(isset($_SESSION['seeker'])){
 						echo "
-						<mark class='status' id='open-reschedule' onclick='open_modal(\"reschedule\", {$list[$j]['purchase_id']});'>resched</mark>
-						<a href='deleting.php?table=purchase&attr=purchase_id&data=".$list[$j]['purchase_id']."&url=purchase' class='status' onclick='return confirm(\"You cannot undo this process, confirm cancellation?\");'>cancel</a>
-						";
-
+						<mark class='status' id='open-reschedule' onclick='open_modal(\"reschedule\", {$list[$j]['purchase_id']});'>resched</mark>";
+						## CAN CANCEL IF MORE THAN 3 DAYS REMAINING BEFORE SERVICE WAKE DATE
+						$days_remaining = (strtotime(date($list[$j]['purchase_wake_date'])) - strtotime(date("Y-m-d"))) /60/60/24;
+						##
+						if($days_remaining > 3) {
+							echo "<a class='status' href='deleting.php?table=purchase&attr=purchase_id&data=".$list[$j]['purchase_id']."&url=purchase' onclick='return confirm(\"You cannot undo this process, confirm cancellation?\");'>cancel</a>";
+						}
 						## DIALOG FOR RESCHEDULE BUTTON
 						echo "
 						<dialog class='modal-img' id='modal-reschedule{$list[$j]['purchase_id']}'>
@@ -1157,8 +1160,7 @@
 								".mass_required_details($list[$j]['purchase_wake_date'], $list[$j]['purchase_wake_time'], $list[$j]['purchase_num_days'], $list[$j]['purchase_burial_date'], $list[$j]['purchase_burial_time'])."
 								<button class='btn' type='submit' name='btnreschedule' onclick='return confirm(\"Confirm reschedule purchase?\");'>Resched</button>
 							</form>
-						</dialog>
-						";
+						</dialog>";
 					}
 				}
 

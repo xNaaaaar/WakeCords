@@ -195,7 +195,7 @@
 											if(count($services) > 0){
 												foreach($services as $service){
 													// IF ALREADY HAVE PURCHASE CHURCH MASS SERVICE
-													if($service['service_type'] == "church"){
+													if($service['service_type'] == "church" && $service['purchase_status'] != "done" && $service['purchase_status'] != "rated"){
 														$proceed = false;
 														break;
 													}
