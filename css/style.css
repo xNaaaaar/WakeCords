@@ -178,6 +178,7 @@ button.header-btn i{font-size:var(--size-7);}
 .banner-ratings .list > div:last-child{width:18%;}
 .banner-ratings .list div span{color:#aaa;font-style:italic;font-size:15px;line-height:1;}
 .status{display:inline-block;padding:7px 20px;border-radius:15px;background:#000;color:#fff;border:1px solid #000;font-size:13px;margin:3px;line-height:1;}
+.status.abs-top-right{position:absolute;inset:0 0 auto auto;}
 .status:hover{background:none;color:#000;cursor:pointer;}
 
 .ratings-con .rate{display:inline-block;width:350px;max-width:50%;margin:.5em;padding:1em;min-height:auto;vertical-align:top;box-shadow:var(--shadow-4);border-radius:5px;}

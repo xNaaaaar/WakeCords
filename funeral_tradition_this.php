@@ -158,11 +158,7 @@
 									## FOR CHURCH
 									} else {
 									// echo time_available($service['church_mass_time'], $_GET['service_id']);
-									// <div class='gray-note'>
-									// 		\"Note: Please provide burial mass time and take note that burial date is the day after your wake no. of days. For example: If you provided 7 days for the wake mass, the 8th day is the burial mass date.\"
-									// 	</div>
-								echo "	
-										".mass_required_details();
+										echo mass_required_details();
 									}
 								echo "
 									</div>	

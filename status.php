@@ -33,10 +33,6 @@
 						}
 						else {
 							echo "<h2><a href='purchase.php'>Transactions</a> <span>> Status</span></h2>";
-						}
-						## UPDATE PROGRESS STATUS FOR PROVIDER
-						if(isset($_SESSION['provider']) && !progress_limits($_GET['purchaseid'])) {
-							echo "<a class='btn btn-link-absolute' href='updating.php?id=".$_GET['purchaseid']."&purchase' onclick='return confirm(\"Are you sure you want to update purchase progress?\");'>Update Progress</a>";
 						}?>
 
 						<div class="order-con">
@@ -220,23 +216,48 @@
 										echo "
 										<div class='".purchase_progress($purchase['purchase_progress'], 1)."'>
 											<h3>Preparing wake</h3>
-											<p>Funeral Home is now processing the wake.</p>
+											<p>Funeral Home is now processing the wake.</p>"; 
+											## UPDATE PROGRESS STATUS FOR PROVIDER
+											if(isset($_SESSION['provider']) && !progress_limits($_GET['purchaseid']) && purchase_progress($purchase['purchase_progress'], 1) != "done") {
+												echo "<a class='status abs-top-right' href='updating.php?id=".$_GET['purchaseid']."&purchase' onclick='return confirm(\"Are you sure you want to update purchase progress?\");'>Done</a>";
+											}
+											echo "
 										</div>
 										<div class='".purchase_progress($purchase['purchase_progress'], 2)."'>
 											<h3 >Wake is ready</h3>
-											<p >Funeral Home has now prepared the wake and is ready for delivery.</p>
+											<p >Funeral Home has now prepared the wake and is ready for delivery.</p>"; 
+											## UPDATE PROGRESS STATUS FOR PROVIDER
+											if(isset($_SESSION['provider']) && !progress_limits($_GET['purchaseid']) && purchase_progress($purchase['purchase_progress'], 2) != "done") {
+												echo "<a class='status abs-top-right' href='updating.php?id=".$_GET['purchaseid']."&purchase' onclick='return confirm(\"Are you sure you want to update purchase progress?\");'>Done</a>";
+											}
+											echo "
 										</div>
 										<div class='".purchase_progress($purchase['purchase_progress'], 3)."'>
 											<h3>Wake is delivered (optional)</h3>
-											<p>Funeral Home has delivered the wake in the location and is ready for viewing.</p>
+											<p>Funeral Home has delivered the wake in the location and is ready for viewing.</p>"; 
+											## UPDATE PROGRESS STATUS FOR PROVIDER
+											if(isset($_SESSION['provider']) && !progress_limits($_GET['purchaseid']) && purchase_progress($purchase['purchase_progress'], 3) != "done") {
+												echo "<a class='status abs-top-right' href='updating.php?id=".$_GET['purchaseid']."&purchase' onclick='return confirm(\"Are you sure you want to update purchase progress?\");'>Done</a>";
+											}
+											echo "
 										</div>
 										<div class='".purchase_progress($purchase['purchase_progress'], 4)."'>
 											<h3>Wake is ready for viewing</h3>
-											<p>Wake is available for visitation.</p>
+											<p>Wake is available for visitation.</p>"; 
+											## UPDATE PROGRESS STATUS FOR PROVIDER
+											if(isset($_SESSION['provider']) && !progress_limits($_GET['purchaseid']) && purchase_progress($purchase['purchase_progress'], 4) != "done") {
+												echo "<a class='status abs-top-right' href='updating.php?id=".$_GET['purchaseid']."&purchase' onclick='return confirm(\"Are you sure you want to update purchase progress?\");'>Done</a>";
+											}
+											echo "
 										</div>
 										<div class='".purchase_progress($purchase['purchase_progress'], 5)."'>
 											<h3>Done</h3>
-											<p>Transaction successfully completed.</p>
+											<p>Transaction successfully completed.</p>"; 
+											## UPDATE PROGRESS STATUS FOR PROVIDER
+											if(isset($_SESSION['provider']) && !progress_limits($_GET['purchaseid']) && purchase_progress($purchase['purchase_progress'], 5) != "done") {
+												echo "<a class='status abs-top-right' href='updating.php?id=".$_GET['purchaseid']."&purchase' onclick='return confirm(\"Are you sure you want to update purchase progress?\");'>Done</a>";
+											}
+											echo "
 										</div>";
 									break;
 									## FOR CHURCH
@@ -245,19 +266,35 @@
 										for($i=1; $i<=$purchase['purchase_num_days']; $i++){
 											echo "
 											<div class='".purchase_progress($purchase['purchase_progress'], $i)."'>
-												<h3>Date: ".date("M j, Y", strtotime($purchase['purchase_wake_date']."".($i - 1)." days"))."</h3>
-												<p>Wake Mass Time: ".$purchase['purchase_wake_time']."</p>
+												<h3>Wake Mass Date: ".date("M j, Y", strtotime($purchase['purchase_wake_date']."".($i - 1)." days"))."</h3>
+												<p>Wake Mass Time: ".$purchase['purchase_wake_time']."</p>"; 
+												## UPDATE PROGRESS STATUS FOR PROVIDER
+												if(isset($_SESSION['provider']) && !progress_limits($_GET['purchaseid']) && purchase_progress($purchase['purchase_progress'], $i) != "done") {
+													echo "<a class='status abs-top-right' href='updating.php?id=".$_GET['purchaseid']."&purchase' onclick='return confirm(\"Are you sure you want to update purchase progress?\");'>Done</a>";
+												}
+												echo "
 											</div>";
+											
 										}
 										##
 										echo "
 										<div class='".purchase_progress($purchase['purchase_progress'], $purchase['purchase_num_days'] + 1)."'>
-											<h3>Date: ".date("M j, Y", strtotime($purchase['purchase_burial_date']))."</h3>
-											<p>Wake Mass Time: ".$purchase['purchase_burial_time']."</p>
+											<h3>Burial Mass Date: ".date("M j, Y", strtotime($purchase['purchase_burial_date']))."</h3>
+											<p>Burial Mass Time: ".$purchase['purchase_burial_time']."</p>"; 
+											## UPDATE PROGRESS STATUS FOR PROVIDER
+											if(isset($_SESSION['provider']) && !progress_limits($_GET['purchaseid']) && purchase_progress($purchase['purchase_progress'], $purchase['purchase_num_days'] + 1) != "done") {
+												echo "<a class='status abs-top-right' href='updating.php?id=".$_GET['purchaseid']."&purchase' onclick='return confirm(\"Are you sure you want to update purchase progress?\");'>Done</a>";
+											}
+											echo "
 										</div>
 										<div class='".purchase_progress($purchase['purchase_progress'], $purchase['purchase_num_days'] + 2)."'>
 											<h3>Done</h3>
-											<p>Transaction successfully completed.</p>
+											<p>Transaction successfully completed.</p>"; 
+											## UPDATE PROGRESS STATUS FOR PROVIDER
+											if(isset($_SESSION['provider']) && !progress_limits($_GET['purchaseid']) && purchase_progress($purchase['purchase_progress'], $purchase['purchase_num_days'] + 2) != "done") {
+												echo "<a class='status abs-top-right' href='updating.php?id=".$_GET['purchaseid']."&purchase' onclick='return confirm(\"Are you sure you want to update purchase progress?\");'>Done</a>";
+											}
+											echo "
 										</div>";
 									break;
 									## FOR HEADSTONE

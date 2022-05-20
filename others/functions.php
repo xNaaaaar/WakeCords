@@ -379,17 +379,20 @@
 	## MASS DETAILS
 	function mass_required_details($wake_date="", $wake_time="", $num_days=0, $burial_date="", $burial_time=""){
 		return "
-		<div style='width:100%;font-style:italic;color:gray;'>
-			<label>No. of days between wake & burial mass start date: <span id='numdays1'>{$num_days}</span> days</label>
-			<input type='hidden' name='numdays' id='numdays2'>
+		<div style='width:100%;color:gray;'>
+			<label>No. of days between wake & burial mass date: <span id='numdays1'>{$num_days}</span> days</label>
+			<input type='hidden' name='numdays' id='numdays2' value='{$num_days}'>
 		</div>
 		<div>
 			<label>Wake Mass Start Date: </label>
 			<input type='date' name='massstart' id='massstart' value='{$wake_date}' required>
 		</div>
 		<div>
-			<label>Burial Mass Start Date: </label>
+			<label>Burial Mass Date: </label>
 			<input type='date' name='burialstart' id='burialstart' value='{$burial_date}' required>
+		</div>
+		<div class='gray-note'>
+			\"Note: You can also specify wake & burial mass time if not found.\"
 		</div>
 		<div>
 			<label>Wake Mass Time: </label>
@@ -412,6 +415,7 @@
 				<option value='06:00pm - 07:00pm'>
 				<option value='07:00pm - 08:00pm'>
 			</datalist>
+			
 		</div>";
 	}
 	## TYPE [notify, success, error]
@@ -989,7 +993,12 @@
 
 					$name = $headstone["stone_color"]." ".$headstone["stone_kind"]." ".$headstone["stone_type"];
 					$name = ucwords($name);
-				} 
+				}
+
+				if($service_['service_type'] == "church") {
+					$church = read("church", ["service_id"], [$list[$j]['service_id']]);
+					$church = $church[0];
+				}
 				
 				echo "
 				<div class='list'>
@@ -1013,12 +1022,13 @@
 						if($service_['service_type'] == "funeral" && $list[$j]['purchase_status'] != "to pay") {
 							echo "<a style='color:var(--blue);font-size:18px;' href='' title='Covered by no cancellation policy.'><i class='fa-solid fa-circle-question'></i></a>";
 						}
-
-						if($service_['service_type'] == "church" && $list[$j]['purchase_status'] == "re-schedule") {
-							echo "<a style='color:var(--blue);font-size:18px;' href='' title='Church provider changed time availability.'><i class='fa-solid fa-circle-question'></i></a>";
-						}
 						
-				echo $list[$j]['purchase_status']; 
+						if($list[$j]['purchase_status'] == "rejected"){
+							echo $list[$j]['purchase_status']."; please check your email";
+						}
+						else {
+							echo $list[$j]['purchase_status']; 
+						}
 				##
 				$payout = read("payout", ["purchase_id"], [$list[$j]['purchase_id']]);
 
@@ -1171,8 +1181,17 @@
 					<form method='post' style='text-align:left;'>
 						<input type='hidden' name='pid' value='{$list[$j]['purchase_id']}'></input>
 						<h2>Mass Information</h2>
+						"; 
+						if(isset($_SESSION['provider'])){
+							$seeker_info = read("seeker", ["seeker_id"], [$list[$j]['seeker_id']]);
+							$seeker_info = $seeker_info[0];
+							## SEEKER INFO (NAME, CONTACT NO.)
+							echo "<h3>{$seeker_info['seeker_fname']} {$seeker_info['seeker_lname']} <span>{$seeker_info['seeker_phone']}</span></h3>";
+						}
+						echo "
+						
+						<h4>{$name} ({$differ_['church_cemetery']} Cemetery)</h4>
 						<h3 style='margin-bottom:0;'>₱ ".number_format($list[$j]['purchase_total'],2,'.',',')."</h3>
-						<h4>{$name}</h4>
 						<p>{$service_['service_desc']}</p>
 
 						<p style='font-size:1rem;margin-bottom:1em;'>
@@ -1186,7 +1205,7 @@
 					## APPROVE & REJECT BUTTON FOR PROVIDER
 					if(isset($_SESSION['provider']) && $list[$j]['purchase_status'] == "for approval"){
 						echo "
-						<button class='btn' type='submit' name='btnapproved' onclick='return confirm(\"Confirm approval?\");'>Approved</button>
+						<button class='btn' type='submit' name='btnapproved' onclick='return confirm(\"Confirm approval?\");'>Approve</button>
 						<a href='reject.php?purchase_id={$list[$j]['purchase_id']}' class='btn'>Reject</a>
 						";
 					}
@@ -2266,14 +2285,13 @@
 						$reqs = $reqs[0];
 						echo "
 							<div>".$reqs['req_status']."</div>
-							<div>
-								<a onclick='open_modal(\"image\", {$count});' class='img-link'>
-									<figure>
-										<img src='images/seekers/".$results['seeker_id']."/".$reqs['req_img']."'>
-									</figure>
-								</a>
-							</div>
+							<div> — </div>
 						";
+						// <a onclick='open_modal(\"image\", {$count});' class='img-link'>
+						// 	<figure>
+						// 		<img src='images/seekers/".$results['seeker_id']."/".$reqs['req_img']."'>
+						// 	</figure>
+						// </a>
 
 						if($reqs['req_status'] == "pending"){
 							## <a href='admin_users.php?reject=".$reqs['req_id']."' class='verify btn status' onclick='return confirm(\"Are you sure you want to reject this requirement?\");'>reject</a>
@@ -2329,15 +2347,19 @@
 						$count++;
 						$reqs = $reqs[0];
 						echo "
-							<div>".$reqs['req_status']."</div>
-							<div>
-								<a onclick='open_modal(\"image\", {$count});' class='img-link'>
-									<figure>
-										<img src='images/providers/".$results['provider_type']."/".$results['provider_id']."/".$reqs['req_img']."'>
-									</figure>
-								</a>
-							</div>
-						";
+							<div>".$reqs['req_status']."</div>"; 
+							if($results['provider_type'] != "church"){
+								echo "
+								<div>
+									<a onclick='open_modal(\"image\", {$count});' class='img-link'>
+										<figure>
+											<img src='images/providers/".$results['provider_type']."/".$results['provider_id']."/".$reqs['req_img']."'>
+										</figure>
+									</a>
+								</div>";
+							}
+							else echo "<div> — </div>";
+							
 
 						if($reqs['req_status'] == "pending"){
 							echo "

@@ -39,7 +39,8 @@
 									<li><h3>Cost</h3></li>
 								</ul>
 								<?php
-									if($single_payment) $list = read("purchase", ["seeker_id", "purchase_id", "purchase_status"], [$_SESSION['seeker'], $_GET['purchaseid'], "to pay"]);
+									if($single_payment) 
+										$list = read("purchase", ["seeker_id", "purchase_id", "purchase_status"], [$_SESSION['seeker'], $_GET['purchaseid'], "to pay"]);
 									else $list = read("purchase", ["seeker_id", "purchase_status"], [$_SESSION['seeker'], "to pay"]);
 
 									$type_list = [];
@@ -296,25 +297,36 @@
 
 							if(isset($_POST['btnpay'])){
 								## USE FOR pay_purchase() FUNCTION
+								$proceed = false;
 								$_SESSION['field_array'] = [$_POST['cbomethod'], trim(ucwords($_POST['txtdeceasedname'])), trim(ucwords($_POST['gcash-name'])), $_POST['gcash-num'], $total];
 
 								if(service_type_exist_bool("funeral", $type_list)){
 									## USE FOR pay_purchase() FUNCTION
 									$_SESSION['field_array_funeral'] = [$_POST['dtburial'], trim(ucwords($_POST['txtburialadd']))];
+
+									$proceed = true;
 								}
 
 								if(service_type_exist_bool("headstone", $type_list)){
 									## USE FOR pay_purchase() FUNCTION
 									$_SESSION['field_array_headstone'] = [$_POST['datebirth'], $_POST['datedeath'], $_POST['datedeliveryheadstone'], trim(ucwords($_POST['txtmsg']))];
+
+									$proceed = true;
 								}
 
 								if(service_type_exist_bool("church", $type_list)){
 									## USE FOR pay_purchase() FUNCTION
 									$_SESSION['field_array_church'] = [$_POST['datedeath']];
-								}
 
+									if($_POST['datedeath'] >= date("Y-m-d")) {
+										echo "<script>alert('Date death cannot be future date.')</script>";
+										$proceed = false;
+									}
+									else $proceed = true;
+									
+								}
 								## PAYMENT FOR GCASH
-								if($_POST['cbomethod'] == "gcash") {
+								if($_POST['cbomethod'] == "gcash" && $proceed) {
 									##
 									$_SESSION['type_list'] = $type_list;
 									$_SESSION['list'] = $list;
