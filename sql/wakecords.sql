@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 18, 2022 at 03:20 PM
+-- Generation Time: May 20, 2022 at 02:23 AM
 -- Server version: 10.4.19-MariaDB
 -- PHP Version: 7.3.28
 
@@ -134,7 +134,7 @@ CREATE TABLE `details` (
 
 INSERT INTO `details` (`purchase_id`, `deceased_name`, `burial_datetime`, `burial_add`, `delivery_add`, `delivery_date`, `message`, `birth_date`, `death_date`, `delivery_datetime`, `num_pax`, `cemetery_add`) VALUES
 (51, 'Deceased Name', '2022-05-21 18:05:00', 'Sample Burial Address', 'My Updated Delivery Address', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(61, 'Asdys Sdfwe', NULL, NULL, NULL, NULL, NULL, NULL, '2022-05-14', NULL, NULL, NULL);
+(61, 'John Doeeer', NULL, NULL, NULL, NULL, NULL, NULL, '2022-05-14', NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -156,7 +156,8 @@ CREATE TABLE `feedback` (
 --
 
 INSERT INTO `feedback` (`feedback_id`, `seeker_id`, `service_id`, `feedback_star`, `feedback_comments`, `feedback_date`) VALUES
-(6, 17, 46, 4, '', '2022-05-12');
+(6, 17, 46, 4, '', '2022-05-12'),
+(7, 19, 71, 5, '', '2022-05-18');
 
 -- --------------------------------------------------------
 
@@ -179,18 +180,22 @@ CREATE TABLE `funeral` (
   `service_id` int(8) NOT NULL,
   `funeral_name` varchar(50) NOT NULL,
   `funeral_type` varchar(20) NOT NULL,
-  `funeral_size` varchar(100) DEFAULT NULL
+  `funeral_kind` varchar(20) NOT NULL,
+  `funeral_size` varchar(200) DEFAULT NULL,
+  `funeral_qty` varchar(200) DEFAULT NULL,
+  `funeral_price` varchar(200) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `funeral`
 --
 
-INSERT INTO `funeral` (`service_id`, `funeral_name`, `funeral_type`, `funeral_size`) VALUES
-(45, 'St. Jude', 'traditional', 'size #1,size #2,size #4,'),
-(46, 'St. Catherine', 'cremation', 'size #2,size #5,'),
-(47, 'St. Bernadette', 'traditional', 'size #3,size #4,size #5,'),
-(48, 'St. Paul', 'traditional', 'size #4,sample size#1');
+INSERT INTO `funeral` (`service_id`, `funeral_name`, `funeral_type`, `funeral_kind`, `funeral_size`, `funeral_qty`, `funeral_price`) VALUES
+(45, 'St. Jude', 'traditional', '', 'size #1,size #2,size #4,', NULL, NULL),
+(46, 'St. Catherine', 'cremation', '', 'size #2,size #5,', NULL, NULL),
+(47, 'St. Bernadette', 'traditional', '', 'size #3,size #4,size #5,', NULL, NULL),
+(48, 'St. Paul', 'traditional', '', 'size #4,sample size#1', NULL, NULL),
+(74, 'St. Bernadette', 'traditional', 'wooden', '6x3x4,7x3x4,5x3x4,4x3x4', '50,20,10,15', '35000,20000,25000,29000');
 
 -- --------------------------------------------------------
 
@@ -249,7 +254,8 @@ CREATE TABLE `payout` (
 --
 
 INSERT INTO `payout` (`purchase_id`, `payout_method`, `account_name`, `account_number`, `payout_datetime`, `payout_image`) VALUES
-(51, 'gcash', 'Nelmar Citan', '04958283757', '2022-05-12 18:21:48', '627ce005351128.55894108.png');
+(51, 'gcash', 'Nelmar Citan', '04958283757', '2022-05-12 18:21:48', '627ce005351128.55894108.png'),
+(61, 'gcash', 'Nelmar Citan', '04958283757', '2022-05-18 23:42:09', '62851425aedc89.20980104.png');
 
 -- --------------------------------------------------------
 
@@ -281,7 +287,8 @@ INSERT INTO `provider` (`provider_id`, `provider_logo`, `provider_company`, `pro
 (8, '627c6bfc278075.93773823.jpg', 'Cosmopolitan', '', 'Jane', 'V', 'Doe', 'funeral', '09457239646', 'Fake Address St.', 'funeral@wakecords.com', 'd7e73fb6980b78278c69b4e9f024f16a'),
 (9, '627cc232f1dc11.01858196.png', 'Marbles', '', 'Jooon', 'K', 'Dee', 'headstone', '09457239646', 'My Sample Address', 'headstone@wakecords.com', 'd7e73fb6980b78278c69b4e9f024f16a'),
 (10, '627cd7b895bb55.68335576.jpg', 'St. Peter', '', 'Jane', 'J', 'Dee', 'funeral', '09457239646', 'Sample Fake Address', 'saintpeter@wakecords.com', 'd7e73fb6980b78278c69b4e9f024f16a'),
-(11, '6280abb997b055.59562307.jpg', 'Church Incorporation', '', 'Meelnar', 'B', 'Aancit', 'church', '09457239646', '2392 E. Sabellano Street, Sitio Granada Quiot Pardo, Cebu City, Cebu', 'narancit@gmail.com', 'd7e73fb6980b78278c69b4e9f024f16a');
+(11, '6280abb997b055.59562307.jpg', 'Church Incorporation', '', 'Meelnar', 'B', 'Aancit', 'church', '09457239646', '2392 E. Sabellano Street, Sitio Granada Quiot Pardo, Cebu City, Cebu', 'narancit@gmail.com', 'd7e73fb6980b78278c69b4e9f024f16a'),
+(12, '628609c82aac43.94774141.png', 'St. Anghel', '', 'Prove', 'T', 'Vader', 'funeral', '09457239646', '5492A Fake Street, Sitio Sample Barangay Test, Mandaue City, Cebu', 'narancit2021@gmail.com', 'd7e73fb6980b78278c69b4e9f024f16a');
 
 -- --------------------------------------------------------
 
@@ -314,7 +321,8 @@ CREATE TABLE `purchase` (
 INSERT INTO `purchase` (`purchase_id`, `seeker_id`, `service_id`, `purchase_total`, `purchase_qty`, `purchase_size`, `purchase_font`, `purchase_date`, `purchase_wake_date`, `purchase_wake_time`, `purchase_num_days`, `purchase_burial_date`, `purchase_burial_time`, `purchase_status`, `purchase_progress`) VALUES
 (51, 17, 46, '30000.00', 1, 'size #2', NULL, '2022-05-12', NULL, NULL, NULL, NULL, NULL, 'rated', 5),
 (52, 17, 48, '30000.00', 1, 'size #4', NULL, '2022-05-12', NULL, NULL, NULL, NULL, NULL, 'to pay', 0),
-(61, 19, 71, '1300.00', NULL, NULL, NULL, '2022-05-18', '2022-05-21', '07:00pm - 08:00pm', 7, '2022-05-28', '11:00am - 12:00nn', 'paid', 0);
+(61, 19, 71, '1300.00', NULL, NULL, NULL, '2022-05-18', '2022-05-21', '07:00pm - 08:00pm', 6, '2022-05-27', '10:00am - 11:00am', 'rated', 8),
+(62, 19, 71, '800.00', NULL, NULL, NULL, '2022-05-19', '2022-06-01', '04:00pm - 05:00pm', 3, '2022-06-04', '10:00am - 11:00am', 'for approval', 0);
 
 -- --------------------------------------------------------
 
@@ -354,7 +362,8 @@ INSERT INTO `requirement` (`req_id`, `provider_id`, `seeker_id`, `req_type`, `re
 (11, 9, NULL, 'business permit', '627face55bf158.12435535.jpg', 'not verified'),
 (12, 10, NULL, 'business permit', '627cd7c6519e11.94355213.jpg', 'verified'),
 (13, 11, NULL, 'church', '', 'verified'),
-(14, NULL, 19, 'seeker', '', 'verified');
+(14, NULL, 19, 'seeker', '', 'verified'),
+(15, 12, NULL, 'business permit', '628609dddd5640.90228614.png', 'verified');
 
 -- --------------------------------------------------------
 
@@ -422,7 +431,8 @@ INSERT INTO `services` (`service_id`, `provider_id`, `service_type`, `service_de
 (47, 8, 'funeral', 'This is my sample description for St. Bernadette traditional funeral services.', '40000.00', 4, '627cda89dbb2c7.95809111.png', 'active'),
 (48, 10, 'funeral', 'This is my description for St. Paul traditional funeral services.', '30000.00', 3, '627ce5026bbe33.40763445.png', 'active'),
 (71, 11, 'church', 'This package includes: wake pamisa (x no. of days) and burial pamisa after wake pamisa.', '800.00', NULL, '6280ca1aaebc65.26001768.jpg', 'active'),
-(72, 11, 'church', 'This package includes: wake mass (x no. of days) and burial mass after wake mass.', '750.00', NULL, '62821ff2eac687.79673148.jpg', 'active');
+(72, 11, 'church', 'This package includes: wake mass (x no. of days) and burial mass after wake mass.', '750.00', NULL, '62821ff2eac687.79673148.jpg', 'active'),
+(74, 12, 'funeral', 'This is my sample description for funeral tradition services. This is my sample packages: sample package #1, sample package #2, sample package #3 and sample package #4.', NULL, NULL, '62865b6e0a2fc1.77696580.png', 'active');
 
 -- --------------------------------------------------------
 
@@ -445,7 +455,8 @@ CREATE TABLE `subscription` (
 INSERT INTO `subscription` (`provider_id`, `subs_startdate`, `subs_duedate`, `subs_description`, `subs_cost`) VALUES
 (8, '2022-05-12', '2023-05-12', 'Provider can post and boost their service in an affordable amount.', '2000.00'),
 (10, '2022-05-12', '2022-06-12', 'Provider can post and boost their service in an affordable amount.', '200.00'),
-(11, '2022-05-15', '2022-06-15', 'Provider can post and boost their service in an affordable amount.', '200.00');
+(11, '2022-05-15', '2022-06-15', 'Provider can post and boost their service in an affordable amount.', '200.00'),
+(12, '2022-05-19', '2023-05-19', 'Provider can post and boost their service in an affordable amount.', '2000.00');
 
 --
 -- Indexes for dumped tables
@@ -597,25 +608,25 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `cart_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=115;
+  MODIFY `cart_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=117;
 
 --
 -- AUTO_INCREMENT for table `feedback`
 --
 ALTER TABLE `feedback`
-  MODIFY `feedback_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `feedback_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `provider`
 --
 ALTER TABLE `provider`
-  MODIFY `provider_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `provider_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `purchase`
 --
 ALTER TABLE `purchase`
-  MODIFY `purchase_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=62;
+  MODIFY `purchase_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
 
 --
 -- AUTO_INCREMENT for table `request`
@@ -627,7 +638,7 @@ ALTER TABLE `request`
 -- AUTO_INCREMENT for table `requirement`
 --
 ALTER TABLE `requirement`
-  MODIFY `req_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `req_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `seeker`
@@ -639,7 +650,7 @@ ALTER TABLE `seeker`
 -- AUTO_INCREMENT for table `services`
 --
 ALTER TABLE `services`
-  MODIFY `service_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=73;
+  MODIFY `service_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=76;
 
 --
 -- Constraints for dumped tables
