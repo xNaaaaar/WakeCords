@@ -91,13 +91,13 @@
 								echo "<button class='btn btn-link-absolute higher-top' type='submit' name='btnadd'>Add Service</button>";
 							}
 
-							$others = "
-							<label class='label-span'>Others <span>(please specify separated by comma)</span></label>
-							<div>
-								<input type='text' name='txtothers' placeholder='Sample#1, Sample#2, Sample#3' value='";
-							$others .= ($edit) ? return_value("services", $_GET['id'], "others"):"";
-							$others .= "' >
-							</div>";
+							// $others = "
+							// <label class='label-span'>Others <span>(please specify separated by comma)</span></label>
+							// <div>
+							// 	<input type='text' name='txtothers' placeholder='Sample#1, Sample#2, Sample#3' value='";
+							// $others .= ($edit) ? return_value("services", $_GET['id'], "others"):"";
+							// $others .= "' >
+							// </div>";
 							## DO THIS IF SERVICE HAS NO BOOKING
 							if((isset($_GET['edit']) && !service_is_booked($_GET['id'])) || $edit == false){
 							## FOR CHECKBOX TO USE IMAGE
@@ -128,8 +128,11 @@
 							switch($user['provider_type']){
 								## FOR FUNERAL SERVICES
 								case "funeral":
-									$desc = "please specify casket size and if for adult or child";
 									$width = "style='width:24%;'";
+									$funeral_sizes = explode(",",$type['funeral_size']);
+									$funeral_qtys = explode(",",$type['funeral_qty']);
+									$funeral_prices = explode(",",$type['funeral_price']);
+									$count_value = ($edit) ? count($funeral_sizes):1;
 									##
 									echo "
 									<div>
@@ -137,48 +140,6 @@
 										<input type='text' name='txtsname' value='"; 
 										echo ($edit) ? return_value("services", $_GET['id'], "name"):"";
 										echo "' required>
-									</div>
-									<div style='width:100%;'>
-										<label class='label-span'>Size Available <span>(check all that applies)</span></label>
-										<div class='checkbox'>
-											<div>
-												<input type='checkbox' name='cbsize[]' value='size #1'";
-												echo ($edit) ? return_value("services", $_GET['id'], "size", "size #1"):"";
-												echo ">
-												<label>Size #1</label>
-											</div>
-											<div>
-												<input type='checkbox' name='cbsize[]' value='size #2'";
-												echo ($edit) ? return_value("services", $_GET['id'], "size", "size #2"):"";
-												echo ">
-												<label>Size #2</label>
-											</div>
-											<div>
-												<input type='checkbox' name='cbsize[]' value='size #3'";
-												echo ($edit) ? return_value("services", $_GET['id'], "size", "size #3"):"";
-												echo ">
-												<label>Size #3</label>
-											</div>
-											<div>
-												<input type='checkbox' name='cbsize[]' value='size #4'";
-												echo ($edit) ? return_value("services", $_GET['id'], "size", "size #4"):"";
-												echo ">
-												<label>Size #4</label>
-											</div>
-											<div>
-												<input type='checkbox' name='cbsize[]' value='size #5'";
-												echo ($edit) ? return_value("services", $_GET['id'], "size", "size #5"):"";
-												echo ">
-												<label>Size #5</label>
-											</div>
-											<div>
-												<input type='checkbox' name='cbsize[]' value='size #6'";
-												echo ($edit) ? return_value("services", $_GET['id'], "size", "size #6"):"";
-												echo ">
-												<label>Size #6</label>
-											</div>
-										</div>
-										{$others}
 									</div>
 									<div>
 										<label>Type</label>
@@ -191,6 +152,138 @@
 											echo ($edit) ? return_value("services", $_GET['id'], "type", "cremation"):"";
 											echo ">Cremation</option>
 										</select>
+									</div>
+									<div>
+										<label>Kind</label>
+										<select name='cbokind'>
+											<option>BROWSE OPTIONS</option>
+											<option value='metal'";
+											echo ($edit) ? return_value("services", $_GET['id'], "kind", "metal"):"";
+											echo ">Metal</option>
+											<option value='wooden'";
+											echo ($edit) ? return_value("services", $_GET['id'], "kind", "wooden"):"";
+											echo ">Wooden</option>
+										</select>
+									</div>
+									<div id='main-div' style='width:100%;'>
+										<h3 style='margin-bottom:0;'>Casket Details <span class='status' id='add-desc' style='vertical-align:middle;margin:0 0 10px;'>+ Add New Details</span></h3>
+										<input id='count' type='hidden' name='numcount' value='";
+										## VALUE OF COUNT
+										echo $count_value;
+										echo "' />
+										<div class='checkbox'>
+											<div class='desc'>
+												<label>Size</label>
+												<input type='text' name='txtsize1' placeholder='Ex in ft. 6x3x4 (Length x Width x Height)' value='"; 
+												echo ($edit) ? $funeral_sizes[0]:"";
+												echo "' required />
+											</div>
+											<div class='desc'>
+												<label>Quantity</label>
+												<input type='number' name='numqty1' placeholder='' value='"; 
+												echo ($edit) ? $funeral_qtys[0]:"";
+												echo "' required/>
+											</div>
+											<div class='desc'>
+												<label>Price</label>
+												<input type='number' name='numprice1' value='"; 
+												echo ($edit) ? $funeral_prices[0]:"";
+												echo "' required/>
+											</div>
+										</div>";
+										if($edit && $count_value >= 2){
+											for($i=2; $i<=$count_value; $i++){
+												echo "
+												<div class='checkbox'>
+													<div class='desc'>
+														<label>Size</label>
+														<input type='text' name='txtsize{$i}' placeholder='Ex in ft. 6x3x4 (Length x Width x Height)' value='{$funeral_sizes[$i-1]}' />
+													</div>
+													<div class='desc'>
+														<label>Quantity</label>
+														<input type='number' name='numqty{$i}' placeholder='' value='{$funeral_qtys[$i-1]}'/>
+													</div>
+													<div class='desc'>
+														<label>Price</label>
+														<input type='number' name='numprice{$i}' value='{$funeral_prices[$i-1]}'/>
+													</div>
+												</div>";
+											}
+										}
+										echo "
+									</div>
+									";
+								break;
+								## FOR CHURCH SERVICES
+								case "church":
+									// <div>
+									// 	<label>Date</label>
+									// 	<input type='date' name='date' value='"; 
+									// 	echo ($edit) ? return_value("services", $_GET['id'], "date"):"";
+									// 	echo "' required>
+									// </div>
+									$width = "style='width:100%;'";
+
+									// ## GETTING THE SPECIFIC ADDRESSES
+									// if(user_type() == 'seeker') $address = $user['seeker_address'];
+									// else $address = $user['provider_address'];
+									// $empty_address = false;
+									// ## CHECK IF ADDRESS IS EMPTY
+									// if(empty($address)) $empty_address = true;
+									// ## EXPLODED ADDRESS
+									// $address = explode(",", $address);
+
+									echo "
+									<div>
+										<label>Priest</label>
+										<input type='text' name='txtpriest' value='"; 
+										echo ($edit) ? return_value("services", $_GET['id'], "priest"):"";
+										echo "' required>
+									</div>
+									<div>
+										<label>Church</label>
+										<input type='text' name='txtsname' value='"; 
+										echo ($edit) ? return_value("services", $_GET['id'], "name"):"";
+										echo "' required>
+									</div>
+									<div>
+										<label>Cemetery</label>
+										<input type='text' name='txtcemetery' value='"; 
+										echo ($edit) ? return_value("services", $_GET['id'], "cemetery"):"";
+										echo "' required>
+									</div>
+
+									<h3 style='width:100%;'>Complete Address</h3>
+									<div style='width:100%;' class='checkbox'>
+										<div class='full'>
+											<input id='profile-address' type='checkbox' name='cbaddress'>
+											<label class='label-span'><span>Check to use address in Profile.</span></label>
+										</div>
+									</div>
+
+									<div>
+										<label>House No. / Street</label>
+										<input id='street' class='' type='text' name='txtstreet' value='"; 
+										echo ($edit) ? return_value("services", $_GET['id'], "address_street"):"";
+										echo "' required>
+									</div>
+									<div>
+										<label>Sitio / Barangay</label>
+										<input id='brgy' class='' type='text' name='txtbrgy' value='"; 
+										echo ($edit) ? return_value("services", $_GET['id'], "address_brgy"):"";
+										echo "' required>
+									</div>
+									<div>
+										<label>Province</label>
+										<input id='province' class='' type='text' name='txtprovince' value='"; 
+										echo ($edit) ? return_value("services", $_GET['id'], "address_province"):"";
+										echo "' required>
+									</div>
+									<div>
+										<label>City</label>
+										<input id='city' class='' type='text' name='txtcity' value='"; 
+										echo ($edit) ? return_value("services", $_GET['id'], "address_city"):"";
+										echo "' required>
 									</div>
 									";
 								break;
@@ -336,79 +429,6 @@
 											echo ($edit) ? return_value("services", $_GET['id'], "others1"):"";
 											echo "'>
 										</div>
-									</div>
-									";
-								break;
-								## FOR CHURCH SERVICES
-								case "church":
-									// <div>
-									// 	<label>Date</label>
-									// 	<input type='date' name='date' value='"; 
-									// 	echo ($edit) ? return_value("services", $_GET['id'], "date"):"";
-									// 	echo "' required>
-									// </div>
-									$width = "style='width:100%;'";
-
-									// ## GETTING THE SPECIFIC ADDRESSES
-									// if(user_type() == 'seeker') $address = $user['seeker_address'];
-									// else $address = $user['provider_address'];
-									// $empty_address = false;
-									// ## CHECK IF ADDRESS IS EMPTY
-									// if(empty($address)) $empty_address = true;
-									// ## EXPLODED ADDRESS
-									// $address = explode(",", $address);
-
-									echo "
-									<div>
-										<label>Priest</label>
-										<input type='text' name='txtpriest' value='"; 
-										echo ($edit) ? return_value("services", $_GET['id'], "priest"):"";
-										echo "' required>
-									</div>
-									<div>
-										<label>Church</label>
-										<input type='text' name='txtsname' value='"; 
-										echo ($edit) ? return_value("services", $_GET['id'], "name"):"";
-										echo "' required>
-									</div>
-									<div>
-										<label>Cemetery</label>
-										<input type='text' name='txtcemetery' value='"; 
-										echo ($edit) ? return_value("services", $_GET['id'], "cemetery"):"";
-										echo "' required>
-									</div>
-
-									<h3 style='width:100%;'>Complete Address</h3>
-									<div style='width:100%;' class='checkbox'>
-										<div class='full'>
-											<input id='profile-address' type='checkbox' name='cbaddress'>
-											<label class='label-span'><span>Check to use address in Profile.</span></label>
-										</div>
-									</div>
-
-									<div>
-										<label>House No. / Street</label>
-										<input id='street' class='' type='text' name='txtstreet' value='"; 
-										echo ($edit) ? return_value("services", $_GET['id'], "address_street"):"";
-										echo "' required>
-									</div>
-									<div>
-										<label>Sitio / Barangay</label>
-										<input id='brgy' class='' type='text' name='txtbrgy' value='"; 
-										echo ($edit) ? return_value("services", $_GET['id'], "address_brgy"):"";
-										echo "' required>
-									</div>
-									<div>
-										<label>Province</label>
-										<input id='province' class='' type='text' name='txtprovince' value='"; 
-										echo ($edit) ? return_value("services", $_GET['id'], "address_province"):"";
-										echo "' required>
-									</div>
-									<div>
-										<label>City</label>
-										<input id='city' class='' type='text' name='txtcity' value='"; 
-										echo ($edit) ? return_value("services", $_GET['id'], "address_city"):"";
-										echo "' required>
 									</div>
 									";
 								break;
@@ -613,18 +633,20 @@
 								break;
 							}
 							## PAMISA PRICE
-							echo "
-							<div {$width}>
-								<label>Price</label>
-								<input type='number' name='numprice' placeholder='Ex. 50000 for 50k' value='";
-								echo ($edit) ? return_value("services", $_GET['id'], "price"):"";
-								echo "' required>
-							</div>
-							";
+							if($user['provider_type'] != "funeral"){
+								echo "
+								<div {$width}>
+									<label>Price</label>
+									<input type='number' name='numprice' placeholder='Ex. 50000 for 50k' value='";
+									echo ($edit) ? return_value("services", $_GET['id'], "price"):"";
+									echo "' required>
+								</div>
+								";
+							}
 
 							} ## END OF, IF SERVICE IS NOT BOOKED
 							
-							if($user['provider_type'] != "catering" && $user['provider_type'] != "church"){
+							if($user['provider_type'] != "catering" && $user['provider_type'] != "church" && $user['provider_type'] != "funeral"){
 								echo "
 								<div {$width}>
 									<label>Quantity</label>
@@ -746,6 +768,59 @@
 		})
 	<?php
 	} ?>
+
+	let addDesc = document.getElementById("add-desc")
+	let counter = document.getElementById("count")
+	let count = counter.value
+
+	addDesc.addEventListener("click", () => {
+		count = parseInt(count) + 1
+		counter.value = count
+
+		let mainDiv = document.getElementById("main-div")
+		let element1 = document.createElement("div")
+		element1.className = "checkbox"
+
+		let element2 = document.createElement("div")
+		element2.className = "desc"
+
+		let element3 = document.createElement("label")
+		element3.innerText= "Size"
+
+		let element4 = document.createElement("input")
+		element4.setAttribute("type", "text")
+		element4.setAttribute("name", "txtsize"+count)
+		element4.setAttribute("placeholder", "Example in ft. 6x3x4 (Length x Width x Height)")
+
+		let element5 = document.createElement("div")
+		element5.className = "desc"
+
+		let element6 = document.createElement("label")
+		element6.innerText= "Quantity"
+
+		let element7 = document.createElement("input")
+		element7.setAttribute("type", "number")
+		element7.setAttribute("name", "numqty"+count)
+
+		let element8 = document.createElement("div")
+		element8.className = "desc"
+
+		let element9 = document.createElement("label")
+		element9.innerText= "Price"
+
+		let element10 = document.createElement("input")
+		element10.setAttribute("type", "number")
+		element10.setAttribute("name", "numprice"+count)
+
+		mainDiv.appendChild(element1)
+		element1.append(element2, element5, element8)
+		// DESC 1
+		element2.append(element3, element4)
+		// DESC 2
+		element5.append(element6, element7)
+		// DESC 3
+		element8.append(element9, element10)
+	})
 	</script>
 </body>
 </html>

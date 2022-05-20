@@ -72,6 +72,8 @@
 							switch($service_type['service_type']){
 								case "funeral":
 									$size_array = explode(",",$service['funeral_size']);
+									$qty_array = explode(",",$service['funeral_qty']);
+									$price_array = explode(",",$service['funeral_price']);
 									echo "
 									<h2><a href='{$service_link}'>Services</a> <span>> <a href='{$a_link}?id={$provider['provider_id']}'>{$provider['provider_company']}</a> > {$service['funeral_name']}</span></h2>
 									";
@@ -116,12 +118,16 @@
 										</h3>
 										<p>
 											".$service['service_desc']."
-										</p>
-										<div class='card-price trad'>₱ ".number_format($service['service_cost'], 2, '.', ',')."</div>	
-								";
+										</p>";
+
+								if($service['service_type'] == "funeral")
+									echo "<div class='card-price trad'>Casket Details <span style='color:gray;'>({$service['funeral_kind']})</span></div>";
+								else 
+									echo "<div class='card-price trad'>₱ ".number_format($service['service_cost'], 2, '.', ',')."</div>";
+								
 								## OUT OF STOCK IF QTY IS 0
 								$qty_status = "";
-								if($service_type['service_qty'] == 0) $qty_status = "Out of Stock";
+								if($service_type['service_qty'] == 0 && $service['service_type'] != "funeral") $qty_status = "Out of Stock";
 								##
 								if(isset($_SESSION['seeker']) && !isset($_GET['rate']) && !isset($_GET['rated'])){
 								echo "
@@ -162,9 +168,29 @@
 										<button type='submit' name='btnadd' class='btn trad' onclick=\"return confirm('Confirm booking?');\">Book</button>
 								</form>";
 								}
+								## FOR PROVIDER & ADMIN
 								else {
-									if($service_type['service_type'] != "church")
+									if($service_type['service_type'] != "church" && $service_type['service_type'] != "funeral")
 										echo "<h4 style='color:gray'>QUANTITY: x{$service['service_qty']}</h4>";
+									
+									if($service_type['service_type'] == "funeral"){
+										echo "
+										<ul class='desc-table main'>
+											<li>Size (ft.)</li>
+											<li>Quantity</li>
+											<li>Price per qty</li>
+										</ul>";
+										
+										for($i=0; $i<count($size_array); $i++){
+											echo "
+											<ul class='desc-table body'>
+												<li>{$size_array[$i]}</li>
+												<li>{$qty_array[$i]}</li>
+												<li>₱ ".number_format($price_array[$i],2,'.',',')."</li>
+											</ul>
+											";
+										}
+									}
 								}
 								echo "
 									</div>

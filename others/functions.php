@@ -804,7 +804,7 @@
 						<div class='card-0 no-padding'>
 							<a href='funeral_tradition_this.php?service_id=".$results['service_id']."&id={$results['provider_id']}'>
 								<img src='images/providers/".$results['service_type']."/".$results['provider_id']."/".$results['service_img']."'>
-								<h3 style='margin-bottom:0;line-height:1;font-size:25px;'>₱ ".number_format($results['service_cost'], 2, '.', ',')."</h3>
+								<h3 style='margin-bottom:0;line-height:1;font-size:25px;'>Kind: ".ucwords($results['funeral_kind'])."</h3>
 								<h3>".$results['funeral_name']."
 									<span>
 										".ratings($results['service_id'], true)."
@@ -1504,6 +1504,9 @@
 				if($service['service_type'] == "headstone") {
 					if($type['stone_kind'] == $value) return "selected";
 				}
+				else if($service['service_type'] == "funeral") {
+					if($type['funeral_kind'] == $value) return "selected";
+				}
 			break;
 			## FOR SOME COLOR
 			case "color":
@@ -1725,25 +1728,11 @@
 	function service_adding(){
 		## DECLARE VARIABLES
 		$provider = provider();
-		## 
-		if($provider['provider_type'] != "headstone") $txtsname = trim(ucwords($_POST['txtsname']));
-		if($provider['provider_type'] != "church") $txtothers = trim($_POST['txtothers']);	
-		if($provider['provider_type'] != "catering" && $provider['provider_type'] != "church") $numqty = $_POST['numqty'];
-		## FOR ALL SERVICES
-		$numprice = $_POST['numprice'];
+		$imageName = upload_image("file_img", "images/providers/".$provider['provider_type']."/".$_SESSION['provider']."/");
 		$txtdesc = trim($_POST['txtdesc']);
-		## USE EXISTING IMAGE IS CHECKED
-		if(isset($_POST['cblogo'])) {
-			$service_img = read("services", ["service_id"], [$_GET['id']]);
-			$service_img = $service_img[0];
-			
-			$imageName = $service_img['service_img'];
-			$imageName = trim($imageName);
-		}
-		else {
-			$imageName = upload_image("file_img", "images/providers/".$provider['provider_type']."/".$_SESSION['provider']."/");
-		}
-		
+		## 
+		if($provider['provider_type'] != "headstone") $txtsname = trim(ucwords($_POST['txtsname'])); 
+		if($provider['provider_type'] != "funeral") $numprice = $_POST['numprice'];
 		## ERROR TRAPPINGS
 		if($imageName === 1){
 			echo "<script>alert('An error occurred in uploading your image!')</script>";
@@ -1757,19 +1746,33 @@
 
 			switch ($provider['provider_type']){
 				case "funeral":
+					// $cbotype = $_POST['cbotype'];
+					// $cbsize = implode(",", $_POST['cbsize']);
+					// $cbsize .= ",".$txtothers;
 					$cbotype = $_POST['cbotype'];
-					$cbsize = implode(",", $_POST['cbsize']);
-					$cbsize .= ",".$txtothers;
+					$cbokind = $_POST['cbokind'];
+					$numcount = $_POST['numcount'];
+					$size_array = [];
+					$qty_array = [];
+					$price_array = [];
+					
+					for($i=1; $i<=$numcount; $i++){
+						if(!empty(trim($_POST['txtsize'.$i])) && !empty($_POST['numqty'.$i]) && !empty($_POST['numprice'.$i])){
+							array_push($size_array, trim($_POST['txtsize'.$i]));
+							array_push($qty_array, $_POST['numqty'.$i]);
+							array_push($price_array, $_POST['numprice'.$i]);
+						}
+					}
 					##
-					$attr_list = ["provider_id", "service_type", "service_desc", "service_cost", "service_qty", "service_img", "service_status"];
-					array_push($data_list, $provider['provider_id'], $provider['provider_type'], $txtdesc, $numprice, $numqty, $imageName, "active");
+					$attr_list = ["provider_id", "service_type", "service_desc", "service_img", "service_status"];
+					array_push($data_list, $provider['provider_id'], $provider['provider_type'], $txtdesc, $imageName, "active");
 					## ADDED TO SERVICES
 					create($table, $attr_list, qmark_generator(count($attr_list)), $data_list);
 					$service = read("services", ["service_img"], [$imageName]);
 					$service = $service[0];	
 					## ADD TO SPECIFIC TYPE
-					$attr_list = ["service_id", "funeral_name", "funeral_type", "funeral_size"];
-					$data_list = [$service['service_id'], $txtsname, $cbotype, $cbsize];
+					$attr_list = ["service_id", "funeral_name", "funeral_type", "funeral_kind", "funeral_size", "funeral_qty", "funeral_price"];
+					$data_list = [$service['service_id'], $txtsname, $cbotype, $cbokind, implode(",", $size_array), implode(",", $qty_array), implode(",", $price_array)];
 					
 				break;
 

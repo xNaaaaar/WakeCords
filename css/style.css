@@ -197,6 +197,7 @@ button.header-btn i{font-size:var(--size-7);}
 .checkbox{padding-bottom:0;}
 .checkbox div{display:flex;align-items:center;column-gap:5px;width:32.5%;}
 .checkbox div.full{width:100%;}
+.checkbox div.desc{flex-direction:column;align-items:flex-start;width:32.5%;}
 
 .banner-div h2 span.btn.status{display:inline-block;font-size:12px;margin:0 0 0 15px;border:none;pointer-events:none;vertical-align:middle;}
 .banner-div h2 span.btn.status.green{background:var(--green);}
@@ -389,3 +390,9 @@ figcaption mark, .mark-style{cursor:pointer;background-color:var(--light-blue);c
 .guide-step:first-child::after{display:none;}
 .guide-step p{margin-bottom:0;}
 .guide-step i{font-size:2rem;}
+
+/* FUNERAL TRADITION THIS */
+.desc-table{width:100%;display:flex;justify-content:space-between;gap:0 2em;margin-bottom:0 !important;background-color:var(--light-blue);color:#fff;padding:.5em;flex-wrap:nowrap !important;text-align:center;}
+.desc-table li{width:32.5%;}
+.desc-table.main{border-top-left-radius:10px;border-top-right-radius:10px;}
+.desc-table.body{background-color:#fff;color:var(--light-blue);font-style:italic;border-radius:5px;border:1px solid var(--light-blue);}
