@@ -605,7 +605,17 @@
 					$ids_array = id_array_of_query($table);
 					## CREATE PURCHASE
 					create($table, $attr_list, qmark_generator(count($attr_list)), $data_list);
-
+					## FOR FUNERAL
+					if($service_['service_type'] == "funeral") {
+						## SEND EMAIL TO PROVIDER
+						$provider = provider($service_['provider_id']);
+						##
+						$subject = "Booking";
+						$txt = "Hi {$provider['provider_fname']},\n\nPlease be advice that {$seeker['seeker_fname']}(seeker) booked your funeral services.";
+						$txt .= "\n\n\nBest regards,\nTeam Wakecords";
+						##
+						mail($provider['provider_email'], $subject, $txt);
+					}
 					## FOR CHURCH
 					if($service_['service_type'] == "church") {
 					// 	## GET THE LAST CREATED ID
@@ -634,6 +644,7 @@
 						mail($provider['provider_email'], $subject, $txt);
 
 					}
+
 				}
 				## DELETE ALL DATA IN CART
 				delete("cart", "seeker_id", $_SESSION['seeker']);
