@@ -123,16 +123,20 @@
 								<input id='image-file' type='file' name='file_img' required>
 							</div>
 							";
+							// echo ($edit) ? "":"required";
 							
 							## SWITCH FOR DIFFERENT PROVIDER TYPE
 							switch($user['provider_type']){
 								## FOR FUNERAL SERVICES
 								case "funeral":
 									$width = "style='width:24%;'";
-									$funeral_sizes = explode(",",$type['funeral_size']);
-									$funeral_qtys = explode(",",$type['funeral_qty']);
-									$funeral_prices = explode(",",$type['funeral_price']);
-									$count_value = ($edit) ? count($funeral_sizes):1;
+									if($edit){
+										$funeral_sizes = explode(",",$type['funeral_size']);
+										$funeral_qtys = explode(",",$type['funeral_qty']);
+										$funeral_prices = explode(",",$type['funeral_price']);
+										$count_value = count($funeral_sizes);
+									}
+									else $count_value = 1;
 									##
 									echo "
 									<div>
@@ -173,8 +177,8 @@
 										echo "' />
 										<div class='checkbox'>
 											<div class='desc'>
-												<label>Size</label>
-												<input type='text' name='txtsize1' placeholder='Ex in ft. 6x3x4 (Length x Width x Height)' value='"; 
+												<label>Size (ft.)</label>
+												<input type='text' name='txtsize1' placeholder='Ex. 6x3x4 (Length x Width x Height)' value='"; 
 												echo ($edit) ? $funeral_sizes[0]:"";
 												echo "' required />
 											</div>

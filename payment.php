@@ -92,14 +92,15 @@
 							</div>
 							<!-- ADDITIONAL DETAILS -->
 							<div class="banner-section details card">
-								<h3>Additional Details</h3>
+								
 								
 								<?php
 								## TYPE [notify, success, error]
 								messaging("notify", "Note: Take note that you can always update this data inputted later.");
 								## DECEASE NAME FOR FUNERAL, CHURCH, HEADSTONE
-								if(service_type_exist_bool("funeral", $type_list) || service_type_exist_bool("church", $type_list) || service_type_exist_bool("headstone", $type_list)) {
+								if(service_type_exist_bool("funeral", $type_list) || service_type_exist_bool("church", $type_list)) {
 									echo "
+									<h3>Additional Details</h3>
 									<div class='details-con no-padding'>
 										<div class='single'>
 											<label>Deceased name <span>*<span></label>
@@ -108,26 +109,25 @@
 									</div>
 									";
 								}
-								## DELIVERY ADDRESS INPUT FOR ALL SERVICES EXCEPT CHURCH
-								if(!service_type_exist_bool("church", $type_list)){
-									echo "
-									<div class='details-con no-padding'>
-										<div class='single'>
-											<label>Delivery address <span>*<span></label>
-											<input type='text' name='txtdeliveryadd' required>
-										</div>
-									</div>
-									<div class='details-con no-padding'>
-										<div class='single'>
-											<label>Delivery address <span>*<span></label>
-											<input type='text' name='txtdeliveryadd' required>
-										</div>
-									</div>
-									";
-								}
 								
 								if(service_type_exist_bool("funeral", $type_list)){
 									echo "
+									<div class='details-con no-padding'>
+										<div>
+											<label>Deceased location <span>*<span></label>
+											<input type='text' name='txtdecloc' required>
+										</div>
+										<div>
+											<label>Preferred date for deceased pickup <span>*<span></label>
+											<input type='date' name='dpreferred' required>
+										</div>
+									</div>
+									<div class='details-con no-padding'>
+										<div class='single'>
+											<label>Delivery address <span>*<span></label>
+											<input type='text' name='txtdeliveryadd' required>
+										</div>
+									</div>
 									<h5>Funeral</h5>
 									<div class='details-con'>
 										<div>
@@ -301,10 +301,18 @@
 								$_SESSION['field_array'] = [$_POST['cbomethod'], trim(ucwords($_POST['txtdeceasedname'])), trim(ucwords($_POST['gcash-name'])), $_POST['gcash-num'], $total];
 
 								if(service_type_exist_bool("funeral", $type_list)){
-									## USE FOR pay_purchase() FUNCTION
-									$_SESSION['field_array_funeral'] = [$_POST['dtburial'], trim(ucwords($_POST['txtburialadd']))];
+									if($_POST['dpreferred'] < date("Y-m-d")) {
+										echo "<script>alert('Preferred date must be future date.')</script>";
+									}
+									else if($_POST['dpreferred'] > date("Y-m-d", strtotime($_POST['dtburial']))) {
+										echo "<script>alert('Preferred date for pickup must be lesser than burial date.')</script>";
+									}
+									else {
+										## USE FOR pay_purchase() FUNCTION
+										$_SESSION['field_array_funeral'] = [trim(ucwords($_POST['txtdecloc'])), $_POST['dpreferred'], trim(ucwords($_POST['txtdeliveryadd'])), $_POST['dtburial'], trim(ucwords($_POST['txtburialadd']))];
 
-									$proceed = true;
+										$proceed = true;
+									}
 								}
 
 								if(service_type_exist_bool("headstone", $type_list)){

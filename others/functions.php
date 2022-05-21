@@ -79,6 +79,31 @@
 		if($services['service_qty'] - $total_qty < 0) return false;
 		return true; 
 	}
+	## function that will get the size value then check which index, then output in the array of either qty & price the value base on size index
+	function corresponding_size_value($service_id, $size, $corresponding_value){
+		$service = read("services", ["service_id"], [$service_id]);
+		$service = $service[0];
+
+		$provider_service = read($service['service_type'], ["service_id"], [$service_id]);
+		$provider_service = $provider_service[0];
+
+		if($service['service_type'] == "funeral"){
+			$funeral_size = explode(",",$provider_service["funeral_size"]);
+			$funeral_qty = explode(",",$provider_service["funeral_qty"]);
+			$funeral_price = explode(",",$provider_service["funeral_price"]);
+			$index = 0;
+
+			for($i=0; $i<count($funeral_size); $i++){
+				if($size == $funeral_size[$i]) {
+					$index = $i;
+					break;
+				}	
+			}
+
+			if($corresponding_value == "qty") return $funeral_qty[$index];
+			if($corresponding_value == "price") return $funeral_price[$index];
+		}
+	}
 	## CREATE FUNCTION
 	function create($table, $attr_list, $qmark_list, $data_list){
 		## INSERT INTO seeker(seeker_fname, seeker_mi, seeker_lname) VALUES(?,?,?)
@@ -447,7 +472,7 @@
 				switch($results['service_type']){
 					## FOR FUNERAL
 					case "funeral":
-						$total_cost = $cart['service_cost'] * $cart['cart_qty'];
+						$_SESSION['total_cost'] = $cart['cart_price'] * $cart['cart_qty'];
 						echo "
 						<div class='my-cart'>
 							<figure>
@@ -456,12 +481,12 @@
 							<div class='my-cart-details'>
 								<div class='my-cart-title'>
 									<h3>".$cart['funeral_name']."
-										<span>".$cart['cart_size']."</span>
+										<span>".$cart['cart_size']." ft.</span>
 									</h3>
 									<p>".limit_text($cart['service_desc'], 10)."</p>
 								</div>
 								<span class='qty'>x".$cart['cart_qty']."</span>
-								<h3>₱ ".number_format($total_cost,2,'.',',')."</h3>
+								<h3>₱ ".number_format($_SESSION['total_cost'],2,'.',',')."</h3>
 							</div>
 							<div class='my-cart-qty'><a href='deleting.php?table=cart&attr=cart_id&data=".$cart['cart_id']."' onclick=\"return confirm('Are you sure you want to delete this to cart?');\"><i class='fa-solid fa-trash-can'></i></a></div>
 						</div>
@@ -558,9 +583,9 @@
 					switch($service_['service_type']){
 						##
 						case "funeral":
-							$per_cost = $service_["service_cost"] * $results['cart_qty'];
+							// $per_cost = $service_["service_cost"] * $results['cart_qty'];
 
-							$data_list = [$results['seeker_id'], $results['service_id'], $per_cost, $results['cart_qty'], $results['cart_size'], date('Y-m-d'), "to pay", 0];
+							$data_list = [$results['seeker_id'], $results['service_id'], $_SESSION['total_cost'], $results['cart_qty'], $results['cart_size'], date('Y-m-d'), "to pay", 0];
 						break;
 						##
 						case "church":
@@ -665,8 +690,12 @@
 		$txtdeceasedname = $_SESSION['field_array'][1];
 		## SESSIONS ARE LOCATED IN payment.php
 		if(service_type_exist_bool("funeral", $type_list)){
-			$dtburial = $_SESSION['field_array_funeral'][0];
-			$txtburialadd = $_SESSION['field_array_funeral'][1];
+			$txtdecloc = $_SESSION['field_array_funeral'][0];
+			$dpreferred = $_SESSION['field_array_funeral'][1];
+			$txtdeliveryadd = $_SESSION['field_array_funeral'][2];
+			$dtburial = $_SESSION['field_array_funeral'][3];
+			$txtburialadd = $_SESSION['field_array_funeral'][4];
+			
 		}
 		## SESSIONS ARE LOCATED IN payment.php
 		if(service_type_exist_bool("headstone", $type_list)){
@@ -696,8 +725,8 @@
 				$data_list = [$results['purchase_id'], $txtdeceasedname];
 				## FOR FUNERAL
 				if(service_type_exist_bool("funeral", $type_list)){
-					array_push($attr_list, "burial_datetime", "burial_add");
-					array_push($data_list, date("Y-m-d H:i:s", strtotime($dtburial)), $txtburialadd);
+					array_push($attr_list, "burial_datetime", "burial_add", "delivery_add", "deceased_loc", "pickup_date");
+					array_push($data_list, date("Y-m-d H:i:s", strtotime($dtburial)), $txtburialadd, $txtdeliveryadd, $txtdecloc, $dpreferred);
 				}
 				## FOR HEADSTONE
 				if(service_type_exist_bool("headstone", $type_list)){
@@ -716,20 +745,28 @@
 				update("purchase", ["purchase_total", "purchase_status"], [$total, "paid", $results['purchase_id']], "purchase_id");
 
 				## UPDATE SERVICE REMAINING QTY FOR NOT CHURCH
-				if(!service_type_exist_bool("church", $type_list)){
-					$service = read("services", ["service_id"], [$results['service_id']]);
-					$service = $service[0];
+				if(service_type_exist_bool("funeral", $type_list)){
+					$funeral = read("funeral", ["service_id"], [$results['service_id']]);
+					$funeral = $funeral[0];
+					// GET THE INDEX OF SPECIFC SIZE
+					$index = array_search($results['purchase_size'], explode(",",$funeral['funeral_size']));
+					// GET THE VALUE OF SPECIFIC FUNERAL QTY [INDEX OF SIZE]
+					$funeral_qty = explode(",",$funeral['funeral_qty']);
+					// UPDATE SPECIFIC FUNERAL QTY INDEX
+					$upd_qty = $funeral_qty[$index] - $results['purchase_qty'];
+					$funeral_qty[$index] = $upd_qty;
+					//
+					$updated_qty = implode(",",$funeral_qty);
 
-					$update_qty = $service['service_qty'] - $results['purchase_qty'];
-					update("services", ["service_qty"], [$update_qty, $results['service_id']], "service_id");
+					update("funeral", ["funeral_qty"], [$updated_qty, $results['service_id']], "service_id");
 
 					## IF SERVICE QTY = 0, UPDATE SERVICE STATUS TO INACTIVE
-					$service_ = read("services", ["service_id"], [$results['service_id']]);
-					$service_ = $service_[0];
+					// $service = read("services", ["service_id"], [$results['service_id']]);
+					// $service = $service[0];
 
-					if($service_['service_qty'] == 0){
-						update("services", ["service_status"], ["inactive", $results['service_id']], "service_id");
-					}
+					// if($service['service_qty'] == 0){
+					// 	update("services", ["service_status"], ["inactive", $results['service_id']], "service_id");
+					// }
 				}
 				
 				## CREATE PAYMENT TABLE
@@ -1581,9 +1618,9 @@
 		echo "
 		<div>
 			<label>".ucwords($type).": </label>
-			<select name='cbo{$type}' required>
+			<select name='cbo{$type}' id='card-{$type}' required>
 				<option value=''>BROWSE OPTIONS</option>";
-				for($i=0; $i<count($array)-1; $i++) 
+				for($i=0; $i<count($array); $i++) 
 					echo "<option value='".$array[$i]."'>".$array[$i]."</option>";
 		echo "
 			</select>
@@ -1631,17 +1668,11 @@
 
 					if(count($services) > 0){
 						foreach($services as $results){
-							## CHECK IF SERVICE QTY IS 0
-							$qty_status = "";
-							if($results['service_qty'] == 0) $qty_status = "Out of Stock";
 							## FOR USERS
 							echo "
 							<div class='card-0 no-padding'>
 								<img src='images/providers/".$results['service_type']."/".$results['provider_id']."/".$results['service_img']."'>
-								<h3 style='margin-bottom:0;line-height:1;font-size:25px;"; 
-							## IF QTY IS EMPTY
-							if(!empty($qty_status)) echo "text-decoration:line-through;color:gray;";
-							echo "'>₱ ".number_format($results['service_cost'], 2, '.', ',')."</h3>
+								<h3 style='margin-bottom:0;line-height:1;font-size:25px;'>Kind: ".ucwords($results['funeral_kind'])."</h3>
 								<h3>".$results['funeral_name']."
 									<span>
 										".ratings($results['service_id'], true)."
@@ -1652,7 +1683,6 @@
 								<p>
 									".limit_text($results['service_desc'], 10)."
 								</p>
-								<p style='color:red;text-align:center;font-size:1.5rem;'>{$qty_status}</p>
 								<div class='buttons'>
 									<a title='View' href='funeral_tradition_this.php?service_id=".$results['service_id']."&id={$results['provider_id']}'><i class='fa-solid fa-eye'></i></a>
 								</div>
@@ -2015,15 +2045,23 @@
 		switch($type) {
 			## FOR FUNERAL 
 			case "funeral":
-				$txtbdt = $_POST['txtbdt'];
-				$txtbadd = trim(ucwords($_POST['txtbadd']));
+				$dpreferred = $_POST['dpreferred'];
+				$txtdecloc = trim(ucwords($_POST['txtdecloc']));
 				$txtdadd = trim(ucwords($_POST['txtdadd']));
+				$dtburial = $_POST['dtburial'];
+				$txtbadd = trim(ucwords($_POST['txtbadd']));
 
-				$attr_list = ["deceased_name","burial_datetime","burial_add", "delivery_add"];
-				$data_list = [$txtname, date("Y-m-d H:i:s", strtotime($txtbdt)), $txtbadd, $txtdadd, $_GET['purchaseid']];
+				$attr_list = ["deceased_name","burial_datetime","burial_add", "delivery_add", "deceased_loc", "pickup_date"];
+				$data_list = [$txtname, date("Y-m-d H:i:s", strtotime($dtburial)), $txtbadd, $txtdadd, $txtdecloc, date("Y-m-d", strtotime($dpreferred)), $_GET['purchaseid']];
 
 				if(preg_match('/\d/', $txtname)) {
 					echo "<script>alert('Firstname cannot have a number!')</script>";
+				}
+				else if($dpreferred < date("Y-m-d")) {
+					echo "<script>alert('Preferred date must be future date.')</script>";
+				}
+				else if($dpreferred > date("Y-m-d", strtotime($dtburial))) {
+					echo "<script>alert('Preferred date for pickup must be lesser than burial date.')</script>";
 				}
 				else {
 					## UPDATE DETAILS TABLE

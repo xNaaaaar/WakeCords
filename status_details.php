@@ -45,18 +45,25 @@
 							case "funeral":
 								echo "
 								<div>
-									<label>Burial datetime</label>
-									<input type='datetime-local' name='txtbdt' value='".date("Y-m-d\TH:i", strtotime($details['burial_datetime']))."'>
+									<label>Preferred deceased pickup date</label>
+									<input type='date' name='dpreferred' value='".date("Y-m-d", strtotime($details['pickup_date']))."'>
 								</div>
 								<div>
-									<label>Burial address</label>
-									<input type='text' name='txtbadd' value='".$details['burial_add']."'>
+									<label>Deceased location</label>
+									<input type='text' name='txtdecloc' value='".$details['deceased_loc']."'>
 								</div>
 								<div>
 									<label>Delivery address</label>
 									<input type='text' name='txtdadd' value='".$details['delivery_add']."'>
 								</div>
-								";
+								<div>
+									<label>Burial date & time</label>
+									<input type='datetime-local' name='dtburial' value='".date("Y-m-d\TH:i", strtotime($details['burial_datetime']))."'>
+								</div>
+								<div>
+									<label>Burial address</label>
+									<input type='text' name='txtbadd' value='".$details['burial_add']."'>
+								</div>";
 							break;
 							## FOR CHURCH SERVICES
 							case "church":

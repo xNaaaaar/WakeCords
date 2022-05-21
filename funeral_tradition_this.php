@@ -65,7 +65,7 @@
 								$size_array = array();
 								$font_array = array();
 								$qty_array = array();
-								for($i=1; $i<=$service['service_qty']; $i++) array_push($qty_array, $i);
+								// for($i=1; $i<=$service['service_qty']; $i++) array_push($qty_array, $i);
 							}
 
 							## NAME BASED ON SERVICE PROVIDER
@@ -74,6 +74,7 @@
 									$size_array = explode(",",$service['funeral_size']);
 									$qty_array = explode(",",$service['funeral_qty']);
 									$price_array = explode(",",$service['funeral_price']);
+									
 									echo "
 									<h2><a href='{$service_link}'>Services</a> <span>> <a href='{$a_link}?id={$provider['provider_id']}'>{$provider['provider_company']}</a> > {$service['funeral_name']}</span></h2>
 									";
@@ -120,10 +121,10 @@
 											".$service['service_desc']."
 										</p>";
 
-								if($service['service_type'] == "funeral")
+								if($service['service_type'] == "funeral" && isset($_SESSION['provider']))
 									echo "<div class='card-price trad'>Casket Details <span style='color:gray;'>({$service['funeral_kind']})</span></div>";
 								else 
-									echo "<div class='card-price trad'>₱ ".number_format($service['service_cost'], 2, '.', ',')."</div>";
+									echo "<div class='card-price trad'>₱ <span id='card-price'>".number_format($service['service_cost'],2,'.',',')."</span></div>";
 								
 								## OUT OF STOCK IF QTY IS 0
 								$qty_status = "";
@@ -134,25 +135,21 @@
 								<form method='post'>
 									<div class='selection-con'>";
 									if($service_type['service_type'] != "church") {
-								
+										echo "
+										<div class='gray-note'>
+											\"Note: Sizes are measured in foot.\"
+										</div>";
 										## SELECT TAG FOR SIZES
 										if(count($size_array) > 0 && $size_array[0] != NULL) {
 											select_array($size_array, "sizes");
-									 	} 
-										## SELECT TAG FOR FONTS
-										if(count($font_array) > 0 && $font_array[0] != NULL) {
-											select_array($font_array, "fonts");
-										}
+									 	}
 										## SELECT TAG FOR QTY
 										echo "
 										<div>
-											<label>Quantity: <span style='color:red;'>{$qty_status}</span></label>
-											<select name='cboquantity' required>
-												<option value=''>BROWSE OPTIONS</option>";
-												for($i=1; $i<=$service_type['service_qty']; $i++) 
-													echo "<option value='".$i."'>".$i."</option>";
-										echo "
-											</select>
+											<label>Quantity: <span id='card-qty' style='color:red;'>{$qty_status}</span></label>
+											<input type='hidden' name='maxqty' id='max-qty' value='' />
+											<input type='hidden' name='hidprice' id='hidprice' value='' />
+											<input type='number' name='numqty' value='' required/>
 										</div>";
 								 
 									## FOR CHURCH
@@ -199,11 +196,24 @@
 									switch($service_type['service_type']){
 										## FOR FUNERAL
 										case "funeral":
-											$cbomaxqty = $_POST['cboquantity'];
+											$maxqty = $_POST['maxqty']; // OUTPUT "Out of Stock" or a number
+											$hidprice = $_POST['hidprice'];
+											$numqty = $_POST['numqty'];
 											$cbosize = $_POST['cbosizes'];
-											$attr_list = ["service_id", "seeker_id", "cart_qty", "cart_size"];
-											$data_list = [$service['service_id'], $_SESSION['seeker'], $cbomaxqty, $cbosize];
-											
+											// 
+											if($maxqty == "Out of Stock"){
+												echo "<script>alert('Out of Stock! Cannot proceed.')</script>";
+												$proceed = false;
+											}
+											else if($numqty > $maxqty) {
+												echo "<script>alert('Inputted quantity is more than the available quantity!')</script>";
+												$proceed = false;
+											}
+											else {
+												$attr_list = ["service_id", "seeker_id", "cart_qty", "cart_size", "cart_price"];
+												$data_list = [$service['service_id'], $_SESSION['seeker'], $numqty, $cbosize, $hidprice];
+											}
+
 										break;
 										## FOR CHURCH
 										case "church":
@@ -377,7 +387,8 @@
 		})
 	<?php } ?>
 
-	// FOR NUMBER OF DAYS
+	// FOR NUMBER OF DAYS $service_type['service_type']
+	<?php if($service_type['service_type'] == "church") { ?>
 	let massstart = document.getElementById("massstart");
 	let burialstart = document.getElementById("burialstart");
 	let num_days1 = document.getElementById("numdays1");
@@ -413,6 +424,50 @@
 			num_days1.innerHTML = 0;
 			num_days2.value = 0;
 		}
+	}
+	<?php } ?>
+
+	// WHEN ON CHANGE IN SIZES 
+	let cardSize = document.getElementById("card-sizes")
+	
+
+	cardSize.onchange = function () {
+		let cardQty = document.getElementById("card-qty")
+		let maxQty = document.getElementById("max-qty")
+		let cardPrice = document.getElementById("card-price")
+		let hidPrice = document.getElementById("hidprice")
+
+		let stringSize = '<?php echo $service['funeral_size']; ?>'
+		let stringQty = '<?php echo $service['funeral_qty']; ?>'
+		let stringPrice = '<?php echo $service['funeral_price']; ?>'
+
+		console.log(stringSize.split(","))
+		cardQty.innerHTML = return_qty(stringSize.split(","), cardSize.value, stringQty.split(","))
+		maxQty.value = cardQty.innerHTML
+		cardPrice.innerHTML = return_formatted_price(stringSize.split(","), cardSize.value, stringPrice.split(","), true)
+		hidPrice.value = return_formatted_price(stringSize.split(","), cardSize.value, stringPrice.split(","))
+	}
+
+	function return_qty(size_array, size, my_array){
+		index = 0
+		for(let i=0; i<size_array.length; i++){
+			if(size == size_array[i]) index = i
+		}
+
+		if(my_array[index] == 0)
+			return "Out of Stock"
+		else return my_array[index]
+	}
+
+	function return_formatted_price(size_array, size, my_array, bool=false){
+		index = 0
+		for(let i=0; i<size_array.length; i++){
+			if(size == size_array[i]) index = i
+		}
+		
+		if(bool) // RETURN NUMBER FORMAT IN JS
+			return parseInt(my_array[index]).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,')
+		else return my_array[index]
 	}
 	</script>
 <!-- FOOTER JS -->

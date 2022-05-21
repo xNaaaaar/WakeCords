@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 20, 2022 at 09:08 AM
+-- Generation Time: May 21, 2022 at 02:19 AM
 -- Server version: 10.4.19-MariaDB
 -- PHP Version: 7.3.28
 
@@ -65,7 +65,7 @@ CREATE TABLE `cart` (
   `seeker_id` int(8) NOT NULL,
   `cart_qty` int(2) DEFAULT NULL,
   `cart_size` varchar(25) DEFAULT NULL,
-  `cart_font` varchar(25) DEFAULT NULL,
+  `cart_price` decimal(9,2) DEFAULT NULL,
   `cart_wake_start_date` date DEFAULT NULL,
   `cart_wake_time` varchar(50) DEFAULT NULL,
   `cart_num_days` int(2) DEFAULT NULL,
@@ -104,7 +104,8 @@ CREATE TABLE `church` (
 --
 
 INSERT INTO `church` (`service_id`, `church_church`, `church_cemetery`, `church_priest`, `church_address`, `church_mass_date`, `church_mass_time`) VALUES
-(76, 'Sto. Rosario', 'Caretta', 'Benedict Servi', '3294A Fake Street, Sitio Sample Barangay Test, Cebu City, Cebu', NULL, NULL);
+(76, 'Sto. Rosario', 'Caretta', 'Benedict Servi', '3294A Fake Street, Sitio Sample Barangay Test, Cebu City, Cebu', NULL, NULL),
+(82, 'St. Joseph Parish Church', 'Caretta', 'George Wais', '3294A Fake Street, Sitio Sample Barangay Test, Cebu City, Cebu', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -124,15 +125,19 @@ CREATE TABLE `details` (
   `death_date` date DEFAULT NULL,
   `delivery_datetime` datetime DEFAULT NULL,
   `num_pax` int(4) DEFAULT NULL,
-  `cemetery_add` varchar(100) DEFAULT NULL
+  `cemetery_add` varchar(100) DEFAULT NULL,
+  `deceased_loc` varchar(100) DEFAULT NULL,
+  `pickup_date` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `details`
 --
 
-INSERT INTO `details` (`purchase_id`, `deceased_name`, `burial_datetime`, `burial_add`, `delivery_add`, `delivery_date`, `message`, `birth_date`, `death_date`, `delivery_datetime`, `num_pax`, `cemetery_add`) VALUES
-(64, 'Deceased Name', NULL, NULL, NULL, NULL, NULL, NULL, '2022-05-10', NULL, NULL, NULL);
+INSERT INTO `details` (`purchase_id`, `deceased_name`, `burial_datetime`, `burial_add`, `delivery_add`, `delivery_date`, `message`, `birth_date`, `death_date`, `delivery_datetime`, `num_pax`, `cemetery_add`, `deceased_loc`, `pickup_date`) VALUES
+(64, 'Deceased Name', NULL, NULL, NULL, NULL, NULL, NULL, '2022-05-10', NULL, NULL, NULL, NULL, NULL),
+(67, 'Deceased Name', NULL, NULL, NULL, NULL, NULL, NULL, '2022-05-10', NULL, NULL, NULL, NULL, NULL),
+(69, 'Jane Deep', '2022-05-29 06:51:00', 'My Burial Address', 'My Delivery Address', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'My Sample Deceased Location', '2022-05-23');
 
 -- --------------------------------------------------------
 
@@ -148,6 +153,13 @@ CREATE TABLE `feedback` (
   `feedback_comments` varchar(250) DEFAULT NULL,
   `feedback_date` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `feedback`
+--
+
+INSERT INTO `feedback` (`feedback_id`, `seeker_id`, `service_id`, `feedback_star`, `feedback_comments`, `feedback_date`) VALUES
+(8, 20, 76, 5, '', '2022-05-20');
 
 -- --------------------------------------------------------
 
@@ -175,6 +187,14 @@ CREATE TABLE `funeral` (
   `funeral_qty` varchar(200) DEFAULT NULL,
   `funeral_price` varchar(200) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `funeral`
+--
+
+INSERT INTO `funeral` (`service_id`, `funeral_name`, `funeral_type`, `funeral_kind`, `funeral_size`, `funeral_qty`, `funeral_price`) VALUES
+(77, 'St. Bernadette', 'traditional', 'wooden', '6x3x4,5x3x5,7x3x3', '8,5,15', '35000,30000,25000'),
+(79, 'St. Jude', 'traditional', 'metal', '6x3x4,7x3x4,5x3x4', '10,25,40', '40000,35000,25000');
 
 -- --------------------------------------------------------
 
@@ -210,7 +230,9 @@ CREATE TABLE `payment` (
 --
 
 INSERT INTO `payment` (`purchase_id`, `payment_method`, `account_name`, `account_number`, `payment_datetime`) VALUES
-(64, 'gcash', 'My Account Name', '09345588383', '2022-05-20 14:52:13');
+(64, 'gcash', 'My Account Name', '09345588383', '2022-05-20 14:52:13'),
+(67, 'gcash', 'My Name', '09345588383', '2022-05-20 20:37:36'),
+(69, 'gcash', 'My Name', '09345588383', '2022-05-21 06:52:21');
 
 -- --------------------------------------------------------
 
@@ -285,7 +307,10 @@ CREATE TABLE `purchase` (
 --
 
 INSERT INTO `purchase` (`purchase_id`, `seeker_id`, `service_id`, `purchase_total`, `purchase_qty`, `purchase_size`, `purchase_font`, `purchase_date`, `purchase_wake_date`, `purchase_wake_time`, `purchase_num_days`, `purchase_burial_date`, `purchase_burial_time`, `purchase_status`, `purchase_progress`) VALUES
-(64, 20, 76, '1350.00', NULL, NULL, NULL, '2022-05-20', '2022-05-23', '06:00pm - 07:00pm', 7, '2022-05-30', '10:00am - 11:00am', 'done', 9);
+(64, 20, 76, '1350.00', NULL, NULL, NULL, '2022-05-20', '2022-05-23', '06:00pm - 07:00pm', 7, '2022-05-30', '10:00am - 11:00am', 'rated', 9),
+(66, 21, 76, '850.00', NULL, NULL, NULL, '2022-05-20', '2022-06-02', '07:00pm - 08:00pm', 2, '2022-06-04', '11:00am - 12:00nn', 'for approval', 0),
+(67, 20, 76, '1350.00', NULL, NULL, NULL, '2022-05-20', '2022-05-28', '06:00pm - 07:00pm', 7, '2022-06-04', '11:00am - 12:00nn', 'done', 9),
+(69, 20, 77, '36000.00', 1, '6x3x4', NULL, '2022-05-21', NULL, NULL, NULL, NULL, NULL, 'paid', 0);
 
 -- --------------------------------------------------------
 
@@ -320,7 +345,9 @@ CREATE TABLE `requirement` (
 
 INSERT INTO `requirement` (`req_id`, `provider_id`, `seeker_id`, `req_type`, `req_img`, `req_status`) VALUES
 (16, NULL, 20, 'seeker', '', 'verified'),
-(17, 13, NULL, 'church', '', 'verified');
+(17, 13, NULL, 'church', '', 'verified'),
+(18, NULL, 21, 'seeker', '', 'verified'),
+(19, 14, NULL, 'business permit', '6287916f2407e3.98386738.jpg', 'verified');
 
 -- --------------------------------------------------------
 
@@ -358,7 +385,8 @@ CREATE TABLE `seeker` (
 --
 
 INSERT INTO `seeker` (`seeker_id`, `seeker_fname`, `seeker_mi`, `seeker_lname`, `seeker_address`, `seeker_phone`, `seeker_status`, `seeker_email`, `seeker_pass`) VALUES
-(20, 'Joy', 'G', 'Blanco', 'A9845 Fake Street, Sitio Sample Barangay Test, Cebu City, Cebu', '09457239646', 'inactive', 'joyblanco819@gmail.com', 'd250786e8127c338aa76955b8c1faab2');
+(20, 'Joy', 'G', 'Blanco', 'A9845 Fake Street, Sitio Sample Barangay Test, Cebu City, Cebu', '09457239646', 'inactive', 'joyblanco819@gmail.com', 'd250786e8127c338aa76955b8c1faab2'),
+(21, 'Lindor', NULL, 'Siton', NULL, NULL, 'inactive', 'sitonorlin@gmail.com', 'd250786e8127c338aa76955b8c1faab2');
 
 -- --------------------------------------------------------
 
@@ -382,7 +410,10 @@ CREATE TABLE `services` (
 --
 
 INSERT INTO `services` (`service_id`, `provider_id`, `service_type`, `service_desc`, `service_cost`, `service_qty`, `service_img`, `service_status`) VALUES
-(76, 13, 'church', 'This is sample description for church services with a package of: sample package 1 and sample package 2.', '850.00', NULL, '62873692862844.56231897.jpg', 'active');
+(76, 13, 'church', 'This is sample description for church services with a package of: sample package 1 and sample package 2.', '850.00', NULL, '62873692862844.56231897.jpg', 'active'),
+(77, 14, 'funeral', 'Inclusion in this package are: retrieval from place of death and transfer to our care, professional care of our staff, embalming & cosmetics, three (3) day chapel viewing, documentation (registration of death certificates and securing of necessary permits).', NULL, NULL, '62879b2b2091e4.47952906.png', 'active'),
+(79, 14, 'funeral', 'Inclusion in this package are: retrieval from place of death and transfer to our care, professional care of our staff, embalming & cosmetics, three (3) day chapel viewing, documentation (registration of death certificates and securing of necessary permits).', NULL, NULL, '62882b50c05273.97084982.png', 'active'),
+(82, 13, 'church', 'This is sample description for church services with a package of: sample package 1 and sample package 2.', '1100.00', NULL, '62882f26a70c63.20621805.jpg', 'active');
 
 -- --------------------------------------------------------
 
@@ -403,7 +434,8 @@ CREATE TABLE `subscription` (
 --
 
 INSERT INTO `subscription` (`provider_id`, `subs_startdate`, `subs_duedate`, `subs_description`, `subs_cost`) VALUES
-(13, '2022-05-20', '2022-06-20', 'Provider can post and boost their service in an affordable amount.', '200.00');
+(13, '2022-05-20', '2022-06-20', 'Provider can post and boost their service in an affordable amount.', '200.00'),
+(14, '2022-05-20', '2023-05-20', 'Provider can post and boost their service in an affordable amount.', '2000.00');
 
 --
 -- Indexes for dumped tables
@@ -555,13 +587,13 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `cart_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=118;
+  MODIFY `cart_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=127;
 
 --
 -- AUTO_INCREMENT for table `feedback`
 --
 ALTER TABLE `feedback`
-  MODIFY `feedback_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `feedback_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `provider`
@@ -573,7 +605,7 @@ ALTER TABLE `provider`
 -- AUTO_INCREMENT for table `purchase`
 --
 ALTER TABLE `purchase`
-  MODIFY `purchase_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=65;
+  MODIFY `purchase_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=70;
 
 --
 -- AUTO_INCREMENT for table `request`
@@ -585,19 +617,19 @@ ALTER TABLE `request`
 -- AUTO_INCREMENT for table `requirement`
 --
 ALTER TABLE `requirement`
-  MODIFY `req_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `req_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `seeker`
 --
 ALTER TABLE `seeker`
-  MODIFY `seeker_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `seeker_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `services`
 --
 ALTER TABLE `services`
-  MODIFY `service_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=77;
+  MODIFY `service_id` int(8) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=83;
 
 --
 -- Constraints for dumped tables

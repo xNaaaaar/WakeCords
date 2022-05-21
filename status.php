@@ -80,14 +80,20 @@
 												<label>Deceased name</label>
 												<input type='text' disabled value='".$details['deceased_name']."'>
 
+												<label>Deceased location</label>
+												<input type='text' disabled value='".$details['deceased_loc']."'>
+
+												<label>Preferred deceased pickup date</label>
+												<input type='text' disabled value='".date("M j, Y", strtotime($details['pickup_date']))."'>
+
+												<label>Delivery address</label>
+												<input type='text' disabled value='".$details['delivery_add']."'>
+
 												<label>Burial datetime</label>
 												<input type='text' disabled value='".date("M j, Y - h:i a", strtotime($details['burial_datetime']))."'>
 
 												<label>Burial address</label>
 												<input type='text' disabled value='".$details['burial_add']."'>
-
-												<label>Delivery address</label>
-												<input type='text' disabled value='".$details['delivery_add']."'>
 												";
 											break;
 											## FOR CHURCH
