@@ -427,7 +427,7 @@
 	}
 	<?php } ?>
 
-	<?php if($service_type['service_type'] == "church") { ?>
+	<?php if($service_type['service_type'] == "funeral") { ?>
 	// WHEN ON CHANGE IN SIZES 
 	let cardSize = document.getElementById("card-sizes")
 	
