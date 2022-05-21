@@ -427,10 +427,10 @@
 	}
 	<?php } ?>
 
+	<?php if($service_type['service_type'] == "church") { ?>
 	// WHEN ON CHANGE IN SIZES 
 	let cardSize = document.getElementById("card-sizes")
 	
-
 	cardSize.onchange = function () {
 		let cardQty = document.getElementById("card-qty")
 		let maxQty = document.getElementById("max-qty")
@@ -447,6 +447,7 @@
 		cardPrice.innerHTML = return_formatted_price(stringSize.split(","), cardSize.value, stringPrice.split(","), true)
 		hidPrice.value = return_formatted_price(stringSize.split(","), cardSize.value, stringPrice.split(","))
 	}
+	<?php } ?>
 
 	function return_qty(size_array, size, my_array){
 		index = 0
